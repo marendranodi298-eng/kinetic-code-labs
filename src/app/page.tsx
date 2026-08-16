@@ -121,11 +121,22 @@ export default async function HomePage({ searchParams }: HomeProps) {
       {/* Hero Section */}
       <section style={styles.heroSection}>
         <div className="container" style={styles.heroContainer}>
-          <span style={styles.heroPreTitle}>OUR JOURNAL</span>
+          <span style={styles.heroPreTitle}>GLOBAL CONTENT PORTAL</span>
           <h1 style={styles.heroTitle}>
-            Discover the perfect code abstractions <br />
-            <span style={styles.heroTitleItalic}>to elevate your everyday engineering.</span>
+            Trending Stories Across Tech, Entertainment, <br />
+            <span style={styles.heroTitleItalic}>Bollywood, Education, and 100+ Influential Sectors.</span>
           </h1>
+          <p style={{
+            color: "var(--color-text-muted)",
+            fontSize: "0.95rem",
+            lineHeight: "1.6",
+            maxWidth: "800px",
+            margin: "1rem auto 0 auto",
+            fontWeight: 300,
+            textAlign: "center"
+          }}>
+            Explore our curated feed of news, photo stories, and video series. From cutting-edge software engineering and AI breakthroughs to Bollywood updates, Hollywood gossips, educational guides, and top-tier industry insights.
+          </p>
 
           {/* Stats Bar (Zarnoor Jewels inspired) */}
           <div style={styles.statsBar}>
