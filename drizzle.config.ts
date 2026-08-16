@@ -1,6 +1,9 @@
 import { defineConfig } from "drizzle-kit";
+import { config } from "dotenv";
 
-// Automatically detect if we are using Turso Cloud or Local SQLite
+// Load environment variables from .env.local for Drizzle Kit CLI operations
+config({ path: ".env.local" });
+
 const url = process.env.TURSO_CONNECTION_URL || "./data/database.db";
 const isTurso = url.startsWith("libsql:") || url.startsWith("https:");
 
