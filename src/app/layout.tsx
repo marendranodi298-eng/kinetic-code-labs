@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     "Latest Tech Updates", "Global News Portal"
   ],
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
   openGraph: {
     title: "Kinetic Code Labs | Global News, Tech, Entertainment & Education Portal",

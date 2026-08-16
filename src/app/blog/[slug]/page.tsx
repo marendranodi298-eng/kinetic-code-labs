@@ -143,21 +143,26 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
         <span>KINETIC CODE LABS READS</span>
       </div>
 
-      {/* Header */}
-      <header style={styles.header}>
-        <div className="container" style={styles.headerContainer}>
-          <Link href="/">
-            <Image
-              src="/logo.png"
-              alt="Kinetic Code Labs Logo"
-              width={140}
-              height={45}
-              style={styles.logo}
-            />
-          </Link>
-          <Link href="/" style={styles.backBtn}>
-            ← Back to Feed
-          </Link>
+      {/* Responsive Navbar */}
+      <header className="nav-header">
+        <div className="container nav-container">
+          <div className="nav-left">
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="Kinetic Code Labs Logo"
+                width={140}
+                height={45}
+                className="nav-logo-img"
+                priority
+              />
+            </Link>
+          </div>
+          <div className="nav-right">
+            <Link href="/" className="nav-explore-link">
+              ← <span className="nav-explore-link-text">Back to </span>Feed
+            </Link>
+          </div>
         </div>
       </header>
 

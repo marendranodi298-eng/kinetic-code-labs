@@ -89,31 +89,31 @@ export default async function HomePage({ searchParams }: HomeProps) {
         <span>HIGH PERFORMANCE WEB DEVELOPMENT</span>
       </div>
 
-      {/* Navbar (Zarnoor Jewels inspired) */}
-      <header style={styles.header}>
-        <div className="container" style={styles.headerContainer}>
-          <div style={styles.headerLeft}>
-            <Link href="/admin" style={styles.exploreLink}>
-              <span style={styles.exploreMenu}></span>
-              Workspace
+      {/* Responsive Navbar */}
+      <header className="nav-header">
+        <div className="container nav-container">
+          <div className="nav-left">
+            <Link href="/admin" className="nav-explore-link">
+              <span className="nav-explore-menu"></span>
+              <span className="nav-explore-link-text">Workspace</span>
             </Link>
           </div>
 
-          <div style={styles.headerCenter}>
+          <div className="nav-center">
             <Link href="/">
               <Image
                 src="/logo.png"
                 alt="Kinetic Code Labs Logo"
                 width={180}
                 height={55}
-                style={styles.logo}
+                className="nav-logo-img"
                 priority
               />
             </Link>
           </div>
 
-          <div style={styles.headerRight}>
-            <span style={styles.memberTag}>PUBLIC FEED</span>
+          <div className="nav-right">
+            <span className="nav-member-tag">PUBLIC FEED</span>
           </div>
         </div>
       </header>
