@@ -500,11 +500,11 @@ export default function Footer({ transparent }: FooterProps) {
           <div className="footer-grid-col">
             <h4 className="col-title">Platform &amp; About</h4>
             <ul className="col-list">
-              <li><Link href="/" className="footer-link">About Us &amp; Founder</Link></li>
-              <li><Link href="/" className="footer-link">Student Internship Portal</Link></li>
-              <li><Link href="/" className="footer-link">Our Past Work &amp; Projects</Link></li>
-              <li><Link href="/admin" className="footer-link">Client Workspace Login</Link></li>
-              <li><Link href="/" className="footer-link">Technology Articles &amp; Blogs</Link></li>
+              <li><a href="https://www.kineticcodelabs.in/about" target="_blank" rel="noopener noreferrer" className="footer-link">About Us &amp; Founder</a></li>
+              <li><a href="https://www.kineticcodelabs.in/internship" target="_blank" rel="noopener noreferrer" className="footer-link">Student Internship Portal</a></li>
+              <li><a href="https://www.kineticcodelabs.in/work" target="_blank" rel="noopener noreferrer" className="footer-link">Our Past Work &amp; Projects</a></li>
+              <li><a href="https://www.kineticcodelabs.in/workspace" target="_blank" rel="noopener noreferrer" className="footer-link">Client Workspace Login</a></li>
+              <li><a href="https://www.kineticcodelabs.in/blogs" target="_blank" rel="noopener noreferrer" className="footer-link">Technology Articles &amp; Blogs</a></li>
             </ul>
           </div>
 
@@ -512,11 +512,11 @@ export default function Footer({ transparent }: FooterProps) {
           <div className="footer-grid-col">
             <h4 className="col-title">Our Services</h4>
             <ul className="col-list">
-              <li><Link href="/" className="footer-link">Custom Website Architecture</Link></li>
-              <li><Link href="/" className="footer-link">AI &amp; Smart Automation</Link></li>
-              <li><Link href="/" className="footer-link">Programmatic SEO Engine</Link></li>
-              <li><Link href="/" className="footer-link">SaaS Platform Development</Link></li>
-              <li><Link href="/" className="footer-link">Custom LLM &amp; Chatbots</Link></li>
+              <li><a href="https://www.kineticcodelabs.in/service/database-architecture" target="_blank" rel="noopener noreferrer" className="footer-link">Custom Website Architecture</a></li>
+              <li><a href="https://www.kineticcodelabs.in/service/ai-engineering" target="_blank" rel="noopener noreferrer" className="footer-link">AI &amp; Smart Automation</a></li>
+              <li><a href="https://www.kineticcodelabs.in/service/responsive-ui-ux-design" target="_blank" rel="noopener noreferrer" className="footer-link">Responsive UI/UX Design</a></li>
+              <li><a href="https://www.kineticcodelabs.in/service/enterprise-software" target="_blank" rel="noopener noreferrer" className="footer-link">SaaS Platform Development</a></li>
+              <li><a href="https://www.kineticcodelabs.in/service/e-commerce-solutions" target="_blank" rel="noopener noreferrer" className="footer-link">E-commerce Solutions</a></li>
             </ul>
           </div>
 
@@ -541,9 +541,9 @@ export default function Footer({ transparent }: FooterProps) {
                 </span>
               </li>
               <li style={{ paddingTop: "0.5rem" }}>
-                <Link href="/" className="discovery-call-btn">
+                <a href="https://www.kineticcodelabs.in/book" target="_blank" rel="noopener noreferrer" className="discovery-call-btn">
                   Book Free Discovery Call ➜
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -553,22 +553,22 @@ export default function Footer({ transparent }: FooterProps) {
             <h4 className="col-title">Legal &amp; Security</h4>
             <ul className="col-list">
               <li>
-                <a href="/privacy-policy" onClick={(e) => openLegalModal(e, "privacy")} className="footer-link">
+                <a href="https://www.kineticcodelabs.in/privacy-policy" onClick={(e) => openLegalModal(e, "privacy")} className="footer-link">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="/terms-and-conditions" onClick={(e) => openLegalModal(e, "terms")} className="footer-link">
+                <a href="https://www.kineticcodelabs.in/terms-and-conditions" onClick={(e) => openLegalModal(e, "terms")} className="footer-link">
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="/refund-policy" onClick={(e) => openLegalModal(e, "refund")} className="footer-link">
+                <a href="https://www.kineticcodelabs.in/refund-policy" onClick={(e) => openLegalModal(e, "refund")} className="footer-link">
                   Refund Policy
                 </a>
               </li>
               <li style={{ paddingTop: "0.2rem" }}>
-                <a href="/" onClick={(e) => { e.preventDefault(); alert("Verification portal is currently offline for audit."); }} className="verify-badge">
+                <a href="https://www.kineticcodelabs.in/get-certificate" target="_blank" rel="noopener noreferrer" className="verify-badge">
                   <span>Verify Student Diplomas</span>
                   <svg style={{ width: "14px", height: "14px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
