@@ -7,6 +7,7 @@ import Image from "next/image";
 
 const initialState = {
   success: false,
+  requireOtp: false,
   error: null as string | null,
 };
 
@@ -101,6 +102,33 @@ export default function AdminLoginPage() {
                 placeholder="••••••••••••"
               />
             </div>
+
+            {state.requireOtp && (
+              <div className="form-group" style={{ marginBottom: "2rem" }}>
+                <label htmlFor="otp" style={{ color: "var(--color-accent)", fontWeight: "bold" }}>
+                  Telegram 2FA Security Code
+                </label>
+                <input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  maxLength={6}
+                  required
+                  className="form-input"
+                  style={{ 
+                    ...styles.input, 
+                    borderColor: "var(--color-accent)", 
+                    letterSpacing: "0.4em", 
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    color: "var(--color-accent)",
+                    fontWeight: "bold",
+                    fontFamily: "monospace"
+                  }}
+                  placeholder="000000"
+                />
+              </div>
+            )}
 
             <button
               type="submit"

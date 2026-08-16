@@ -64,3 +64,29 @@ export async function deleteSession() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
+
+// Temporary 2FA Session payload structure
+export interface TempSessionPayload {
+  otp: string;
+  expires: string;
+}
+
+export async function encryptTemp(payload: TempSessionPayload) {
+  return await new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("5m") // Code expires in 5 minutes
+    .sign(key);
+}
+
+export async function decryptTemp(token: string): Promise<TempSessionPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, key, {
+      algorithms: ["HS256"],
+    });
+    return payload as unknown as TempSessionPayload;
+  } catch (error) {
+    return null;
+  }
+}
+
