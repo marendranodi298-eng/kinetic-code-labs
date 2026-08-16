@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { eq, and, like, or, desc, sql } from "drizzle-orm";
 import Footer from "@/app/components/Footer";
+import { optimizeCloudinaryUrl } from "@/lib/media";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -246,7 +247,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                       {post.type === "video" ? (
                         <div style={styles.videoThumbnailWrapper}>
                           <video
-                            src={post.mediaUrl}
+                            src={optimizeCloudinaryUrl(post.mediaUrl)}
                             style={styles.cardImage}
                             muted
                             playsInline
@@ -258,7 +259,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={post.mediaUrl}
+                          src={optimizeCloudinaryUrl(post.mediaUrl)}
                           alt={post.title}
                           style={styles.cardImage}
                         />

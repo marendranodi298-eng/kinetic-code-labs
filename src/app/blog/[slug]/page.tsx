@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import Footer from "@/app/components/Footer";
 import MDContent from "@/app/components/MDContent";
 import Script from "next/script";
+import { optimizeCloudinaryUrl } from "@/lib/media";
 
 interface BlogDetailsProps {
   params: Promise<{
@@ -189,7 +190,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
           <section style={styles.mediaSection}>
             {post.type === "video" ? (
               <video
-                src={post.mediaUrl}
+                src={optimizeCloudinaryUrl(post.mediaUrl)}
                 controls
                 style={styles.videoPlayer}
                 className="card"
@@ -198,7 +199,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
               <div style={styles.imageWrapper} className="card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={post.mediaUrl}
+                  src={optimizeCloudinaryUrl(post.mediaUrl)}
                   alt={post.title}
                   style={styles.articleImage}
                 />

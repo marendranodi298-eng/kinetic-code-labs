@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { createBlogPost, updateBlogPost } from "../../actions/blog";
 import { Post } from "@/db";
+import { optimizeCloudinaryUrl } from "@/lib/media";
 
 interface PostEditorProps {
   post?: Post; // If provided, we are in Edit Mode
@@ -499,10 +500,10 @@ export default function PostEditor({ post }: PostEditorProps) {
               {mediaUrl ? (
                 <div style={styles.mediaPreviewContainer}>
                   {type === "video" ? (
-                    <video src={mediaUrl} controls style={styles.mediaPreview} />
+                    <video src={optimizeCloudinaryUrl(mediaUrl)} controls style={styles.mediaPreview} />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={mediaUrl} alt="Upload preview" style={styles.mediaPreview} />
+                    <img src={optimizeCloudinaryUrl(mediaUrl)} alt="Upload preview" style={styles.mediaPreview} />
                   )}
                   <button
                     type="button"
