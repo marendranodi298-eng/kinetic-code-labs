@@ -16,7 +16,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kinetic-code-labs-nu.vercel.app"),
+  metadataBase: new URL("https://kineticcodelabs-blogs.vercel.app"),
   title: {
     template: "%s | Kinetic Code Labs Blog",
     default: "Kinetic Code Labs - Global News, Tech, Entertainment & Education Portal",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kinetic Code Labs | Global News, Tech, Entertainment & Education Portal",
     description: "Trending multi-format stories (news, photos, videos) across Tech, Bollywood, Hollywood, Education, and 100+ influential sectors.",
-    url: "https://kinetic-code-labs-nu.vercel.app/",
+    url: "https://kineticcodelabs-blogs.vercel.app/",
     siteName: "Kinetic Code Labs",
     images: [
       {
