@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     default: "Kinetic Code Labs - Global News, Tech, Entertainment & Education Portal",
   },
   description: "Discover trending stories and multi-format blogs covering Technology, Entertainment, Bollywood, Hollywood, Education, and 100+ most influential categories across all global sectors.",
+  verification: {
+    google: "RKOM1eIEjWHIqrbBqzChQutXqwTEmQ-QG7ve6pSiHyA",
+  },
   keywords: [
     "Kinetic Code Labs", "Kinetic Code Labs Blog", "Tech News Kanpur", "Bollywood Gossip", 
     "Hollywood Updates", "Education and Career Blogs", "Influential Blog Categories", 
