@@ -55,6 +55,107 @@ export default function PostEditor({ post }: PostEditorProps) {
     setContent(e.currentTarget.innerHTML);
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    const htmlData = clipboardData.getData("text/html");
+    const textData = clipboardData.getData("text/plain");
+
+    if (htmlData) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlData, "text/html");
+      
+      const sanitizeNode = (node: Node): Node | null => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return node.cloneNode(true);
+        }
+        
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const tagName = el.tagName.toLowerCase();
+          
+          const allowedTags = [
+            "h1", "h2", "h3", "h4", "h5", "h6",
+            "p", "br", "span", "div",
+            "strong", "b", "em", "i", "u", "s", "strike",
+            "ul", "ol", "li",
+            "pre", "code",
+            "table", "thead", "tbody", "tr", "th", "td",
+            "a"
+          ];
+          
+          if (!allowedTags.includes(tagName)) {
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < el.childNodes.length; i++) {
+              const child = sanitizeNode(el.childNodes[i]);
+              if (child) fragment.appendChild(child);
+            }
+            return fragment;
+          }
+          
+          const cleanEl = document.createElement(tagName);
+          
+          if (tagName === "a") {
+            cleanEl.setAttribute("href", el.getAttribute("href") || "#");
+            cleanEl.setAttribute("target", "_blank");
+            cleanEl.setAttribute("rel", "noopener noreferrer");
+            cleanEl.setAttribute("style", "color: var(--color-accent); text-decoration: underline; font-weight: 600;");
+          }
+          
+          if (tagName === "table") {
+            cleanEl.setAttribute("style", "width:100%; border-collapse:collapse; margin:1rem 0;");
+            cleanEl.setAttribute("border", "1px");
+          }
+          if (tagName === "td" || tagName === "th") {
+            cleanEl.setAttribute("style", "padding:8px; border:1px solid var(--color-border);");
+          }
+          if (tagName === "pre") {
+            cleanEl.setAttribute("style", "background:#110D0B; color:#EAE5DB; padding:1rem; font-family:monospace; border-radius:6px; overflow-x:auto; margin:1rem 0;");
+          }
+          if (tagName === "code" && el.parentElement?.tagName.toLowerCase() !== "pre") {
+            cleanEl.setAttribute("style", "background:rgba(198,154,91,0.1); color:var(--color-text-dark); padding:0.15rem 0.35rem; border-radius:4px; font-family:monospace; font-size:0.9rem;");
+          }
+          
+          for (let i = 0; i < el.childNodes.length; i++) {
+            const child = sanitizeNode(el.childNodes[i]);
+            if (child) cleanEl.appendChild(child);
+          }
+          
+          return cleanEl;
+        }
+        
+        return null;
+      };
+      
+      const cleanFragment = document.createDocumentFragment();
+      const bodyNodes = doc.body.childNodes;
+      for (let i = 0; i < bodyNodes.length; i++) {
+        const cleaned = sanitizeNode(bodyNodes[i]);
+        if (cleaned) cleanFragment.appendChild(cleaned);
+      }
+      
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(cleanFragment);
+        range.collapse(false);
+      }
+    } else {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(textData));
+        range.collapse(false);
+      }
+    }
+    
+    if (editorRef.current) {
+      setContent(editorRef.current.innerHTML);
+    }
+  };
+
   // Handle file selection and direct signed upload to Cloudinary
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -362,6 +463,7 @@ export default function PostEditor({ post }: PostEditorProps) {
                   ref={editorRef}
                   contentEditable
                   onInput={handleEditorInput}
+                  onPaste={handlePaste}
                   style={styles.wordPaperSheet}
                   className="form-input"
                   data-placeholder="Start typing your rich text article here... Use the toolbar ribbon above to design layouts, create code terminals, insert LaTeX equations, or copy-paste directly from Microsoft Word."
