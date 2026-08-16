@@ -7,6 +7,7 @@ import { posts } from "@/db/schema";
 import { eq, and, ne, desc } from "drizzle-orm";
 import { incrementPostViews } from "../../actions/blog";
 import { Metadata } from "next";
+import Footer from "@/app/components/Footer";
 
 interface BlogDetailsProps {
   params: Promise<{
@@ -250,26 +251,8 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
         )}
       </main>
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <div className="container" style={styles.footerContainer}>
-          <Image
-            src="/logo.png"
-            alt="Kinetic Code Labs Logo"
-            width={130}
-            height={40}
-            style={styles.footerLogo}
-          />
-          <p style={styles.footerText}>
-            Kinetic Code Labs. Built with performance, accessibility, and high quality media delivery.
-          </p>
-          <div style={styles.footerLinks}>
-            <Link href="/" style={styles.footerLink}>Home Feed</Link>
-            <span>•</span>
-            <Link href="/admin" style={styles.footerLink}>Dashboard</Link>
-          </div>
-        </div>
-      </footer>
+      {/* Extracted Premium Footer */}
+      <Footer />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { eq, and, like, or, desc, sql } from "drizzle-orm";
+import Footer from "@/app/components/Footer";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -330,26 +331,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
         )}
       </main>
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <div className="container" style={styles.footerContainer}>
-          <Image
-            src="/logo.png"
-            alt="Kinetic Code Labs Logo"
-            width={140}
-            height={45}
-            style={styles.footerLogo}
-          />
-          <p style={styles.footerText}>
-            Kinetic Code Labs Journal. Delivering optimized, premium tech content since 2026.
-          </p>
-          <div style={styles.footerLinks}>
-            <Link href="/" style={styles.footerLink}>Home</Link>
-            <span>•</span>
-            <Link href="/admin" style={styles.footerLink}>Admin Workspace</Link>
-          </div>
-        </div>
-      </footer>
+      {/* Extracted Premium Footer */}
+      <Footer />
     </div>
   );
 }
