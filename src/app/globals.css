@@ -1,26 +1,289 @@
-@import "tailwindcss";
+/* Kinetic Code Labs - Global Design System */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette - Inspired by Zarnoor Jewels */
+  --color-bg-light: #F7F4EF;       /* Premium Off-White */
+  --color-bg-tan: #EAE5DB;         /* Warm Tan/Beige */
+  --color-text-dark: #1C1512;      /* Rich Dark Brown */
+  --color-text-muted: #6B5E56;     /* Soft Taupe */
+  --color-accent: #C69A5B;         /* Luxury Gold */
+  --color-accent-hover: #A3793F;   /* Darker Gold */
+  --color-bg-dark: #231B18;        /* Contrast Dark Brown */
+  --color-border: #E0D9CE;         /* Delicate Muted Border */
+  --color-border-dark: #3A2F2B;    /* Dark Card Border */
+  --color-white: #FFFFFF;
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Transition Curves */
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: all 0.15s ease;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Reset & Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html, body {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-dark);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Base Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-tan);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Header & Banner Styles */
+.banner-top {
+  background-color: var(--color-bg-dark);
+  color: var(--color-bg-light);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--color-border-dark);
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .banner-top {
+    gap: 0.5rem;
+    font-size: 0.65rem;
+  }
+}
+
+/* Components & Typography Classes */
+.serif-title {
+  font-family: var(--font-serif);
+}
+
+.text-gold {
+  color: var(--color-accent);
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-text-dark);
+  color: var(--color-bg-light);
+  border: 1px solid var(--color-text-dark);
+  padding: 0.8rem 1.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.btn-primary:hover {
+  background-color: transparent;
+  color: var(--color-text-dark);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-text-dark);
+  padding: 0.8rem 1.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.btn-secondary:hover {
+  background-color: var(--color-text-dark);
+  color: var(--color-bg-light);
+}
+
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-accent);
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-accent);
+  padding: 0.8rem 1.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.btn-gold:hover {
+  background-color: transparent;
+  color: var(--color-accent);
+}
+
+/* Cards & Grid Layouts */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 480px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent);
+  box-shadow: 0 12px 24px rgba(28, 21, 18, 0.04);
+}
+
+.card-dark {
+  background-color: var(--color-bg-dark);
+  color: var(--color-bg-light);
+  border: 1px solid var(--color-border-dark);
+}
+.card-dark:hover {
+  border-color: var(--color-accent);
+}
+
+/* Type Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+.badge-news {
+  background-color: #E6EFFF;
+  color: #1A56DB;
+}
+
+.badge-photo {
+  background-color: #FDF2F2;
+  color: #C81E1E;
+}
+
+.badge-video {
+  background-color: #EDFDFD;
+  color: #0369A1;
+}
+
+/* Form Styling - Premium Inputs */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-dark);
+}
+.form-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-white);
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(198, 154, 91, 0.1);
+}
+.form-input-dark {
+  background-color: transparent;
+  border-color: var(--color-border-dark);
+  color: var(--color-bg-light);
+}
+.form-input-dark:focus {
+  border-color: var(--color-accent);
+}
+
+/* Custom Page Transitions and Utilities */
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
