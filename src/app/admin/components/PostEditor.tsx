@@ -35,6 +35,26 @@ export default function PostEditor({ post }: PostEditorProps) {
   // Editor layout tab: "write" or "preview"
   const [editorTab, setEditorTab] = useState<"write" | "preview">("write");
 
+  const editorRef = React.useRef<HTMLDivElement>(null);
+
+  // Sync content with editable paper sheet on load and tab toggle
+  React.useEffect(() => {
+    if (editorTab === "write" && editorRef.current && editorRef.current.innerHTML !== content) {
+      editorRef.current.innerHTML = content;
+    }
+  }, [editorTab, content]);
+
+  const execCmd = (command: string, value: string = "") => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleEditorInput = (e: React.FormEvent<HTMLDivElement>) => {
+    setContent(e.currentTarget.innerHTML);
+  };
+
   // Handle file selection and direct signed upload to Cloudinary
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -239,10 +259,10 @@ export default function PostEditor({ post }: PostEditorProps) {
             />
           </div>
 
-          {/* Rich Content Editor */}
+          {/* MS Word-style WYSIWYG Ribbon Rich Editor */}
           <div className="form-group" style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
             <div style={styles.editorHeader}>
-              <label style={{ margin: 0 }}>Main Content (Markdown Supported)</label>
+              <label style={{ margin: 0, fontWeight: 700 }}>Main Article Editor (Rich Text &amp; LaTeX)</label>
               <div style={styles.editorTabs}>
                 <button
                   type="button"
@@ -252,7 +272,7 @@ export default function PostEditor({ post }: PostEditorProps) {
                     ...(editorTab === "write" ? styles.tabBtnActive : {}),
                   }}
                 >
-                  Write
+                  Document Editor
                 </button>
                 <button
                   type="button"
@@ -262,42 +282,98 @@ export default function PostEditor({ post }: PostEditorProps) {
                     ...(editorTab === "preview" ? styles.tabBtnActive : {}),
                   }}
                 >
-                  Preview
+                  Live Preview
                 </button>
               </div>
             </div>
 
             {editorTab === "write" ? (
-              <textarea
-                required
-                rows={12}
-                placeholder="Write your article body here in Markdown format..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="form-input"
-                style={{ ...styles.textarea, flexGrow: 1, fontFamily: "monospace", fontSize: "0.85rem" }}
-              />
+              <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                {/* Word Ribbon Toolbar */}
+                <div style={styles.editorToolbar}>
+                  {/* Font Format Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button type="button" onClick={() => execCmd("bold")} title="Bold" style={styles.toolbarBtn}><b>B</b></button>
+                    <button type="button" onClick={() => execCmd("italic")} title="Italic" style={styles.toolbarBtn}><i>I</i></button>
+                    <button type="button" onClick={() => execCmd("underline")} title="Underline" style={styles.toolbarBtn}><u>U</u></button>
+                    <button type="button" onClick={() => execCmd("strikeThrough")} title="Strikethrough" style={styles.toolbarBtn}><s>S</s></button>
+                  </div>
+                  
+                  {/* Heading Block Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button type="button" onClick={() => execCmd("formatBlock", "H1")} title="Header 1" style={styles.toolbarBtn}>H1</button>
+                    <button type="button" onClick={() => execCmd("formatBlock", "H2")} title="Header 2" style={styles.toolbarBtn}>H2</button>
+                    <button type="button" onClick={() => execCmd("formatBlock", "H3")} title="Header 3" style={styles.toolbarBtn}>H3</button>
+                    <button type="button" onClick={() => execCmd("formatBlock", "P")} title="Paragraph" style={styles.toolbarBtn}>P</button>
+                  </div>
+
+                  {/* Lists Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button type="button" onClick={() => execCmd("insertUnorderedList")} title="Bullet List" style={styles.toolbarBtn}>• List</button>
+                    <button type="button" onClick={() => execCmd("insertOrderedList")} title="Numbered List" style={styles.toolbarBtn}>1. List</button>
+                  </div>
+
+                  {/* Alignments Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button type="button" onClick={() => execCmd("justifyLeft")} title="Align Left" style={styles.toolbarBtn}>Left</button>
+                    <button type="button" onClick={() => execCmd("justifyCenter")} title="Align Center" style={styles.toolbarBtn}>Center</button>
+                    <button type="button" onClick={() => execCmd("justifyRight")} title="Align Right" style={styles.toolbarBtn}>Right</button>
+                  </div>
+
+                  {/* Insert Complex Elements Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button 
+                      type="button" 
+                      onClick={() => execCmd("insertHTML", "<pre><code>\n// Write JavaScript Code here\nconsole.log('Sandbox executing...');\n</code></pre>")} 
+                      title="Insert Code Terminal Sandbox" 
+                      style={{ ...styles.toolbarBtn, color: "var(--color-accent)", fontWeight: 700 }}
+                    >
+                      ⚡ Sandbox
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => execCmd("insertHTML", "$$ E = m c^2 $$")} 
+                      title="Insert LaTeX Math Equation" 
+                      style={{ ...styles.toolbarBtn, color: "var(--color-accent)", fontWeight: 700 }}
+                    >
+                      Σ LaTeX
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => execCmd("insertHTML", "<table border='1' style='width:100%; border-collapse:collapse; margin:1rem 0;'><tr style='background:rgba(0,0,0,0.03);'><th style='padding:6px;'>Header 1</th><th style='padding:6px;'>Header 2</th></tr><tr><td style='padding:6px;'>Data 1</td><td style='padding:6px;'>Data 2</td></tr></table>")} 
+                      title="Insert Grid Table" 
+                      style={styles.toolbarBtn}
+                    >
+                      Grid Table
+                    </button>
+                    <button type="button" onClick={() => execCmd("insertHorizontalRule")} title="Horizontal Line" style={styles.toolbarBtn}>Line</button>
+                  </div>
+
+                  {/* Actions Group */}
+                  <div style={styles.toolbarGroup}>
+                    <button type="button" onClick={() => execCmd("removeFormat")} title="Clear Formatting" style={styles.toolbarBtn}>Clear</button>
+                    <button type="button" onClick={() => execCmd("undo")} title="Undo" style={styles.toolbarBtn}>↶</button>
+                    <button type="button" onClick={() => execCmd("redo")} title="Redo" style={styles.toolbarBtn}>↷</button>
+                  </div>
+                </div>
+
+                {/* MS Word Paper Sheet Editable Container */}
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  onInput={handleEditorInput}
+                  style={styles.wordPaperSheet}
+                  className="form-input"
+                  data-placeholder="Start typing your rich text article here... Use the toolbar ribbon above to design layouts, create code terminals, insert LaTeX equations, or copy-paste directly from Microsoft Word."
+                />
+              </div>
             ) : (
               <div style={styles.previewBox}>
                 {content ? (
-                  <div style={styles.markdownPreview}>
-                    {/* Basic Markdown parser rendering headings, lists, bold */}
-                    {content.split("\n").map((line, idx) => {
-                      if (line.startsWith("# ")) {
-                        return <h1 key={idx} style={styles.pHeading1}>{line.slice(2)}</h1>;
-                      }
-                      if (line.startsWith("## ")) {
-                        return <h2 key={idx} style={styles.pHeading2}>{line.slice(3)}</h2>;
-                      }
-                      if (line.startsWith("### ")) {
-                        return <h3 key={idx} style={styles.pHeading3}>{line.slice(4)}</h3>;
-                      }
-                      if (line.startsWith("- ")) {
-                        return <li key={idx} style={styles.pListItem}>{line.slice(2)}</li>;
-                      }
-                      return <p key={idx} style={styles.pParagraph}>{line}</p>;
-                    })}
-                  </div>
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: content }} 
+                    style={{ fontSize: "1.05rem", lineHeight: "1.8", color: "#2C221D" }}
+                  />
                 ) : (
                   <p style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
                     Nothing to preview yet.
@@ -673,5 +749,48 @@ const styles: Record<string, React.CSSProperties> = {
   },
   switchSliderActive: {
     backgroundColor: "var(--color-accent)",
+  },
+  editorToolbar: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "0.4rem",
+    backgroundColor: "#FAF7F2",
+    border: "1px solid var(--color-border)",
+    borderBottom: "none",
+    padding: "0.6rem",
+    borderRadius: "6px 6px 0 0",
+    alignItems: "center",
+  },
+  toolbarGroup: {
+    display: "flex",
+    gap: "0.2rem",
+    borderRight: "1px solid var(--color-border)",
+    paddingRight: "0.4rem",
+    marginRight: "0.2rem",
+  },
+  toolbarBtn: {
+    background: "transparent",
+    border: "1px solid transparent",
+    padding: "0.3rem 0.5rem",
+    fontSize: "0.75rem",
+    cursor: "pointer",
+    borderRadius: "4px",
+    color: "var(--color-text-dark)",
+    fontWeight: 500,
+    transition: "var(--transition-fast)",
+  },
+  wordPaperSheet: {
+    width: "100%",
+    minHeight: "350px",
+    backgroundColor: "var(--color-white)",
+    border: "1px solid var(--color-border)",
+    borderTop: "none",
+    borderRadius: "0 0 6px 6px",
+    padding: "1.5rem",
+    fontSize: "0.95rem",
+    lineHeight: "1.6",
+    outline: "none",
+    overflowY: "auto",
+    fontFamily: "var(--font-sans)",
   },
 };

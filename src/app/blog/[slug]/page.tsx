@@ -8,6 +8,8 @@ import { eq, and, ne, desc } from "drizzle-orm";
 import { incrementPostViews } from "../../actions/blog";
 import { Metadata } from "next";
 import Footer from "@/app/components/Footer";
+import MDContent from "@/app/components/MDContent";
+import Script from "next/script";
 
 interface BlogDetailsProps {
   params: Promise<{
@@ -205,12 +207,9 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
           </section>
         )}
 
-        {/* Content Body */}
+        {/* Content Body (Supporting MathJax LaTeX and Coding Sandbox) */}
         <section style={styles.contentSection}>
-          <div
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-            style={styles.contentBody}
-          />
+          <MDContent content={post.content} />
         </section>
 
         {/* Related Posts Section */}
@@ -255,6 +254,12 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
           </section>
         )}
       </main>
+
+      {/* Load MathJax asynchronously for LaTeX calculations */}
+      <Script
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        strategy="afterInteractive"
+      />
 
       {/* Extracted Premium Footer */}
       <Footer />

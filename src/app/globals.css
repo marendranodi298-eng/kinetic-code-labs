@@ -388,3 +388,14 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Custom contenteditable placeholder styling */
+.form-input[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-muted);
+  opacity: 0.55;
+  font-style: italic;
+  cursor: text;
+  display: block;
+}
+
+
