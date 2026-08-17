@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createBlogPost, updateBlogPost } from "../../actions/blog";
 import { Post } from "@/db";
 import { optimizeCloudinaryUrl } from "@/lib/media";
+import MDContent from "@/app/components/MDContent";
 
 interface PostEditorProps {
   post?: Post; // If provided, we are in Edit Mode
@@ -489,10 +490,7 @@ export default function PostEditor({ post }: PostEditorProps) {
             ) : (
               <div style={styles.previewBox}>
                 {content ? (
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: content }} 
-                    style={{ fontSize: "1.05rem", lineHeight: "1.8", color: "#2C221D" }}
-                  />
+                  <MDContent content={content} />
                 ) : (
                   <p style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
                     Nothing to preview yet.
