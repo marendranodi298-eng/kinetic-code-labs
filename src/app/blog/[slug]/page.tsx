@@ -11,6 +11,7 @@ import Footer from "@/app/components/Footer";
 import MDContent from "@/app/components/MDContent";
 import Script from "next/script";
 import { optimizeCloudinaryUrl } from "@/lib/media";
+import SidebarNewsletter from "@/app/components/SidebarNewsletter";
 
 interface BlogDetailsProps {
   params: Promise<{
@@ -19,6 +20,43 @@ interface BlogDetailsProps {
 }
 
 export const revalidate = 0; // Fresh content on load
+
+interface HeadingItem {
+  text: string;
+  level: number;
+  id: string;
+}
+
+// Extract headings for dynamic Table of Contents
+function extractHeadings(content: string): HeadingItem[] {
+  const headings: HeadingItem[] = [];
+  const lines = content.split("\n");
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("## ") || trimmed.startsWith("### ")) {
+      const level = trimmed.startsWith("## ") ? 2 : 3;
+      const text = level === 2 ? trimmed.slice(3).trim() : trimmed.slice(4).trim();
+      const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+      headings.push({ text, level, id });
+    } else {
+      // Parse HTML heading tags if content is rich text HTML
+      const h2Match = trimmed.match(/<h2[^>]*>(.*?)<\/h2>/i);
+      if (h2Match) {
+        const text = h2Match[1].replace(/<[^>]*>/g, "").trim();
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        headings.push({ text, level: 2, id });
+      }
+      const h3Match = trimmed.match(/<h3[^>]*>(.*?)<\/h3>/i);
+      if (h3Match) {
+        const text = h3Match[1].replace(/<[^>]*>/g, "").trim();
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        headings.push({ text, level: 3, id });
+      }
+    }
+  }
+  return headings;
+}
 
 // Dynamic SEO Metadata Generation
 export async function generateMetadata({
@@ -135,7 +173,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
     day: "numeric",
   });
 
-  const bodyHtml = renderMarkdownToHtml(post.content);
+  const headings = extractHeadings(post.content);
 
   return (
     <div style={styles.pageContainer} className="fade-in">
@@ -169,91 +207,126 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
         </div>
       </header>
 
-      {/* Main Post Container */}
-      <main className="container" style={styles.main}>
-        {/* Post Metadata Header */}
-        <section style={styles.postMetaHeader}>
-          <div style={styles.metaRow}>
-            <span className={`badge badge-${post.type}`}>{post.type}</span>
-            <span style={styles.metaDivider}>•</span>
-            <span style={styles.metaText}>{formattedDate}</span>
-            <span style={styles.metaDivider}>•</span>
-            <span style={styles.metaText}>{post.views} views</span>
-          </div>
+      {/* Main Post Container (Two-column Grid Layout) */}
+      <main className="container editorial-layout" style={{ paddingTop: "3.5rem", paddingBottom: "6rem" }}>
+        {/* Left Column: Article Body */}
+        <div className="editorial-main">
+          {/* Post Metadata Header */}
+          <section style={styles.postMetaHeader}>
+            <div style={styles.metaRow}>
+              <span style={styles.metaText}>{formattedDate}</span>
+              <span style={styles.metaDivider}>•</span>
+              <span style={styles.metaText}>{post.views} views</span>
+            </div>
 
-          <h1 style={styles.postTitle}>{post.title}</h1>
-          <p style={styles.postSummary}>{post.summary}</p>
-        </section>
-
-        {/* Media Block (Photos / Videos) */}
-        {post.type !== "news" && post.mediaUrl && (
-          <section style={styles.mediaSection}>
-            {post.type === "video" ? (
-              <video
-                src={optimizeCloudinaryUrl(post.mediaUrl)}
-                controls
-                style={styles.videoPlayer}
-                className="card"
-              />
-            ) : (
-              <div style={styles.imageWrapper} className="card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={optimizeCloudinaryUrl(post.mediaUrl)}
-                  alt={post.title}
-                  style={styles.articleImage}
-                />
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Content Body (Supporting MathJax LaTeX and Coding Sandbox) */}
-        <section style={styles.contentSection}>
-          <MDContent content={post.content} />
-        </section>
-
-        {/* Related Posts Section */}
-        {relatedPosts.length > 0 && (
-          <section style={styles.relatedSection}>
-            <h2 style={styles.relatedTitle}>Related {post.type === "news" ? "News" : post.type === "photo" ? "Photos" : "Videos"}</h2>
-            <div style={styles.relatedDivider}></div>
-            <div style={styles.relatedGrid}>
-              {relatedPosts.map((relPost) => (
-                <Link
-                  key={relPost.id}
-                  href={`/blog/${relPost.slug}`}
-                  style={styles.relatedCard}
-                  className="card"
-                >
-                  {relPost.type !== "news" && relPost.mediaUrl ? (
-                    <div style={styles.relatedCardMedia}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={relPost.mediaUrl}
-                        alt={relPost.title}
-                        style={styles.relatedCardImage}
-                      />
-                    </div>
-                  ) : (
-                    <div style={styles.relatedNewsPlaceholder}>
-                      <span>¶</span>
-                    </div>
-                  )}
-                  <div style={styles.relatedCardBody}>
-                    <span style={styles.relatedCardDate}>
-                      {new Date(relPost.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <h3 style={styles.relatedCardTitle}>{relPost.title}</h3>
-                  </div>
-                </Link>
-              ))}
+            <h1 style={styles.postTitle}>{post.title}</h1>
+            <p style={styles.postSummary}>{post.summary}</p>
+            
+            {/* Hashtag tags list centered */}
+            <div style={styles.pillsRow}>
+              <span className="badge badge-news" style={styles.pill}>#{post.type}</span>
+              <span className="badge badge-photo" style={styles.pill}>#global-insights</span>
+              <span className="badge badge-video" style={styles.pill}>#trending</span>
             </div>
           </section>
-        )}
+
+          {/* Media Block (Photos / Videos) */}
+          {post.type !== "news" && post.mediaUrl && (
+            <section style={styles.mediaSection}>
+              {post.type === "video" ? (
+                <video
+                  src={optimizeCloudinaryUrl(post.mediaUrl)}
+                  controls
+                  style={styles.videoPlayer}
+                  className="card"
+                />
+              ) : (
+                <div style={styles.imageWrapper} className="card">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={optimizeCloudinaryUrl(post.mediaUrl)}
+                    alt={post.title}
+                    style={styles.articleImage}
+                  />
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Table of Contents Widget */}
+          {headings.length > 0 && (
+            <div style={styles.tocBox} className="card">
+              <h4 style={styles.tocTitle}>Table of Contents</h4>
+              <ul style={styles.tocList}>
+                {headings.map((h, i) => (
+                  <li 
+                    key={i} 
+                    style={{ 
+                      ...styles.tocItem, 
+                      borderLeft: h.level === 2 ? "1.5px solid var(--color-border)" : "none",
+                      paddingLeft: h.level === 2 ? "0.6rem" : "1.2rem"
+                    }}
+                  >
+                    <a href={`#${h.id}`} style={styles.tocLink}>
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Content Body */}
+          <section style={styles.contentSection}>
+            <MDContent content={post.content} />
+          </section>
+        </div>
+
+        {/* Right Column: Sticky Sidebar Widgets */}
+        <aside className="editorial-sidebar">
+          {/* Sidebar Newsletter card */}
+          <SidebarNewsletter />
+
+          {/* Sidebar Recommended Stories Widget */}
+          {relatedPosts.length > 0 && (
+            <div style={styles.sidebarRelSection}>
+              <h4 style={styles.sidebarRelHeader}>RECOMMENDED READS</h4>
+              <div style={styles.sidebarRelList}>
+                {relatedPosts.map((relPost) => (
+                  <Link
+                    key={relPost.id}
+                    href={`/blog/${relPost.slug}`}
+                    className="sidebar-rel-card"
+                  >
+                    <div className="sidebar-rel-media">
+                      {relPost.type !== "news" && relPost.mediaUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={optimizeCloudinaryUrl(relPost.mediaUrl)}
+                          alt={relPost.title}
+                          className="sidebar-rel-img"
+                        />
+                      ) : (
+                        <div className="sidebar-rel-placeholder">
+                          <span>¶</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="sidebar-rel-info">
+                      <span className="sidebar-rel-date">
+                        {new Date(relPost.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                      <h3 className="sidebar-rel-title">{relPost.title}</h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
       </main>
 
       {/* Load MathJax asynchronously for LaTeX calculations */}
@@ -471,5 +544,74 @@ const styles: Record<string, React.CSSProperties> = {
   },
   footerLink: {
     transition: "var(--transition-fast)",
+  },
+  pillsRow: {
+    display: "flex",
+    gap: "0.5rem",
+    flexWrap: "wrap",
+    marginTop: "1.2rem",
+  },
+  pill: {
+    fontSize: "0.65rem",
+    padding: "0.25rem 0.6rem",
+    borderRadius: "20px",
+    textTransform: "lowercase",
+    fontWeight: 600,
+  },
+  tocBox: {
+    backgroundColor: "#FAF7F2",
+    border: "1px solid var(--color-border)",
+    padding: "1.5rem",
+    marginBottom: "2.5rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.8rem",
+  },
+  tocTitle: {
+    fontFamily: "var(--font-sans)",
+    fontSize: "0.8rem",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "var(--color-accent)",
+    margin: 0,
+  },
+  tocList: {
+    listStyleType: "none",
+    padding: 0,
+    margin: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.6rem",
+  },
+  tocItem: {
+    fontSize: "0.9rem",
+    lineHeight: "1.4",
+  },
+  tocLink: {
+    color: "var(--color-text-muted)",
+    textDecoration: "none",
+    transition: "color 0.2s",
+  },
+  sidebarRelSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1.2rem",
+  },
+  sidebarRelHeader: {
+    fontFamily: "var(--font-sans)",
+    fontSize: "0.8rem",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "var(--color-text-muted)",
+    borderBottom: "1px solid var(--color-border)",
+    paddingBottom: "0.5rem",
+    margin: 0,
+  },
+  sidebarRelList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
   },
 };

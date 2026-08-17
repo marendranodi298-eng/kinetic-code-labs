@@ -67,11 +67,21 @@ export default function MDContent({ content }: MDContentProps) {
   );
 }
 
+// Helper to insert unique id attributes into HTML headings for TOC anchors
+function addIdsToHtmlHeadings(html: string): string {
+  return html.replace(/<(h2|h3)([^>]*)>(.*?)<\/(h2|h3)>/gi, (match, tag, attrs, text) => {
+    const cleanText = text.replace(/<[^>]*>/g, "").trim();
+    const id = cleanText.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+    if (attrs.includes("id=")) return match;
+    return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
+  });
+}
+
 // Compact markdown & HTML detection parser
 function renderMarkdownToHtmlCompact(markdown: string): string {
   // Check if content already contains native HTML structures (saved from WYSIWYG editor)
   const isHtml = /<[a-z][\s\S]*>/i.test(markdown);
-  if (isHtml) return markdown;
+  if (isHtml) return addIdsToHtmlHeadings(markdown);
 
   let html = markdown
     .replace(/&/g, "&amp;")
@@ -112,11 +122,17 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
       }
 
       if (trimmed.startsWith("### ")) {
-        result += `<h3 style="font-size:1.25rem;margin-top:1.8rem;margin-bottom:0.8rem;font-family:var(--font-sans);font-weight:700;color:var(--color-text-dark);line-height:1.3;">${trimmed.slice(4)}</h3>`;
+        const text = trimmed.slice(4);
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        result += `<h3 id="${id}" style="font-size:1.25rem;margin-top:1.8rem;margin-bottom:0.8rem;font-family:var(--font-sans);font-weight:700;color:var(--color-text-dark);line-height:1.3;">${text}</h3>`;
       } else if (trimmed.startsWith("## ")) {
-        result += `<h2 style="font-size:1.6rem;margin-top:2.2rem;margin-bottom:1rem;font-family:var(--font-serif);color:var(--color-text-dark);line-height:1.2;">${trimmed.slice(3)}</h2>`;
+        const text = trimmed.slice(3);
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        result += `<h2 id="${id}" style="font-size:1.6rem;margin-top:2.2rem;margin-bottom:1rem;font-family:var(--font-serif);color:var(--color-text-dark);line-height:1.2;">${text}</h2>`;
       } else if (trimmed.startsWith("# ")) {
-        result += `<h1 style="font-size:2rem;margin-top:2.5rem;margin-bottom:1.2rem;font-family:var(--font-serif);color:var(--color-text-dark);border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;line-height:1.15;">${trimmed.slice(2)}</h1>`;
+        const text = trimmed.slice(2);
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        result += `<h1 id="${id}" style="font-size:2rem;margin-top:2.5rem;margin-bottom:1.2rem;font-family:var(--font-serif);color:var(--color-text-dark);border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;line-height:1.15;">${text}</h1>`;
       } else if (trimmed === "") {
         result += '<div style="height:0.8rem;"></div>';
       } else {
