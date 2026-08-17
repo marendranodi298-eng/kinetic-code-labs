@@ -8,9 +8,6 @@ interface MDContentProps {
 }
 
 export default function MDContent({ content }: MDContentProps) {
-  // Split content by markdown code block delimiter (```)
-  const parts = content.split("```");
-
   useEffect(() => {
     // Trigger MathJax parsing on mount or when content updates
     if (typeof window !== "undefined" && (window as any).MathJax) {
@@ -22,13 +19,68 @@ export default function MDContent({ content }: MDContentProps) {
     }
   }, [content]);
 
+  // Unified parser supporting both Markdown (```lang) and Rich Text Editor HTML (<pre><code>)
+  const blocks: { type: "text" | "code"; content: string; language: string }[] = [];
+
+  // Match HTML pre/code tags
+  const hasHtmlPreCode = /<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi.test(content);
+
+  if (hasHtmlPreCode) {
+    let lastIndex = 0;
+    const regex = /<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi;
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      const textBefore = content.substring(lastIndex, match.index);
+      if (textBefore.trim() || textBefore.includes("\n")) {
+        blocks.push({ type: "text", content: textBefore, language: "" });
+      }
+
+      // Extract raw code inside <code> and unescape HTML characters
+      const rawCode = match[1]
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&amp;/g, "&")
+        .trim();
+
+      blocks.push({ type: "code", content: rawCode, language: "javascript" });
+      lastIndex = regex.lastIndex;
+    }
+
+    const textRemaining = content.substring(lastIndex);
+    if (textRemaining.trim() || textRemaining.includes("\n")) {
+      blocks.push({ type: "text", content: textRemaining, language: "" });
+    }
+  } else {
+    // Fallback: Split content by markdown code block delimiter (```)
+    const parts = content.split("```");
+    parts.forEach((part, index) => {
+      if (index % 2 === 0) {
+        blocks.push({ type: "text", content: part, language: "" });
+      } else {
+        if (!part.trim()) return;
+        const firstLineBreak = part.indexOf("\n");
+        let language = "javascript";
+        let code = part;
+
+        if (firstLineBreak !== -1) {
+          const possibleLang = part.substring(0, firstLineBreak).trim().toLowerCase();
+          if (possibleLang) {
+            language = possibleLang;
+            code = part.substring(firstLineBreak + 1);
+          }
+        }
+        blocks.push({ type: "code", content: code, language });
+      }
+    });
+  }
+
   return (
     <div className="md-content-wrapper">
-      {parts.map((part, index) => {
-        // Even indices are regular text/HTML blocks
-        if (index % 2 === 0) {
-          if (!part.trim()) return null;
-          const html = renderMarkdownToHtmlCompact(part);
+      {blocks.map((block, index) => {
+        if (block.type === "text") {
+          if (!block.content.trim() && !block.content.includes("\n")) return null;
+          const html = renderMarkdownToHtmlCompact(block.content);
           return (
             <div
               key={index}
@@ -37,28 +89,12 @@ export default function MDContent({ content }: MDContentProps) {
             />
           );
         } else {
-          // Odd indices are code blocks
-          if (!part.trim()) return null;
-          const firstLineBreak = part.indexOf("\n");
-          let language = "javascript";
-          let code = part;
-
-          if (firstLineBreak !== -1) {
-            const possibleLang = part.substring(0, firstLineBreak).trim().toLowerCase();
-            if (possibleLang) {
-              language = possibleLang;
-              code = part.substring(firstLineBreak + 1);
-            }
-          }
-
-          // Render JavaScript/TypeScript in our interactive sandbox terminal
-          const isRunnable = ["js", "javascript", "ts", "typescript"].includes(language);
-          
+          const isRunnable = ["js", "javascript", "ts", "typescript"].includes(block.language);
           return (
             <TerminalSandbox
               key={index}
-              initialCode={code}
-              language={isRunnable ? language : `${language} (read-only)`}
+              initialCode={block.content}
+              language={isRunnable ? block.language : `${block.language} (read-only)`}
             />
           );
         }
