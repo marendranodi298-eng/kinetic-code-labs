@@ -36,8 +36,8 @@ export default function MDContent({ content }: MDContentProps) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, "text/html");
 
-    // Extract all <pre> elements
-    const preElements = Array.from(doc.querySelectorAll("pre"));
+    // Extract only pre elements that contain a code tag (real sandbox/code blocks)
+    const preElements = Array.from(doc.querySelectorAll("pre")).filter(pre => pre.querySelector("code") !== null);
     const parsedBlocks: { type: "text" | "code"; content: string; language: string }[] = [];
 
     if (preElements.length === 0) {
