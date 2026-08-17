@@ -50,6 +50,16 @@ export default function TerminalSandbox({ initialCode, language = "javascript" }
   const [isEditing, setIsEditing] = useState(false);
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const cleanLang = language.replace(" (read-only)", "").toLowerCase();
+  const isRunnable = ["js", "javascript", "ts", "typescript"].includes(cleanLang) && !language.includes("read-only");
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleRun = () => {
     setIsRunning(true);
@@ -70,7 +80,6 @@ export default function TerminalSandbox({ initialCode, language = "javascript" }
       };
 
       try {
-        // Execute JS code within a sandboxed context overriding console
         const executeCode = new Function("console", code);
         executeCode(customConsole);
         
@@ -88,28 +97,32 @@ export default function TerminalSandbox({ initialCode, language = "javascript" }
 
   return (
     <div style={styles.terminalContainer} className="card">
-      {/* Header Bar */}
+      {/* ChatGPT / Gemini Header Bar */}
       <div style={styles.header}>
-        <div style={styles.dots}>
-          <span style={{ ...styles.dot, backgroundColor: "#FF5F56" }}></span>
-          <span style={{ ...styles.dot, backgroundColor: "#FFBD2E" }}></span>
-          <span style={{ ...styles.dot, backgroundColor: "#27C93F" }}></span>
+        <div style={styles.headerLeft}>
+          <span style={styles.langBadge}>{cleanLang}</span>
         </div>
-        <div style={styles.title}>{language.toUpperCase()} TERMINAL SANDBOX</div>
         <div style={styles.actions}>
-          <button 
-            onClick={() => setIsEditing(!isEditing)} 
-            style={isEditing ? styles.btnActive : styles.btn}
-          >
-            {isEditing ? "View Code" : "Edit Code"}
+          <button onClick={handleCopy} style={styles.copyBtn}>
+            {copied ? "✓ Copied!" : "📋 Copy code"}
           </button>
-          <button 
-            onClick={handleRun} 
-            disabled={isRunning} 
-            style={styles.runBtn}
-          >
-            {isRunning ? "Running..." : "▶ Run"}
-          </button>
+          {isRunnable && (
+            <>
+              <button 
+                onClick={() => setIsEditing(!isEditing)} 
+                style={isEditing ? styles.btnActive : styles.btn}
+              >
+                {isEditing ? "View Code" : "Edit"}
+              </button>
+              <button 
+                onClick={handleRun} 
+                disabled={isRunning} 
+                style={styles.runBtn}
+              >
+                {isRunning ? "Running..." : "▶ Run"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -151,40 +164,53 @@ export default function TerminalSandbox({ initialCode, language = "javascript" }
 
 const styles: Record<string, React.CSSProperties> = {
   terminalContainer: {
-    backgroundColor: "#110D0B",
-    color: "#F7F4EF",
+    backgroundColor: "#1E1E1E", // ChatGPT dark-grey coding theme
+    color: "#F3F4F6",
     fontFamily: "monospace",
-    margin: "1.5rem 0",
+    margin: "2rem 0",
     display: "flex",
     flexDirection: "column",
+    borderRadius: "6px",
+    border: "1px solid var(--color-border)",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1C1512",
-    padding: "0.6rem 1rem",
+    backgroundColor: "#2D2D2D", // Header dark slate
+    padding: "0.6rem 1.2rem",
     borderBottom: "1px solid rgba(255,255,255,0.05)",
   },
-  dots: {
+  headerLeft: {
     display: "flex",
-    gap: "0.4rem",
+    alignItems: "center",
   },
-  dot: {
-    width: "10px",
-    height: "10px",
-    borderRadius: "50%",
-    display: "inline-block",
-  },
-  title: {
-    fontSize: "0.7rem",
+  langBadge: {
+    fontSize: "0.75rem",
     fontWeight: 600,
-    letterSpacing: "0.1em",
-    color: "#C69A5B",
+    color: "#D1A751", // Luxury gold language label
+    textTransform: "lowercase",
+    fontFamily: "var(--font-sans)",
   },
   actions: {
     display: "flex",
-    gap: "0.5rem",
+    alignItems: "center",
+    gap: "0.8rem",
+  },
+  copyBtn: {
+    background: "transparent",
+    border: "none",
+    color: "#9CA3AF",
+    fontSize: "0.72rem",
+    cursor: "pointer",
+    padding: "0.2rem 0.5rem",
+    borderRadius: "4px",
+    transition: "color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.3rem",
+    fontWeight: 500,
+    fontFamily: "var(--font-sans)",
   },
   btn: {
     background: "rgba(255,255,255,0.05)",
@@ -195,6 +221,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "4px",
     cursor: "pointer",
     transition: "all 0.2s",
+    fontFamily: "var(--font-sans)",
   },
   btnActive: {
     background: "#C69A5B",
@@ -205,6 +232,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "4px",
     cursor: "pointer",
     fontWeight: "bold",
+    fontFamily: "var(--font-sans)",
   },
   runBtn: {
     background: "#27C93F",
@@ -216,14 +244,15 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "4px",
     cursor: "pointer",
     transition: "all 0.2s",
+    fontFamily: "var(--font-sans)",
   },
   codeWrapper: {
-    padding: "1rem",
+    padding: "1.2rem",
     fontSize: "0.85rem",
-    lineHeight: "1.5",
-    backgroundColor: "#110D0B",
+    lineHeight: "1.6",
+    backgroundColor: "#1E1E1E",
     overflowX: "auto",
-    minHeight: "100px",
+    minHeight: "80px",
     display: "flex",
   },
   codePre: {
@@ -231,7 +260,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "monospace",
     whiteSpace: "pre-wrap",
     wordBreak: "break-all",
-    color: "#EAE5DB",
+    color: "#E5E7EB",
     width: "100%",
   },
   editor: {
@@ -241,22 +270,23 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#FEF3C7",
     fontFamily: "monospace",
     fontSize: "0.85rem",
-    lineHeight: "1.5",
+    lineHeight: "1.6",
     outline: "none",
     resize: "vertical",
     minHeight: "120px",
   },
   console: {
-    backgroundColor: "#080605",
+    backgroundColor: "#151515",
     borderTop: "1px solid rgba(255,255,255,0.05)",
-    padding: "0.8rem 1rem",
+    padding: "0.8rem 1.2rem",
   },
   consoleTitle: {
-    fontSize: "0.6rem",
+    fontSize: "0.65rem",
     fontWeight: "bold",
     color: "#6B5E56",
     letterSpacing: "0.05em",
     marginBottom: "0.4rem",
+    fontFamily: "var(--font-sans)",
   },
   consolePre: {
     margin: 0,

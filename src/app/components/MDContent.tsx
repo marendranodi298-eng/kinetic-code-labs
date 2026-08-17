@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TerminalSandbox from "./TerminalSandbox";
 
 interface MDContentProps {
@@ -8,6 +8,8 @@ interface MDContentProps {
 }
 
 export default function MDContent({ content }: MDContentProps) {
+  const [blocks, setBlocks] = useState<{ type: "text" | "code"; content: string; language: string }[]>([]);
+
   useEffect(() => {
     // Trigger MathJax parsing on mount or when content updates
     if (typeof window !== "undefined" && (window as any).MathJax) {
@@ -19,68 +21,79 @@ export default function MDContent({ content }: MDContentProps) {
     }
   }, [content]);
 
-  // Unified parser supporting both Markdown (```lang) and Rich Text Editor HTML (<pre><code>)
-  const blocks: { type: "text" | "code"; content: string; language: string }[] = [];
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  // Match HTML pre/code tags
-  const hasHtmlPreCode = /<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi.test(content);
+    // Convert markdown to HTML first if it is pure markdown
+    const isHtml = /<[a-z][\s\S]*>/i.test(content);
+    let htmlContent = content;
 
-  if (hasHtmlPreCode) {
-    let lastIndex = 0;
-    const regex = /<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-      const textBefore = content.substring(lastIndex, match.index);
-      if (textBefore.trim() || textBefore.includes("\n")) {
-        blocks.push({ type: "text", content: textBefore, language: "" });
-      }
-
-      // Extract raw code inside <code> and clean all copy-pasted HTML formats
-      const rawCode = stripHtml(match[1]);
-
-      blocks.push({ type: "code", content: rawCode, language: "javascript" });
-      lastIndex = regex.lastIndex;
+    if (!isHtml) {
+      htmlContent = renderMarkdownToHtmlCompact(content);
     }
 
-    const textRemaining = content.substring(lastIndex);
-    if (textRemaining.trim() || textRemaining.includes("\n")) {
-      blocks.push({ type: "text", content: textRemaining, language: "" });
-    }
-  } else {
-    // Fallback: Split content by markdown code block delimiter (```)
-    const parts = content.split("```");
-    parts.forEach((part, index) => {
-      if (index % 2 === 0) {
-        blocks.push({ type: "text", content: part, language: "" });
-      } else {
-        if (!part.trim()) return;
-        const firstLineBreak = part.indexOf("\n");
+    // Use DOMParser to safely parse HTML and extract elements
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, "text/html");
+
+    // Extract all <pre> elements
+    const preElements = Array.from(doc.querySelectorAll("pre"));
+    const parsedBlocks: { type: "text" | "code"; content: string; language: string }[] = [];
+
+    if (preElements.length === 0) {
+      // No code blocks, render full HTML directly
+      setBlocks([{ type: "text", content: doc.body.innerHTML, language: "" }]);
+    } else {
+      let currentHtml = doc.body.innerHTML;
+      
+      // Replace each pre tag with a unique split delimiter
+      preElements.forEach((pre, index) => {
+        const delimiter = `__CODE_BLOCK_DELIMITER_${index}__`;
+        
+        // Extract raw code text (automatically decoding HTML entities and stripping nested styling tags)
+        const rawCode = pre.textContent || pre.innerText || "";
+        
+        // Detect language if present in class list
         let language = "javascript";
-        let code = part;
-
-        if (firstLineBreak !== -1) {
-          const possibleLang = part.substring(0, firstLineBreak).trim().toLowerCase();
-          if (possibleLang) {
-            language = possibleLang;
-            code = part.substring(firstLineBreak + 1);
+        const codeElement = pre.querySelector("code");
+        if (codeElement) {
+          const className = codeElement.className || "";
+          const match = className.match(/language-(\w+)/);
+          if (match) {
+            language = match[1];
           }
         }
-        blocks.push({ type: "code", content: code, language });
-      }
-    });
-  }
+
+        // Replace outer HTML with split delimiter safely
+        currentHtml = currentHtml.replace(pre.outerHTML, delimiter);
+        parsedBlocks.push({ type: "code", content: rawCode.trim(), language });
+      });
+
+      // Split the HTML by delimiters
+      const textParts = currentHtml.split(/__CODE_BLOCK_DELIMITER_\d+__/);
+      const finalBlocks: { type: "text" | "code"; content: string; language: string }[] = [];
+
+      textParts.forEach((part, index) => {
+        if (part.trim() || part.includes("\n")) {
+          finalBlocks.push({ type: "text", content: part, language: "" });
+        }
+        if (index < parsedBlocks.length) {
+          finalBlocks.push(parsedBlocks[index]);
+        }
+      });
+
+      setBlocks(finalBlocks);
+    }
+  }, [content]);
 
   return (
     <div className="md-content-wrapper">
       {blocks.map((block, index) => {
         if (block.type === "text") {
-          if (!block.content.trim() && !block.content.includes("\n")) return null;
-          const html = renderMarkdownToHtmlCompact(block.content);
           return (
             <div
               key={index}
-              dangerouslySetInnerHTML={{ __html: html }}
+              dangerouslySetInnerHTML={{ __html: block.content }}
               style={styles.textBlock}
             />
           );
