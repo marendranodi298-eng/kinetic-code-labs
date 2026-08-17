@@ -36,12 +36,8 @@ export default function MDContent({ content }: MDContentProps) {
         blocks.push({ type: "text", content: textBefore, language: "" });
       }
 
-      // Extract raw code inside <code> and unescape HTML characters
-      const rawCode = match[1]
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&amp;/g, "&")
-        .trim();
+      // Extract raw code inside <code> and clean all copy-pasted HTML formats
+      const rawCode = stripHtml(match[1]);
 
       blocks.push({ type: "code", content: rawCode, language: "javascript" });
       lastIndex = regex.lastIndex;
@@ -101,6 +97,25 @@ export default function MDContent({ content }: MDContentProps) {
       })}
     </div>
   );
+}
+
+// Helper to strip copy-pasted rich formatting HTML tags from terminal code
+function stripHtml(html: string): string {
+  let text = html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<p[^>]*>/gi, "")
+    .replace(/<\/p>/gi, "\n");
+  // Strip all other HTML tags (like spans, styles, colors)
+  text = text.replace(/<[^>]*>/g, "");
+  // Unescape standard HTML entities
+  return text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&amp;/g, "&")
+    .trim();
 }
 
 // Helper to insert unique id attributes into HTML headings for TOC anchors
