@@ -52,6 +52,11 @@ export default function PostEditor({ post }: PostEditorProps) {
     }
   };
 
+  const insertUploadedImage = () => {
+    if (!mediaUrl) return;
+    execCmd("insertHTML", `<img src="${mediaUrl}" style="width:100%; max-height:450px; object-fit:cover; margin:1.5rem 0; border-radius:6px; border:1px solid var(--color-border);" alt="Uploaded Image" />`);
+  };
+
   const handleEditorInput = (e: React.FormEvent<HTMLDivElement>) => {
     setContent(e.currentTarget.innerHTML);
   };
@@ -448,6 +453,17 @@ export default function PostEditor({ post }: PostEditorProps) {
                     >
                       Grid Table
                     </button>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const url = prompt("Enter Image URL:");
+                        if (url) execCmd("insertHTML", `<img src="${url}" style="width:100%; max-height:450px; object-fit:cover; margin:1.5rem 0; border-radius:6px; border:1px solid var(--color-border);" alt="Inserted Image" />`);
+                      }} 
+                      title="Insert External Image URL" 
+                      style={styles.toolbarBtn}
+                    >
+                      📷 Image URL
+                    </button>
                     <button type="button" onClick={() => execCmd("insertHorizontalRule")} title="Horizontal Line" style={styles.toolbarBtn}>Line</button>
                   </div>
 
@@ -512,6 +528,15 @@ export default function PostEditor({ post }: PostEditorProps) {
                   >
                     × Remove Asset
                   </button>
+                  {type !== "video" && (
+                    <button
+                      type="button"
+                      onClick={insertUploadedImage}
+                      style={styles.insertMediaBtn}
+                    >
+                      ➕ Insert to Editor
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div style={styles.dropzone}>
@@ -731,6 +756,20 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "#FDF2F2",
     color: "#9B1C1C",
     border: "1px solid #F8B4B4",
+    padding: "0.5rem",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    cursor: "pointer",
+    marginTop: "0.5rem",
+    transition: "var(--transition-fast)",
+  },
+  insertMediaBtn: {
+    width: "100%",
+    backgroundColor: "#FAF7F2",
+    color: "var(--color-accent)",
+    border: "1px solid var(--color-accent)",
     padding: "0.5rem",
     fontSize: "0.75rem",
     fontWeight: 600,

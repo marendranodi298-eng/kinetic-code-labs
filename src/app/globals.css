@@ -494,5 +494,93 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Premium Editorial Blog Typography Styles */
+.md-content-wrapper {
+  font-family: var(--font-sans);
+  color: var(--color-text-dark);
+}
+
+/* 1. Drop Cap (Bada Pehla Akshar) on the first paragraph */
+.md-content-wrapper p:first-of-type::first-letter {
+  font-family: var(--font-serif);
+  font-size: 3.8rem;
+  float: left;
+  line-height: 0.85;
+  margin-top: 0.15em;
+  margin-right: 0.12em;
+  font-weight: 700;
+  color: var(--color-accent); /* Luxury gold drop cap */
+  text-transform: uppercase;
+}
+
+/* 2. Blockquote / Pull Quote Styling */
+.md-content-wrapper blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding: 1.2rem 1.8rem;
+  margin: 2rem 0;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  background-color: #FAF7F2;
+  line-height: 1.6;
+  border-radius: 0 4px 4px 0;
+  display: block;
+}
+
+/* 3. Styled Tables inside Blog Content */
+.md-content-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.95rem;
+}
+
+.md-content-wrapper th, 
+.md-content-wrapper td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.md-content-wrapper th {
+  background-color: var(--color-bg-tan);
+  color: var(--color-text-dark);
+  font-weight: 700;
+  font-family: var(--font-sans);
+}
+
+.md-content-wrapper tr:nth-child(even) td {
+  background-color: rgba(234, 229, 219, 0.15);
+}
+
+/* 4. List styling spacing */
+.md-content-wrapper ul, 
+.md-content-wrapper ol {
+  margin-bottom: 1.5rem;
+}
+
+.md-content-wrapper li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* 5. Image alignments inside body */
+.md-content-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  margin: 2.2rem auto;
+  display: block;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease;
+}
+
+.md-content-wrapper img:hover {
+  transform: scale(1.01);
+}
+
+
 
 
