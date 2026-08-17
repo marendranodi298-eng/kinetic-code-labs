@@ -7,6 +7,44 @@ interface TerminalSandboxProps {
   language?: string;
 }
 
+// Light-weight high-speed syntax highlighter for coding terminal previews
+function highlightCode(code: string): string {
+  let html = code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // 1. Comments: single line (//...) and block (/*...*/) -> greyish taupe
+  html = html.replace(/(\/\/.*)/g, '<span style="color:#6B5E56;font-style:italic;">$1</span>');
+  html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#6B5E56;font-style:italic;">$1</span>');
+
+  // 2. Strings: single quote, double quote, template literals -> vibrant soft green
+  html = html.replace(/(["'`])(.*?)\1/g, '<span style="color:#34D399;">$1$2$1</span>');
+
+  // 3. Keywords: const, let, return, if, function -> lavender violet
+  const keywords = [
+    "const", "let", "var", "function", "return", "if", "else", "for", "while", 
+    "import", "export", "from", "default", "class", "new", "async", "await", 
+    "try", "catch", "finally", "throw", "error", "null", "undefined", "true", "false",
+    "typeof", "instanceof", "in", "of"
+  ];
+  const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "g");
+  html = html.replace(keywordRegex, '<span style="color:#C084FC;font-weight:600;">$1</span>');
+
+  // 4. Built-in Objects/Methods: console, log, fetch -> sky blue
+  const builtins = ["console", "log", "error", "warn", "info", "fetch", "document", "window", "JSON", "Math", "Promise", "setTimeout"];
+  const builtinRegex = new RegExp(`\\b(${builtins.join("|")})\\b`, "g");
+  html = html.replace(builtinRegex, '<span style="color:#60A5FA;">$1</span>');
+
+  // 5. Function Calls: customName() -> bright amber yellow
+  html = html.replace(/(\b\w+)(?=\()/g, '<span style="color:#FBBF24;">$1</span>');
+
+  // 6. Numeric digits -> neon orange
+  html = html.replace(/\b(\d+)\b/g, '<span style="color:#F97316;">$1</span>');
+
+  return html;
+}
+
 export default function TerminalSandbox({ initialCode, language = "javascript" }: TerminalSandboxProps) {
   const [code, setCode] = useState(initialCode.trim());
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +124,7 @@ export default function TerminalSandbox({ initialCode, language = "javascript" }
           />
         ) : (
           <pre style={styles.codePre}>
-            <code>{code}</code>
+            <code dangerouslySetInnerHTML={{ __html: highlightCode(code) }} />
           </pre>
         )}
       </div>
