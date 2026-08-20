@@ -131,9 +131,18 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
     <div style={styles.pageContainer} className="fade-in">
       {/* Top Banner */}
       <div className="banner-top">
-        <span>✦ JOURNAL ARTICLE</span>
+        <span>✦ KINETIC CODE LABS JOURNAL</span>
         <span>•</span>
-        <span>KINETIC CODE LABS READS</span>
+        <span>A PRODUCT BY AJEET PRAKASH YADAV</span>
+        <span>•</span>
+        <a 
+          href="https://www.kineticcodelabs.in" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={{ color: "var(--color-accent)", textDecoration: "underline" }}
+        >
+          WWW.KINETICCODELABS.IN
+        </a>
       </div>
 
       {/* Responsive Navbar */}

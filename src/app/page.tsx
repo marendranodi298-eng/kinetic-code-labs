@@ -17,6 +17,23 @@ interface HomeProps {
 
 export const revalidate = 0; // Fresh content on load
 
+// Top 50 High-Search Global Tech & Science Categories
+const TOP_50_CATEGORIES = [
+  "Artificial Intelligence", "WebGL 3D Physics", "Astrophysics", "Quantum Computing",
+  "Machine Learning", "Robotics", "Mechanical CAD", "Cybersecurity",
+  "Cloud Architecture", "Biotechnology", "DNA Transcription", "Aerospace Flight",
+  "Thermodynamics", "Full-Stack Web", "Next.js 15", "Neuroscience",
+  "Electric Vehicles", "Clean Energy & Fusion", "Mathematics", "Nanotechnology",
+  "Autonomous Systems", "Data Science", "DevOps & CI/CD", "Computer Vision",
+  "Game Engines", "FinTech & Cryptography", "Semiconductors", "Mobile Apps",
+  "Cellular Biology", "Space Exploration", "Generative AI", "Particle Physics",
+  "Materials Science", "Rocket Escape Velocity", "Industrial Automation", "Supercomputing",
+  "Distributed Systems", "Fluid Dynamics", "Deep Tech", "Augmented Reality",
+  "API Architecture", "Database Optimization", "Compiler Design", "Biomedical Tech",
+  "Edge Computing", "Simulation Labs", "Career Guides", "Global Innovation",
+  "Scientific Papers", "Technical Education"
+];
+
 export default async function HomePage({ searchParams }: HomeProps) {
   const resolvedParams = await searchParams;
   const page = parseInt(resolvedParams.page || "1");
@@ -79,15 +96,48 @@ export default async function HomePage({ searchParams }: HomeProps) {
     video: statCounts[0]?.video || 0,
   };
 
+  // Structured Data Schema for Google SEO
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kinetic Code Labs Journal",
+    "url": "https://journal.kineticcodelabs.in",
+    "description": "Next-generation interactive 3D science simulations and technical publishing platform.",
+    "author": {
+      "@type": "Person",
+      "name": "Ajeet Prakash Yadav",
+      "url": "https://www.kineticcodelabs.in"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Kinetic Code Labs",
+      "url": "https://www.kineticcodelabs.in",
+      "logo": "https://journal.kineticcodelabs.in/logo.png"
+    }
+  };
+
   return (
     <div style={styles.pageContainer} className="fade-in">
+      {/* SEO JSON-LD Script */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Top Banner */}
       <div className="banner-top">
         <span>✦ KINETIC CODE LABS JOURNAL</span>
         <span>•</span>
-        <span>OPEN-SOURCE INNOVATION</span>
+        <span>A PRODUCT BY AJEET PRAKASH YADAV</span>
         <span>•</span>
-        <span>HIGH PERFORMANCE WEB DEVELOPMENT</span>
+        <a 
+          href="https://www.kineticcodelabs.in" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={{ color: "var(--color-accent)", textDecoration: "underline" }}
+        >
+          WWW.KINETICCODELABS.IN
+        </a>
       </div>
 
       {/* Responsive Navbar */}
@@ -114,7 +164,15 @@ export default async function HomePage({ searchParams }: HomeProps) {
           </div>
 
           <div className="nav-right">
-            <span className="nav-member-tag">PUBLIC FEED</span>
+            <a 
+              href="https://www.kineticcodelabs.in" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="nav-member-tag"
+              style={{ textDecoration: "none" }}
+            >
+              MAIN AGENCY ↗
+            </a>
           </div>
         </div>
       </header>
@@ -122,13 +180,18 @@ export default async function HomePage({ searchParams }: HomeProps) {
       {/* Hero Section */}
       <section style={styles.heroSection}>
         <div className="container" style={styles.heroContainer}>
-          <span style={styles.heroPreTitle}>GLOBAL CONTENT PORTAL</span>
+          {/* Founder & Brand Badge */}
+          <div style={styles.founderBadge}>
+            ✦ A Flagship Innovation by <strong style={{ color: "var(--color-text-dark)" }}>AJEET PRAKASH YADAV</strong> • Powered by <a href="https://www.kineticcodelabs.in" target="_blank" rel="noopener noreferrer" style={styles.founderLink}>Kinetic Code Labs</a>
+          </div>
+
           <h1 className="hero-title-fluid">
-            Trending Stories Across Tech, Engineering, <br />
-            <span style={styles.heroTitleItalic}>Astrophysics, Simulation &amp; Global Innovation.</span>
+            Interactive Science, Deep Tech &amp; Engineering. <br />
+            <span style={styles.heroTitleItalic}>Experience Knowledge in Real-Time 3D.</span>
           </h1>
+
           <p style={styles.heroDescription}>
-            Explore our curated interactive articles, 3D simulations, and deep-dive technical insights. From real-time WebGL physics and quantum algorithms to aerospace mechanics and full-stack engineering.
+            Welcome to the official technical journal of <strong>Kinetic Code Labs</strong>. We combine cutting-edge software engineering, artificial intelligence, and hardware-accelerated 3D WebGL simulations to explain complex physics, aerospace, and computing concepts in simple, beautiful English.
           </p>
 
           {/* Responsive Stats Bar */}
@@ -142,14 +205,45 @@ export default async function HomePage({ searchParams }: HomeProps) {
             <div style={styles.statBox}>
               <div style={styles.statLabel}>NEWS &amp; ARTICLES</div>
               <div style={styles.statVal}>{stats.news}</div>
-              <div style={styles.statSubText}>Updates and highlights</div>
+              <div style={styles.statSubText}>Deep-dive technical guides</div>
             </div>
             <div style={styles.statBoxDivider} className="stat-box-divider-responsive"></div>
             <div style={styles.statBox}>
-              <div style={styles.statLabel}>SIMULATIONS &amp; MEDIA</div>
+              <div style={styles.statLabel}>3D SIMULATION LABS</div>
               <div style={styles.statVal}>{stats.photo + stats.video}</div>
-              <div style={styles.statSubText}>Interactive 3D labs</div>
+              <div style={styles.statSubText}>Live interactive 60 FPS models</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Top 50 High-Search Trending Categories Exploration Cloud */}
+      <section style={styles.categorySection}>
+        <div className="container">
+          <div style={styles.categoryHeader}>
+            <span style={styles.categoryPreTitle}>EXPLORE 50+ GLOBAL TOPICS</span>
+            <h2 style={styles.categoryTitle}>Trending Tech &amp; Scientific Categories</h2>
+            <p style={styles.categorySubText}>
+              Click any category to filter our research articles, tutorials, and interactive 3D simulations.
+            </p>
+          </div>
+
+          <div style={styles.categoryPillsWrapper}>
+            {TOP_50_CATEGORIES.map((cat, idx) => (
+              <Link
+                key={idx}
+                href={{ pathname: "/", query: { search: cat } }}
+                style={{
+                  ...styles.categoryPill,
+                  backgroundColor: search.toLowerCase() === cat.toLowerCase() ? "var(--color-accent)" : "#FAF7F2",
+                  color: search.toLowerCase() === cat.toLowerCase() ? "#1C1512" : "var(--color-text-muted)",
+                  borderColor: search.toLowerCase() === cat.toLowerCase() ? "var(--color-accent)" : "var(--color-border)",
+                  fontWeight: search.toLowerCase() === cat.toLowerCase() ? 700 : 500,
+                }}
+              >
+                #{cat}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -175,7 +269,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 ...(type === "news" ? styles.filterTabActive : {}),
               }}
             >
-              News Feed
+              News &amp; Research
             </Link>
             <Link
               href={{ pathname: "/", query: { type: "photo", search } }}
@@ -184,7 +278,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 ...(type === "photo" ? styles.filterTabActive : {}),
               }}
             >
-              Photo Stories
+              Photo Insights
             </Link>
             <Link
               href={{ pathname: "/", query: { type: "video", search } }}
@@ -193,7 +287,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 ...(type === "video" ? styles.filterTabActive : {}),
               }}
             >
-              Video Series
+              3D &amp; Video Labs
             </Link>
           </div>
 
@@ -203,25 +297,37 @@ export default async function HomePage({ searchParams }: HomeProps) {
             <input
               type="text"
               name="search"
-              placeholder="Search posts..."
+              placeholder="Search topics, keywords..."
               defaultValue={search}
               style={styles.searchInput}
             />
             <button type="submit" style={styles.searchBtn}>
               Search
             </button>
+            {search && (
+              <Link href="/" style={styles.clearSearchBtn} title="Clear search">
+                ✕
+              </Link>
+            )}
           </form>
         </div>
       </section>
 
       {/* Main Grid */}
       <main className="container" style={styles.mainFeed}>
+        {search && (
+          <div style={styles.activeSearchBanner}>
+            <span>Showing results for: <strong>&ldquo;{search}&rdquo;</strong></span>
+            <Link href="/" style={styles.clearSearchLink}>Reset search</Link>
+          </div>
+        )}
+
         {matchingPosts.length === 0 ? (
           <div style={styles.emptyState}>
             <h3 style={styles.emptyTitle}>No Stories Found</h3>
-            <p>Try searching for a different keyword or resetting filters.</p>
+            <p>We couldn&apos;t find any articles matching your search criteria. Try a different topic or explore all formats.</p>
             <Link href="/" className="btn-secondary" style={{ marginTop: "1.5rem" }}>
-              Clear Filters
+              Clear All Filters
             </Link>
           </div>
         ) : (
@@ -233,7 +339,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                   {/* Card Index Badge */}
                   <span style={styles.cardCounter}>{cardNum}</span>
 
-                  {/* Card Media (if photo/video and has URL) */}
+                  {/* Card Media */}
                   {post.type !== "news" && post.mediaUrl ? (
                     <div style={styles.cardMediaBox}>
                       {post.type === "video" ? (
@@ -258,7 +364,6 @@ export default async function HomePage({ searchParams }: HomeProps) {
                       )}
                     </div>
                   ) : (
-                    // Default news aesthetic placeholder block
                     <div style={styles.newsAestheticBlock}>
                       <span style={styles.newsSymbol}>¶</span>
                     </div>
@@ -268,12 +373,13 @@ export default async function HomePage({ searchParams }: HomeProps) {
                   <div style={styles.cardBody}>
                     <div style={styles.cardMetaRow}>
                       <span className={`badge badge-${post.type}`}>
-                        {post.type}
+                        {post.type === "video" ? "3D Simulation" : post.type}
                       </span>
                       <span style={styles.cardDate}>
                         {new Date(post.createdAt).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
+                          year: "numeric"
                         })}
                       </span>
                     </div>
@@ -282,7 +388,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
                     <p style={styles.cardExcerpt}>{post.summary}</p>
 
                     <Link href={`/blog/${post.slug}`} style={styles.readMoreLink}>
-                      Read Article →
+                      Read Article &amp; Simulate →
                     </Link>
                   </div>
                 </article>
@@ -303,11 +409,11 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 className="btn-secondary"
                 style={styles.pageBtn}
               >
-                ← Previous
+                ← Previous Page
               </Link>
             ) : (
               <span style={{ ...styles.pageBtnDisabled, marginRight: "auto" }}>
-                ← Previous
+                ← Previous Page
               </span>
             )}
 
@@ -324,11 +430,11 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 className="btn-primary"
                 style={styles.pageBtn}
               >
-                Next →
+                Next Page →
               </Link>
             ) : (
               <span style={{ ...styles.pageBtnDisabled, marginLeft: "auto" }}>
-                Next →
+                Next Page →
               </span>
             )}
           </div>
@@ -362,13 +468,23 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     textAlign: "center",
   },
-  heroPreTitle: {
+  founderBadge: {
     fontSize: "0.72rem",
-    fontWeight: 700,
-    letterSpacing: "0.15em",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
     color: "var(--color-text-muted)",
     textTransform: "uppercase",
-    marginBottom: "0.8rem",
+    backgroundColor: "#FAF7F2",
+    border: "1px solid var(--color-border)",
+    padding: "0.35rem 0.9rem",
+    borderRadius: "20px",
+    marginBottom: "1.2rem",
+    maxWidth: "95%",
+  },
+  founderLink: {
+    color: "var(--color-accent)",
+    fontWeight: 700,
+    textDecoration: "underline",
   },
   heroTitleItalic: {
     fontStyle: "italic",
@@ -376,9 +492,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroDescription: {
     color: "var(--color-text-muted)",
-    fontSize: "0.95rem",
-    lineHeight: "1.6",
-    maxWidth: "760px",
+    fontSize: "0.98rem",
+    lineHeight: "1.7",
+    maxWidth: "780px",
     margin: "0.8rem auto 0 auto",
     fontWeight: 400,
     textAlign: "center",
@@ -412,9 +528,56 @@ const styles: Record<string, React.CSSProperties> = {
     color: "var(--color-text-muted)",
     opacity: 0.8,
   },
+  categorySection: {
+    backgroundColor: "#FAF7F2",
+    borderBottom: "1px solid var(--color-border)",
+    padding: "2.5rem 0",
+    width: "100%",
+  },
+  categoryHeader: {
+    textAlign: "center",
+    marginBottom: "1.5rem",
+  },
+  categoryPreTitle: {
+    fontSize: "0.68rem",
+    fontWeight: 700,
+    letterSpacing: "0.15em",
+    color: "var(--color-accent)",
+    textTransform: "uppercase",
+    display: "block",
+    marginBottom: "0.3rem",
+  },
+  categoryTitle: {
+    fontSize: "1.5rem",
+    fontFamily: "var(--font-serif)",
+    color: "var(--color-text-dark)",
+    marginBottom: "0.4rem",
+  },
+  categorySubText: {
+    fontSize: "0.82rem",
+    color: "var(--color-text-muted)",
+    maxWidth: "600px",
+    margin: "0 auto",
+  },
+  categoryPillsWrapper: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "0.45rem",
+    justifyContent: "center",
+    maxWidth: "1100px",
+    margin: "0 auto",
+  },
+  categoryPill: {
+    fontSize: "0.72rem",
+    padding: "0.3rem 0.65rem",
+    borderRadius: "4px",
+    border: "1px solid",
+    transition: "all 0.15s ease",
+    textDecoration: "none",
+  },
   controlsSection: {
     borderBottom: "1px solid var(--color-border)",
-    backgroundColor: "#FAF8F4",
+    backgroundColor: "var(--color-bg-light)",
     width: "100%",
   },
   controlsContainer: {
@@ -447,9 +610,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   searchForm: {
     display: "flex",
+    alignItems: "center",
     gap: "0.4rem",
     flexGrow: 1,
-    maxWidth: "320px",
+    maxWidth: "340px",
   },
   searchInput: {
     padding: "0.5rem 0.8rem",
@@ -471,6 +635,33 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: "0.05em",
     cursor: "pointer",
     whiteSpace: "nowrap",
+  },
+  clearSearchBtn: {
+    padding: "0.5rem 0.6rem",
+    backgroundColor: "#F1F5F9",
+    border: "1px solid var(--color-border)",
+    fontSize: "0.72rem",
+    color: "var(--color-text-dark)",
+    textDecoration: "none",
+    fontWeight: 700,
+  },
+  activeSearchBanner: {
+    backgroundColor: "#FAF7F2",
+    border: "1px solid var(--color-border)",
+    padding: "0.8rem 1.2rem",
+    borderRadius: "4px",
+    marginBottom: "1.8rem",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: "0.88rem",
+  },
+  clearSearchLink: {
+    fontSize: "0.75rem",
+    color: "var(--color-accent)",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
   mainFeed: {
     paddingTop: "3rem",

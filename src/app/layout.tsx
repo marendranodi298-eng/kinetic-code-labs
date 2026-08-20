@@ -8,34 +8,52 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kineticcodelabs-blogs.vercel.app"),
+  metadataBase: new URL("https://journal.kineticcodelabs.in"),
   title: {
-    template: "%s | Kinetic Code Labs Blog",
-    default: "Kinetic Code Labs - Global News, Tech, Entertainment & Education Portal",
+    template: "%s | Kinetic Code Labs Journal",
+    default: "Kinetic Code Labs Journal — Interactive 3D Simulations, Science, Deep Tech & Engineering",
   },
-  description: "Discover trending stories and multi-format blogs covering Technology, Entertainment, Bollywood, Hollywood, Education, and 100+ most influential categories across all global sectors.",
+  description: "Explore interactive 3D science simulations, software engineering, AI breakthroughs, astrophysics, and in-depth technical research by Ajeet Prakash Yadav at Kinetic Code Labs (www.kineticcodelabs.in).",
   verification: {
-    google: "RKOM1eIEjWHIqrbBqzChQutXqwTEmQ-QG7ve6pSiHyA",
+    google: "5HYx-IQlYm3qUVXkbBvJHgxabhqwZEKb2DGDk6JUZjM",
+  },
+  authors: [
+    { name: "Ajeet Prakash Yadav", url: "https://www.kineticcodelabs.in" }
+  ],
+  creator: "Ajeet Prakash Yadav",
+  publisher: "Kinetic Code Labs",
+  alternates: {
+    canonical: "https://journal.kineticcodelabs.in",
   },
   keywords: [
-    "Kinetic Code Labs", "Kinetic Code Labs Blog", "Tech News Kanpur", "Bollywood Gossip", 
-    "Hollywood Updates", "Education and Career Blogs", "Influential Blog Categories", 
-    "Multi-format News Blogs", "Photo Stories", "Video Series", "Kanpur Software Developers",
-    "Latest Tech Updates", "Global News Portal"
+    // Top 50 High-Search Keywords & Categories
+    "Kinetic Code Labs", "Ajeet Prakash Yadav", "journal.kineticcodelabs.in", "www.kineticcodelabs.in",
+    "Interactive 3D Simulations", "WebGL Shaders", "Three.js Engineering", "Astrophysics Black Hole Simulation",
+    "Software Engineering", "Artificial Intelligence", "Next.js 15 Full Stack", "Quantum Computing",
+    "Machine Learning", "Robotics", "Mechanical CAD & 4-Stroke Engines", "Cybersecurity",
+    "Cloud Architecture", "Biotechnology & Genetics", "DNA Transcription 3D", "Aerospace Flight Dynamics",
+    "Thermodynamics", "Full-Stack Web Development", "Neuroscience", "Electric Vehicles",
+    "Clean Energy & Fusion", "Mathematics & Algorithms", "Nanotechnology", "Autonomous Systems",
+    "Data Science", "DevOps & CI/CD", "Computer Vision", "Game Engine Architecture",
+    "FinTech & Cryptography", "Semiconductors & VLSI", "Mobile App Engineering", "Cellular Biology",
+    "Astronomy & Space Exploration", "Generative AI & LLMs", "Particle Physics", "Materials Science",
+    "Orbital Mechanics & Rocket Escape", "Industrial Automation", "High-Performance Computing",
+    "Distributed Systems", "Computational Fluid Dynamics", "Deep Tech Startups", "Augmented Reality & WebXR",
+    "API Architecture", "Database Optimization", "Compiler Design", "Biomedical Engineering",
+    "Edge Computing", "Kinetic Simulation Labs", "Tech Career Insights", "Global Innovation Portal"
   ],
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/icon.svg", type: "image/svg+xml" }
     ],
-    apple: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
+    shortcut: "/icon.svg",
   },
   openGraph: {
-    title: "Kinetic Code Labs | Global News, Tech, Entertainment & Education Portal",
-    description: "Trending multi-format stories (news, photos, videos) across Tech, Bollywood, Hollywood, Education, and 100+ influential sectors.",
-    url: "https://kineticcodelabs-blogs.vercel.app/",
-    siteName: "Kinetic Code Labs",
+    title: "Kinetic Code Labs Journal — Interactive 3D Simulations & Deep Tech",
+    description: "A flagship deep-tech publishing platform by Ajeet Prakash Yadav featuring live 60 FPS 3D simulations, astrophysics, AI, and software engineering.",
+    url: "https://journal.kineticcodelabs.in/",
+    siteName: "Kinetic Code Labs Journal",
     images: [
       {
         url: "/logo.png",
@@ -49,8 +67,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kinetic Code Labs | Global News, Tech, Entertainment & Education Portal",
-    description: "Trending multi-format stories across Tech, Bollywood, Hollywood, Education, and 100+ influential sectors.",
+    title: "Kinetic Code Labs Journal — Interactive 3D Simulations & Deep Tech",
+    description: "A flagship deep-tech publishing platform by Ajeet Prakash Yadav featuring live 60 FPS 3D simulations, astrophysics, AI, and software engineering.",
     images: ["/logo.png"],
   },
 };
@@ -63,7 +81,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="google-site-verification" content="5HYx-IQlYm3qUVXkbBvJHgxabhqwZEKb2DGDk6JUZjM" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 

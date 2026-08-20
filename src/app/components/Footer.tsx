@@ -443,7 +443,7 @@ export default function Footer({ transparent }: FooterProps) {
             </h3>
 
             <p className="footer-description">
-              Kanpur's premium software agency building custom web apps, programmatic SEO, and AI tools directly with developers.
+              A Flagship Deep-Tech &amp; Interactive Publishing Platform by <strong>Ajeet Prakash Yadav</strong>. Built with pride at <a href="https://www.kineticcodelabs.in" target="_blank" rel="noopener noreferrer" style={{ color: "#FCD34D", textDecoration: "underline" }}>Kinetic Code Labs</a>.
             </p>
           </div>
 
