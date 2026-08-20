@@ -15,161 +15,296 @@ interface ScienceSimEngineProps {
 }
 
 // ============================================================================
-// ✈️ REAL-WORLD AERODYNAMICS & JET AIRCRAFT FLIGHT SIMULATION KERNEL
-// Lift L = 0.5 * rho * v^2 * S * C_L, Drag D = 0.5 * rho * v^2 * S * C_D, Thrust & Airflow
+// 🌍 CINEMATIC NASA EARTH & ROCKET ORBITAL ESCAPE SIMULATION (GLSL SHADERS)
+// Procedural Landmasses, Specular Ocean Sun Reflections, Night-Side City Lights,
+// Atmospheric Twilight Glow, Swirling Clouds & High-Detail Rocket Vehicle
 // ============================================================================
-const AIRCRAFT_FLIGHT_CODE = `// ============================================================================
-// ✈️ AERODYNAMICS: JET FIGHTER AIRCRAFT FLIGHT SIMULATION
-// Real-world Aerodynamic Forces: Lift, Drag, Thrust, Gravity & Airflow Streamlines
+const NASA_EARTH_ROCKET_CODE = `// ============================================================================
+// 🌍 PHOTOREALISTIC NASA EARTH & ROCKET ESCAPE VELOCITY SIMULATION
+// Custom Procedural GLSL Shaders: Oceans, Continents, City Lights & Clouds
 // ============================================================================
 
-// 1. 🛩️ High-Performance Jet Aircraft CAD Assembly
-const jet = new THREE.Group();
-scene.add(jet);
+// 1. ☀️ Distant Blinding Sun Direction
+const sunDir = new THREE.Vector3(1.0, 0.4, 0.8).normalize();
 
-// Fuselage (Aerospace Titanium PBR)
-const body = new THREE.Mesh(
-  new THREE.ConeGeometry(1.6, 14.0, 32),
-  pbr.aerospaceTitanium
-);
-body.rotation.x = Math.PI / 2;
-body.castShadow = true;
-jet.add(body);
+// 2. 🌍 Procedural NASA Earth Shader (Oceans, Continents, Night City Lights)
+const earthVertexShader = \`
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  varying vec2 vUv;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vPosition = position;
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+\`;
 
-// Cockpit Canopy (Refractive Glass)
-const canopy = new THREE.Mesh(
-  new THREE.SphereGeometry(1.1, 32, 24),
-  pbr.crystalGlass
-);
-canopy.scale.set(0.8, 0.9, 2.6);
-canopy.position.set(0, 0.9, 1.5);
-jet.add(canopy);
+const earthFragmentShader = \`
+  uniform vec3 uSunDir;
+  uniform float uTime;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  varying vec2 vUv;
 
-// Swept Delta Main Wings (Carbon Fiber Composite)
-const wingGeom = new THREE.BoxGeometry(16.0, 0.18, 5.5);
-const wing = new THREE.Mesh(wingGeom, pbr.carbonFiber);
-wing.position.set(0, -0.1, -1.2);
-wing.castShadow = true;
-jet.add(wing);
+  // 3D Simplex-Style Noise for Continents & Terrain
+  vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
 
-// Twin Vertical Stabilizer Fins
-const fin1 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.2, 2.4), pbr.carbonFiber);
-fin1.position.set(-2.0, 1.5, -4.5);
-fin1.rotation.z = -0.25;
-const fin2 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.2, 2.4), pbr.carbonFiber);
-fin2.position.set(2.0, 1.5, -4.5);
-fin2.rotation.z = 0.25;
-jet.add(fin1, fin2);
+  float snoise(vec3 v) {
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+    vec3 i  = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + C.yyy;
+    vec3 x3 = x0 - D.yyy;
+    i = mod289(i);
+    vec4 p = permute(permute(permute(
+              i.z + vec4(0.0, i1.z, i2.z, 1.0))
+            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 0.142857142857;
+    vec3  ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ *ns.x + ns.yyyy;
+    vec4 y = y_ *ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+    vec3 p0 = vec3(a0.xy, h.x);
+    vec3 p1 = vec3(a0.zw, h.y);
+    vec3 p2 = vec3(a1.xy, h.z);
+    vec3 p3 = vec3(a1.zw, h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+  }
 
-// Horizontal Stabilator Tailplanes
-const tail = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.15, 2.8), pbr.carbonFiber);
-tail.position.set(0, 0.2, -5.2);
-jet.add(tail);
+  void main() {
+    vec3 n = normalize(vPosition);
+    // Multiscale Terrain Noise
+    float elevation = snoise(n * 2.2) * 0.6 + snoise(n * 6.0) * 0.25 + snoise(n * 14.0) * 0.15;
 
-// Twin Afterburner Jet Nozzles & Fire Plumes
-const nozzle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 1.5, 24), pbr.polishedChrome);
-nozzle1.rotation.x = Math.PI / 2;
-nozzle1.position.set(-1.0, 0, -6.8);
-const nozzle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 1.5, 24), pbr.polishedChrome);
-nozzle2.rotation.x = Math.PI / 2;
-nozzle2.position.set(1.0, 0, -6.8);
-jet.add(nozzle1, nozzle2);
+    // Day/Night Lighting Terminator
+    float NdotL = dot(vNormal, uSunDir);
+    float dayLight = smoothstep(-0.15, 0.25, NdotL);
 
-// Volumetric Afterburner Flame Cone
-const flame = new THREE.Mesh(
-  new THREE.ConeGeometry(0.8, 5.0, 24),
-  new THREE.MeshBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.85 })
-);
-flame.rotation.x = -Math.PI / 2;
-flame.position.set(0, 0, -9.0);
-jet.add(flame);
+    // Ocean vs Continent Palette
+    vec3 deepOcean = vec3(0.02, 0.08, 0.32);
+    vec3 shallowOcean = vec3(0.04, 0.25, 0.55);
+    vec3 forestGreen = vec3(0.12, 0.42, 0.18);
+    vec3 mountainSand = vec3(0.65, 0.52, 0.32);
+    vec3 snowWhite = vec3(0.92, 0.95, 1.0);
 
-const engineThrustLight = new THREE.PointLight(0x38BDF8, 3.5, 30);
-engineThrustLight.position.set(0, 0, -8.0);
-jet.add(engineThrustLight);
+    vec3 dayColor;
+    float isOcean = 0.0;
 
-// 2. 💨 Real-Time Aerodynamic Airflow Streamlines (Wind Tunnel Particles)
-const streamCount = 400;
-const streamPos = new Float32Array(streamCount * 3);
-const streamSpeeds = [];
+    if (elevation < 0.05) {
+      // Ocean Surface with Specular Sun Glint
+      isOcean = 1.0;
+      dayColor = mix(deepOcean, shallowOcean, smoothstep(-0.3, 0.05, elevation));
+      // Blinding Sun Reflection on Water
+      vec3 viewDir = normalize(-vPosition);
+      vec3 halfDir = normalize(uSunDir + viewDir);
+      float spec = pow(max(dot(vNormal, halfDir), 0.0), 32.0);
+      dayColor += vec3(1.0, 0.95, 0.85) * spec * 1.8 * dayLight;
+    } else {
+      // Landmass Continents
+      dayColor = mix(forestGreen, mountainSand, smoothstep(0.05, 0.45, elevation));
+      dayColor = mix(dayColor, snowWhite, smoothstep(0.45, 0.75, elevation));
+    }
 
-for (let s = 0; s < streamCount; s++) {
-  streamPos[s * 3] = (Math.random() - 0.5) * 20.0;
-  streamPos[s * 3 + 1] = (Math.random() - 0.5) * 8.0;
-  streamPos[s * 3 + 2] = 25.0 + Math.random() * 30.0;
-  streamSpeeds.push(25.0 + Math.random() * 15.0);
-}
+    // 🌃 Glowing City Lights on Night Side
+    float cityNoise = snoise(n * 35.0) * 0.5 + snoise(n * 70.0) * 0.5;
+    float cityMask = smoothstep(0.25, 0.6, cityNoise) * (1.0 - isOcean);
+    vec3 nightCities = vec3(1.0, 0.75, 0.25) * cityMask * 2.5 * (1.0 - dayLight);
 
-const streamGeom = new THREE.BufferGeometry();
-streamGeom.setAttribute("position", new THREE.BufferAttribute(streamPos, 3));
-const streamMat = new THREE.PointsMaterial({
-  color: 0xE2E8F0,
-  size: 0.22,
+    // 🌅 Atmospheric Sunset Terminator Amber Rim
+    float sunsetFactor = smoothstep(-0.2, 0.05, NdotL) * smoothstep(0.25, 0.0, NdotL);
+    vec3 sunsetGlow = vec3(1.0, 0.35, 0.08) * sunsetFactor * 0.85;
+
+    vec3 finalColor = dayColor * max(dayLight, 0.04) + nightCities + sunsetGlow;
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+\`;
+
+const earthRadius = 9.0;
+const earthUniforms = {
+  uSunDir: { value: sunDir },
+  uTime: { value: 0.0 }
+};
+
+const earthMat = new THREE.ShaderMaterial({
+  vertexShader: earthVertexShader,
+  fragmentShader: earthFragmentShader,
+  uniforms: earthUniforms,
+});
+
+const earth = new THREE.Mesh(new THREE.SphereGeometry(earthRadius, 96, 96), earthMat);
+scene.add(earth);
+
+// 3. ☁️ Volumetric Swirling Clouds Layer
+const cloudMat = new THREE.MeshStandardMaterial({
+  color: 0xFFFFFF,
   transparent: true,
-  opacity: 0.7,
+  opacity: 0.42,
+  roughness: 0.9,
   blending: THREE.AdditiveBlending
 });
-const airflowStreams = new THREE.Points(streamGeom, streamMat);
-scene.add(airflowStreams);
+const clouds = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.02, 64, 64), cloudMat);
+scene.add(clouds);
 
-// 3. 🔄 60 FPS FLIGHT DYNAMICS & AERODYNAMIC VECTOR LOOP
-let roll = 0.0;
-let pitchAngle = 0.0;
+// 4. 🌀 Atmospheric Rayleigh Scattering Cyan Glow Halo
+const atmoMat = new THREE.MeshStandardMaterial({
+  color: 0x38BDF8,
+  transparent: true,
+  opacity: 0.22,
+  side: THREE.BackSide,
+  blending: THREE.AdditiveBlending
+});
+const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.12, 64, 64), atmoMat);
+scene.add(atmosphere);
 
+// 5. 🌌 Cosmic Starfield Background (2,500 Stars)
+const starCount = 2500;
+const starPos = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  const r = 90 + Math.random() * 60;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(Math.random() * 2 - 1);
+  starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+  starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+  starPos[i * 3 + 2] = r * Math.cos(phi);
+}
+const starGeom = new THREE.BufferGeometry();
+starGeom.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
+scene.add(new THREE.Points(starGeom, new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.35 })));
+
+// 6. 🚀 High-Poly Multi-Stage Heavy Space Rocket (Close-Up Detailed CAD)
+const rocket = new THREE.Group();
+scene.add(rocket);
+
+// Rocket Core Fuselage (Aerospace Titanium PBR)
+const coreStage = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.7, 0.7, 4.8, 32),
+  pbr.aerospaceTitanium
+);
+coreStage.castShadow = true;
+
+// Carbon-Fiber Interstage Ring
+const interstage = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.72, 0.72, 0.6, 32),
+  pbr.carbonFiber
+);
+interstage.position.y = 1.0;
+
+// Aerodynamic Payload Fairing Nose Cone
+const noseFairing = new THREE.Mesh(
+  new THREE.ConeGeometry(0.72, 2.0, 32),
+  pbr.anodizedRed
+);
+noseFairing.position.y = 3.4;
+
+// 4 Aerodynamic Titanium Grid Fins
+for (let f = 0; f < 4; f++) {
+  const ang = (f * Math.PI) / 2;
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.75, 0.85), pbr.carbonFiber);
+  fin.position.set(Math.cos(ang) * 0.75, -1.8, Math.sin(ang) * 0.75);
+  fin.rotation.y = ang;
+  rocket.add(fin);
+}
+
+// Heavy Rocket Engines Gimbal Cluster (Chrome)
+const engineCluster = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.45, 0.65, 0.8, 24),
+  pbr.polishedChrome
+);
+engineCluster.position.y = -2.8;
+
+// Supersonic Shock-Diamond Afterburner Fire Plume
+const plume = new THREE.Mesh(
+  new THREE.ConeGeometry(0.65, 3.8, 24),
+  new THREE.MeshBasicMaterial({ color: 0xFF5500, transparent: true, opacity: 0.95 })
+);
+plume.rotation.x = Math.PI;
+plume.position.y = -4.7;
+
+const thrustLight = new THREE.PointLight(0xFF4500, 4.0, 25);
+thrustLight.position.y = -4.0;
+
+rocket.add(coreStage, interstage, noseFairing, engineCluster, plume, thrustLight);
+
+// 7. 🛰️ Glowing Trajectory Path Spline
+const orbitPts = [];
+for (let j = 0; j <= 120; j++) {
+  const a = (j / 120) * Math.PI * 2;
+  const rad = 15.0 + Math.sin(a * 2.0) * 3.5;
+  orbitPts.push(new THREE.Vector3(Math.cos(a) * rad, Math.sin(a) * 2.5, Math.sin(a) * rad));
+}
+const orbitPath = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints(orbitPts),
+  new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.55 })
+);
+scene.add(orbitPath);
+
+// 8. 🔄 60 FPS ORBITAL FLIGHT DYNAMICS LOOP
 engine.onUpdate((time, delta) => {
-  // Flight Maneuvers (Banking Turn & Climb)
-  roll = Math.sin(time * 0.8) * 0.45;
-  pitchAngle = Math.cos(time * 0.6) * 0.25;
+  earthUniforms.uTime.value = time;
 
-  jet.rotation.z = roll;
-  jet.rotation.x = pitchAngle;
-  jet.position.y = Math.sin(time * 1.2) * 2.0;
-  jet.position.x = Math.sin(time * 0.8) * 4.0;
+  // Earth & Clouds Continuous Spin
+  earth.rotation.y = time * 0.05;
+  clouds.rotation.y = time * 0.07;
 
-  // Afterburner Flame Pulse & Sound Shock Diamonds
-  flame.scale.set(
-    1.0 + Math.sin(time * 30) * 0.15,
-    1.0 + Math.cos(time * 25) * 0.3,
-    1.0 + Math.sin(time * 30) * 0.15
+  // Escape Orbital Mechanics Revolution
+  const orbAngle = time * 0.65;
+  const rad = 15.0 + Math.sin(orbAngle * 2.0) * 3.5;
+  const x = Math.cos(orbAngle) * rad;
+  const y = Math.sin(orbAngle) * 2.5;
+  const z = Math.sin(orbAngle) * rad;
+
+  rocket.position.set(x, y, z);
+
+  // Velocity Vector Prograde Steering
+  const vx = -Math.sin(orbAngle) * rad;
+  const vy = Math.cos(orbAngle) * 2.5;
+  const vz = Math.cos(orbAngle) * rad;
+  const velDir = new THREE.Vector3(vx, vy, vz).normalize();
+  rocket.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), velDir);
+
+  // Supersonic Rocket Plume Shock Waves
+  plume.scale.set(
+    1.0 + Math.sin(time * 35) * 0.18,
+    1.0 + Math.cos(time * 30) * 0.28,
+    1.0 + Math.sin(time * 35) * 0.18
   );
-
-  // Aerodynamic Airflow Streamline Vector Flow
-  const pos = streamGeom.attributes.position;
-  for (let i = 0; i < streamCount; i++) {
-    let z = pos.getZ(i);
-    z -= streamSpeeds[i] * delta * 2.5;
-
-    // Reset particle to front when it passes aircraft
-    if (z < -30.0) {
-      z = 30.0 + Math.random() * 10.0;
-      pos.setX(i, (Math.random() - 0.5) * 20.0);
-      pos.setY(i, (Math.random() - 0.5) * 8.0);
-    }
-
-    // Wing Deflection: Air deflects up and over the cambered airfoil
-    const x = pos.getX(i);
-    let y = pos.getY(i);
-    if (Math.abs(x) < 8.0 && Math.abs(z) < 5.0) {
-      y += Math.sin(z * 0.5) * 0.25;
-    }
-
-    pos.setY(i, y);
-    pos.setZ(i, z);
-  }
-  pos.needsUpdate = true;
 });`;
 
-// Comprehensive Material Library
 function createPBRMaterials() {
   return {
     aerospaceTitanium: new THREE.MeshStandardMaterial({
-      color: 0xCBD5E1,
-      metalness: 0.9,
-      roughness: 0.2,
+      color: 0xF1F5F9,
+      metalness: 0.88,
+      roughness: 0.15,
     }),
     carbonFiber: new THREE.MeshStandardMaterial({
-      color: 0x1E293B,
-      metalness: 0.6,
+      color: 0x0F172A,
+      metalness: 0.7,
       roughness: 0.35,
     }),
     polishedChrome: new THREE.MeshStandardMaterial({
@@ -188,19 +323,9 @@ function createPBRMaterials() {
       roughness: 0.2,
     }),
     anodizedRed: new THREE.MeshStandardMaterial({
-      color: 0xEF4444,
+      color: 0xDC2626,
       metalness: 0.85,
       roughness: 0.2,
-    }),
-    castIron: new THREE.MeshStandardMaterial({
-      color: 0x64748B,
-      metalness: 0.65,
-      roughness: 0.35,
-    }),
-    porcelainCeramic: new THREE.MeshStandardMaterial({
-      color: 0xFFFFFF,
-      roughness: 0.1,
-      metalness: 0.05,
     }),
     crystalGlass: new THREE.MeshPhysicalMaterial({
       color: 0xFFFFFF,
@@ -209,7 +334,6 @@ function createPBRMaterials() {
       transparent: true,
       roughness: 0.05,
       ior: 1.52,
-      metalness: 0.05,
     }),
   };
 }
@@ -224,7 +348,7 @@ export default function ScienceSimEngine({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // States
-  const [code, setCode] = useState<string>(initialCode?.trim() || AIRCRAFT_FLIGHT_CODE);
+  const [code, setCode] = useState<string>(initialCode?.trim() || NASA_EARTH_ROCKET_CODE);
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
@@ -261,14 +385,14 @@ export default function ScienceSimEngine({
     const width = container.clientWidth || 800;
     const height = Math.min(Math.max(width * 0.58, 380), 550);
 
-    // Scene & Deep Sky Atmosphere
+    // Scene & Deep Cosmic Space
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#080D1A");
+    scene.background = new THREE.Color("#02040A");
     sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(18, 12, 28);
+    camera.position.set(22, 14, 34);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -281,9 +405,8 @@ export default function ScienceSimEngine({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.65;
+    renderer.toneMappingExposure = 1.7;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
     canvasRef.current = renderer.domElement;
 
@@ -293,25 +416,13 @@ export default function ScienceSimEngine({
     }
     container.appendChild(renderer.domElement);
 
-    // 💡 Cinematic Sky Lighting
-    const hemiLight = new THREE.HemisphereLight(0xF8FAFC, 0x1E293B, 1.4);
-    scene.add(hemiLight);
+    // 💡 Cosmic Sun Lighting
+    const sunLight = new THREE.DirectionalLight(0xFFFFFF, 2.5);
+    sunLight.position.set(40, 20, 30);
+    scene.add(sunLight);
 
-    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.2);
+    const ambientLight = new THREE.AmbientLight(0x0F172A, 0.6);
     scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0xFFFFFF, 2.2);
-    keyLight.position.set(25, 40, 25);
-    keyLight.castShadow = true;
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0x38BDF8, 1.5);
-    fillLight.position.set(-25, 20, 20);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0xFDE68A, 1.6);
-    rimLight.position.set(0, -10, -30);
-    scene.add(rimLight);
 
     // Mouse Interaction for 3D Orbit
     const onMouseDown = (e: MouseEvent) => {
@@ -350,7 +461,7 @@ export default function ScienceSimEngine({
       const cam = cameraRef.current;
       const dir = cam.position.clone().normalize();
       const dist = cam.position.length();
-      const newDist = Math.max(6, Math.min(120, dist + e.deltaY * 0.04));
+      const newDist = Math.max(8, Math.min(150, dist + e.deltaY * 0.04));
       cam.position.copy(dir.multiplyScalar(newDist));
       cam.lookAt(0, 0, 0);
     };
@@ -412,7 +523,7 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // 3. Dynamic Code Execution with Physics & Aerodynamics Injected
+  // 3. Dynamic Code Execution
   const executeCode = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
@@ -435,30 +546,19 @@ export default function ScienceSimEngine({
 
     const pbr = createPBRMaterials();
 
-    // Universal Scientific Helper APIs
     const engineAPI = {
-      // 60 FPS Update Hook
       onUpdate: (fn: (time: number, delta: number) => void) => {
         if (typeof fn === "function") {
           updateHooksRef.current.push(fn);
         }
       },
-      // Real-World Aerodynamics Calculation Helper
       aerodynamics: {
-        calculateLift: (rho: number, velocity: number, wingArea: number, Cl: number) => {
-          return 0.5 * rho * velocity * velocity * wingArea * Cl;
-        },
-        calculateDrag: (rho: number, velocity: number, wingArea: number, Cd: number) => {
-          return 0.5 * rho * velocity * velocity * wingArea * Cd;
-        },
+        calculateLift: (rho: number, velocity: number, wingArea: number, Cl: number) => 0.5 * rho * velocity * velocity * wingArea * Cl,
+        calculateDrag: (rho: number, velocity: number, wingArea: number, Cd: number) => 0.5 * rho * velocity * velocity * wingArea * Cd,
       },
-      // Molecular Dynamics Lennard-Jones Potential
       molecular: {
-        lennardJonesForce: (r: number, epsilon = 1.0, sigma = 1.0) => {
-          return 24 * epsilon * (2 * Math.pow(sigma / r, 13) - Math.pow(sigma / r, 7));
-        },
+        lennardJonesForce: (r: number, epsilon = 1.0, sigma = 1.0) => 24 * epsilon * (2 * Math.pow(sigma / r, 13) - Math.pow(sigma / r, 7)),
       },
-      // 3D CAD GLTF Loader
       loadGLTF: (url: string, onLoad: (gltf: any) => void) => {
         const loader = new GLTFLoader();
         loader.load(url, onLoad);
@@ -466,7 +566,6 @@ export default function ScienceSimEngine({
     };
 
     try {
-      // Execute the user's custom simulation script with full CANNON, THREE, PBR, and Engine APIs!
       const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "CANNON", "engine", "pbr", "time", sourceCode);
       scriptKernel(scene, camera, renderer, THREE, CANNON, engineAPI, pbr, simTimeRef.current);
     } catch (err: any) {
@@ -486,7 +585,7 @@ export default function ScienceSimEngine({
     rendererRef.current.render(sceneRef.current, cameraRef.current);
     const dataURL = rendererRef.current.domElement.toDataURL("image/png");
     const link = document.createElement("a");
-    link.download = `simulation_4k_${Date.now()}.png`;
+    link.download = `nasa_rocket_simulation_4k_${Date.now()}.png`;
     link.href = dataURL;
     link.click();
   };
@@ -519,7 +618,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `flight_simulation_${Date.now()}.webm`;
+          link.download = `nasa_rocket_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -539,7 +638,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `flight_simulation_${Date.now()}.webm`;
+          link.download = `nasa_rocket_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -597,7 +696,7 @@ export default function ScienceSimEngine({
         </div>
 
         <div style={styles.hintOverlay}>
-          🖱️ 3D Orbit: Drag • Zoom: Scroll • Real-time Aerodynamics &amp; Physics
+          🖱️ 3D Orbit: Drag • Zoom: Scroll • Procedural NASA Earth Shaders
         </div>
       </div>
 
@@ -612,7 +711,7 @@ export default function ScienceSimEngine({
           <div style={styles.codeHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.75rem" }}>
-                💻 Live Simulation Script (Physics, Aerodynamics, Molecular)
+                💻 Live Simulation Script (Physics, Aerodynamics, Shaders)
               </span>
               <span style={{ color: "#94A3B8", fontSize: "0.68rem" }}>
                 [Injected: scene, camera, renderer, THREE, CANNON, engine, pbr]
@@ -647,12 +746,12 @@ export default function ScienceSimEngine({
 
 const styles: Record<string, React.CSSProperties> = {
   engineContainer: {
-    backgroundColor: "#080D1A",
+    backgroundColor: "#02040A",
     borderRadius: "12px",
     border: "1px solid #1E293B",
     overflow: "hidden",
     margin: "2rem 0",
-    boxShadow: "0 15px 35px rgba(0, 0, 0, 0.5)",
+    boxShadow: "0 15px 35px rgba(0, 0, 0, 0.7)",
     width: "100%",
     maxWidth: "100%",
     boxSizing: "border-box",
@@ -662,7 +761,7 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
     overflow: "hidden",
     minHeight: "440px",
-    backgroundColor: "#080D1A",
+    backgroundColor: "#02040A",
   },
   canvasMount: {
     width: "100%",
@@ -694,7 +793,7 @@ const styles: Record<string, React.CSSProperties> = {
     position: "absolute",
     bottom: "10px",
     left: "12px",
-    background: "rgba(15, 23, 42, 0.75)",
+    background: "rgba(2, 4, 10, 0.85)",
     backdropFilter: "blur(4px)",
     color: "#94A3B8",
     fontSize: "0.68rem",
@@ -738,7 +837,7 @@ const styles: Record<string, React.CSSProperties> = {
   scriptTextarea: {
     width: "100%",
     height: "240px",
-    backgroundColor: "#080D1A",
+    backgroundColor: "#02040A",
     color: "#F8FAFC",
     fontFamily: "'Fira Code', monospace",
     fontSize: "0.82rem",
