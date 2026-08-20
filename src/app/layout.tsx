@@ -1,5 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kineticcodelabs-blogs.vercel.app"),
@@ -18,7 +24,12 @@ export const metadata: Metadata = {
     "Latest Tech Updates", "Global News Portal"
   ],
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" }
+    ],
+    apple: "/favicon.svg",
+    shortcut: "/favicon.svg",
   },
   openGraph: {
     title: "Kinetic Code Labs | Global News, Tech, Entertainment & Education Portal",
@@ -52,14 +63,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Load Fonts directly from Google Fonts CDN to bypass Turbopack local font download issues */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" 
           rel="stylesheet" 
         />
-        {/* KaTeX CSS for instant mathematical equation formatting */}
         <link 
           rel="stylesheet" 
           href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" 
@@ -67,7 +77,6 @@ export default function RootLayout({
         />
       </head>
       <body style={{ backgroundColor: "var(--color-bg-light)", minHeight: "100vh" }}>
-        {/* MathJax Configuration and Script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="kineticGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D061" />
+      <stop offset="35%" stop-color="#D1A751" />
+      <stop offset="70%" stop-color="#C69A5B" />
+      <stop offset="100%" stop-color="#8E6728" />
+    </linearGradient>
+    <linearGradient id="bgDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1C1512" />
+      <stop offset="100%" stop-color="#0A0706" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Luxury Rounded Dark Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgDark)" />
+  <rect width="500" height="500" x="6" y="6" rx="106" fill="none" stroke="url(#kineticGold)" stroke-width="4" stroke-opacity="0.35" />
+
+  <!-- Iconic Kinetic "K" Monogram -->
+  <g filter="url(#glow)">
+    <path d="M 148 116 L 196 116 C 200 116 204 120 204 124 L 204 388 C 204 392 200 396 196 396 L 148 396 C 144 396 140 392 140 388 L 140 124 C 140 120 144 116 148 116 Z" fill="url(#kineticGold)" />
+    <path d="M 196 268 L 332 128 C 336 124 342 124 346 128 L 380 162 C 384 166 384 172 380 176 L 254 298 L 382 384 C 386 387 386 393 382 397 L 344 425 C 340 428 334 427 330 423 L 196 288 Z" fill="url(#kineticGold)" />
+    <circle cx="364" cy="148" r="14" fill="#FFFBEB" opacity="0.9" />
+  </g>
+</svg>
