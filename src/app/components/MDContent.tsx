@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import TerminalSandbox from "./TerminalSandbox";
+import katex from "katex";
 
 interface MDContentProps {
   content: string;
@@ -25,40 +26,86 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&nbsp;/g, " ");
 }
 
-// Smart LaTeX normalizer: converts raw bracket equations and copy-pasted mathematical notations to MathJax LaTeX
-function normalizeLatexFormulas(text: string): string {
-  if (!text) return "";
+// Renders mathematical equations using KaTeX
+function renderMathInText(rawText: string): string {
+  if (!rawText) return "";
 
-  // 1. Multi-line isolated bracket equations from ChatGPT:
-  // [
-  // \Delta t = \gamma \Delta \tau
-  // ]
-  let normalized = text.replace(/(?:^|\n)\[\s*\n+([\s\S]*?)\n+\s*\](?:\n|$)/g, (_match, eq) => {
-    const cleanEq = eq.trim();
-    return `\n\n$$ ${cleanEq} $$\n\n`;
-  });
+  let text = rawText;
 
-  // 2. Single-line bracket equations: [ E = mc^2 ] or [ ds^2=-c^2dt^2+dx^2+dy^2+dz^2 ]
-  normalized = normalized.replace(/(?:^|\n)\[\s*([a-zA-Z0-9\s\\_^{}+\-*\/=,;:()\.\sqrt\pi\mu\nu\Lambda\gamma\Delta\tau\infty\rightarrow]+)\s*\](?:\n|$)/g, (match, eq) => {
-    const cleanEq = eq.trim();
-    // Check if it looks like a math equation (has math symbols or variables)
-    if (/[=\\^_{}]|\b(?:c|v|E|m|p|G|L|r|dt|dx|dy|dz|ds|rs)\b/.test(cleanEq)) {
-      return `\n\n$$ ${cleanEq} $$\n\n`;
+  // 1. Clean up and render multi-line bracket equations (including equations with === or --- underlines)
+  text = text.replace(/\[\s*([\s\S]*?)\s*\]/g, (_match, inner) => {
+    const clean = inner
+      .replace(/\r/g, "")
+      .replace(/\n\s*={3,}\s*\n/g, " = ")
+      .replace(/\n\s*-{3,}\s*\n/g, " = ")
+      .replace(/\n+/g, " ")
+      .replace(/;m\/s/g, " \\text{ m/s}")
+      .trim();
+
+    // Check if inner content is mathematical
+    const isMath = /[=\\^_{}]|\b(?:c|v|E|m|p|G|L|r|dt|dx|dy|dz|ds|rs|d\tau)\b|\\[a-zA-Z]+/.test(clean);
+    if (isMath) {
+      try {
+        const rendered = katex.renderToString(clean, {
+          displayMode: true,
+          throwOnError: false,
+        });
+        return `<div class="katex-display-wrapper" style="margin: 1.6rem 0; overflow-x: auto; text-align: center;">${rendered}</div>`;
+      } catch {
+        return `$$ ${clean} $$`;
+      }
     }
-    return match;
+    return `[${inner}]`;
   });
 
-  // 3. Inline Greek & LaTeX expressions in parentheses like (\Delta\tau), (G_{\mu\nu}), (\Lambda), (\gamma)
-  normalized = normalized.replace(/\((\\[a-zA-Z]+(?:_[0-9a-zA-Z{}]+)?)\)/g, (_match, math) => {
-    return `\\(${math}\\)`;
+  // 2. Render standard display math $$ ... $$
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner) => {
+    try {
+      const clean = inner.trim();
+      const rendered = katex.renderToString(clean, {
+        displayMode: true,
+        throwOnError: false,
+      });
+      return `<div class="katex-display-wrapper" style="margin: 1.6rem 0; overflow-x: auto; text-align: center;">${rendered}</div>`;
+    } catch {
+      return `$$ ${inner} $$`;
+    }
   });
 
-  // 4. Inline variables like (v), (c), (L_0), (p=0)
-  normalized = normalized.replace(/(^|\s)\(([a-zA-Z](?:_[0-9a-zA-Z]+)?(?:=[0-9a-zA-Z]+)?)\)(\s|[.,;:?!]|$)/g, (_match, prefix, variable, suffix) => {
-    return `${prefix}\\(${variable}\\)${suffix}`;
+  // 3. Render inline math \( ... \) or $ ... $
+  text = text.replace(/\\\(([\s\S]*?)\\\)/g, (_match, inner) => {
+    try {
+      return katex.renderToString(inner.trim(), {
+        displayMode: false,
+        throwOnError: false,
+      });
+    } catch {
+      return inner;
+    }
   });
 
-  return normalized;
+  // 4. Convert inline Greek & LaTeX variables in parentheses:
+  // e.g. (\Delta\tau), (G_{\mu\nu}), (\Lambda), (\gamma), (\Delta t)
+  text = text.replace(/\((\\[a-zA-Z]+(?:_[0-9a-zA-Z{}]+)?)\)/g, (_match, math) => {
+    try {
+      return katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+    } catch {
+      return `(${math})`;
+    }
+  });
+
+  // 5. Convert single/double letter math variables in parentheses:
+  // e.g. (v), (c), (L_0), (p=0), (c^2), (E_0), (r_s), (r)
+  text = text.replace(/(^|\s)\(([a-zA-Z](?:_[0-9a-zA-Z{}]+|\^[0-9a-zA-Z{}]+)?(?:=[0-9a-zA-Z]+)?)\)(\s|[.,;:?!]|$)/g, (_match, prefix, variable, suffix) => {
+    try {
+      const rendered = katex.renderToString(variable.trim(), { displayMode: false, throwOnError: false });
+      return `${prefix}${rendered}${suffix}`;
+    } catch {
+      return `${prefix}(${variable})${suffix}`;
+    }
+  });
+
+  return text;
 }
 
 // Injects id attributes to headings for TOC scroll anchors
@@ -73,7 +120,10 @@ function addIdsToHtmlHeadings(html: string): string {
 
 // Converts Markdown formatting to semantic HTML
 function renderMarkdownToHtmlCompact(markdown: string): string {
-  let html = markdown
+  // First render all KaTeX math formulas in the text
+  const mathRendered = renderMathInText(markdown);
+
+  let html = mathRendered
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
@@ -98,6 +148,11 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
     /\[(.*?)\]\((.*?)\)/g,
     '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline;font-weight:600;">$1</a>'
   );
+
+  // Restore KaTeX HTML tags that were escaped by &lt; / &gt;
+  html = html
+    .replace(/&lt;(span|div|math|semantics|mrow|mi|mo|mn|annotation|svg|path|line|text)([^&]*)&gt;/gi, '<$1$2>')
+    .replace(/&lt;\/(span|div|math|semantics|mrow|mi|mo|mn|annotation|svg|path|line|text)&gt;/gi, '</$1>');
 
   const lines = html.split("\n");
   let inList = false;
@@ -131,6 +186,8 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
         result += `<h1 id="${id}" style="font-size:2rem;margin-top:2.5rem;margin-bottom:1.2rem;font-family:var(--font-serif);color:var(--color-text-dark);border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;line-height:1.15;">${text}</h1>`;
       } else if (trimmed === "") {
         result += '<div style="height:0.6rem;"></div>';
+      } else if (trimmed.startsWith('<div class="katex-display-wrapper"') || trimmed.startsWith("<hr")) {
+        result += trimmed;
       } else {
         result += `<p style="font-size:1.05rem;line-height:1.8;margin-bottom:1.2rem;color:#2C221D;font-weight:300;">${trimmed}</p>`;
       }
@@ -148,7 +205,8 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
 function renderFormattedText(content: string): string {
   const isHtml = /<(?:p|div|h[1-6]|ul|ol|li|table|img|blockquote|hr|a|span|b|i|strong|em|br)[^>]*>/i.test(content);
   if (isHtml) {
-    return addIdsToHtmlHeadings(content);
+    const mathInHtml = renderMathInText(content);
+    return addIdsToHtmlHeadings(mathInHtml);
   }
   return renderMarkdownToHtmlCompact(content);
 }
@@ -157,12 +215,11 @@ function renderFormattedText(content: string): string {
 export function parseArticleContent(rawContent: string): ContentBlock[] {
   if (!rawContent || !rawContent.trim()) return [];
 
-  // Normalize LaTeX formulas first
-  const normalized = normalizeLatexFormulas(rawContent.replace(/\r\n/g, "\n"));
+  const raw = rawContent.replace(/\r\n/g, "\n");
   const codeItems: { code: string; language: string }[] = [];
 
   // Pattern 1: HTML <pre><code>...</code></pre> blocks
-  let text = normalized.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
+  let text = raw.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
     const cleanCode = decodeHtmlEntities(codeHtml.replace(/<[^>]*>/g, ""));
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
     codeItems.push({ code: cleanCode.trim(), language: lang || "javascript" });
@@ -223,24 +280,6 @@ export default function MDContent({ content }: MDContentProps) {
   useEffect(() => {
     setBlocks(parseArticleContent(content));
   }, [content]);
-
-  useEffect(() => {
-    // Trigger MathJax LaTeX equation rendering
-    if (typeof window !== "undefined") {
-      const renderMath = () => {
-        if ((window as any).MathJax && (window as any).MathJax.typesetPromise) {
-          try {
-            (window as any).MathJax.typesetPromise().catch(() => {});
-          } catch {
-            // MathJax promise catch
-          }
-        }
-      };
-      renderMath();
-      const timer = setTimeout(renderMath, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [content, blocks]);
 
   return (
     <div className="md-content-wrapper">

@@ -59,6 +59,12 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" 
           rel="stylesheet" 
         />
+        {/* KaTeX CSS for instant mathematical equation formatting */}
+        <link 
+          rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" 
+          crossOrigin="anonymous"
+        />
       </head>
       <body style={{ backgroundColor: "var(--color-bg-light)", minHeight: "100vh" }}>
         {/* MathJax Configuration and Script */}
