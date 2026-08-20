@@ -12,192 +12,25 @@ interface ScienceSimEngineProps {
   autoPlay?: boolean;
 }
 
-// ============================================================================
-// ⚙️ BRIGHT & VIBRANT 4-STROKE ENGINE CODE
-// ============================================================================
-const ENGINE_SIM_CODE = `// ============================================================================
-// ⚙️ 4-STROKE INTERNAL COMBUSTION ENGINE (BRIGHT STUDIO PBR)
-// Kinematic Equations: y_piston = r*cos(θ) + sqrt(l² - r²*sin²(θ))
-// 4-Stroke 720° Cycle: 1. Intake ➔ 2. Compression ➔ 3. Power 💥 ➔ 4. Exhaust
-// ============================================================================
-
-const r = 2.5; // Crank Radius (Stroke = 2r = 5.0 units)
-const l = 6.4; // Forged Connecting Rod Length (l/r = 2.56)
-const crankCenterY = -5.4;
-
-// 1. 🔩 Bright CNC Piston (with 3 Piston Rings & Wrist Pin)
-const piston = new THREE.Group();
-const crown = new THREE.Mesh(
-  new THREE.CylinderGeometry(2.38, 2.38, 2.4, 64),
-  pbr.polishedChrome
-);
-crown.castShadow = true;
-
-// 3 Piston Rings
-for (let ringY = 0.5; ringY >= -0.3; ringY -= 0.35) {
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.39, 0.04, 16, 64), pbr.castIron);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.y = ringY;
-  crown.add(ring);
-}
-
-// Wrist Pin (Bright Chrome)
-const wristPin = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 2.1, 32), pbr.polishedChrome);
-wristPin.rotation.z = Math.PI / 2;
-wristPin.position.y = -0.3;
-piston.add(crown, wristPin);
-scene.add(piston);
-
-// 2. 🏆 Forged I-Beam Connecting Rod (Vibrant Gold-Brass)
-const conRod = new THREE.Group();
-const rodBeam = new THREE.Mesh(new THREE.BoxGeometry(0.55, l, 0.38), pbr.forgedGoldBrass);
-rodBeam.castShadow = true;
-const smallEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.7, 32), pbr.forgedGoldBrass);
-smallEnd.rotation.x = Math.PI / 2;
-smallEnd.position.y = l / 2;
-const bigEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.7, 32), pbr.forgedGoldBrass);
-bigEnd.rotation.x = Math.PI / 2;
-bigEnd.position.y = -l / 2;
-conRod.add(rodBeam, smallEnd, bigEnd);
-scene.add(conRod);
-
-// 3. ⚙️ Crankshaft, Dual Counterweights & Flywheel
-const crank = new THREE.Group();
-const journal = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.4, 32), pbr.polishedChrome);
-journal.rotation.x = Math.PI / 2;
-
-const cw1 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.8, 0.6), pbr.castIron);
-cw1.position.set(0, -1.3, -0.8);
-const cw2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.8, 0.6), pbr.castIron);
-cw2.position.set(0, -1.3, 0.8);
-
-const flywheel = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 0.7, 64), pbr.castIron);
-flywheel.rotation.x = Math.PI / 2;
-flywheel.position.z = -2.8;
-flywheel.castShadow = true;
-
-crank.add(journal, cw1, cw2, flywheel);
-crank.position.set(0, crankCenterY, 0);
-scene.add(crank);
-
-// 4. ⚡ Spark Plug with Center Electrode & Ignition Flash
-const sparkPlug = new THREE.Group();
-const porcelain = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 2.4, 32), pbr.porcelainCeramic);
-const hexNut = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.5, 6), pbr.polishedChrome);
-const electrode = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 16), pbr.forgedGoldBrass);
-electrode.position.y = -1.2;
-sparkPlug.add(porcelain, hexNut, electrode);
-sparkPlug.position.set(0, 8.8, 0);
-scene.add(sparkPlug);
-
-const sparkLight = new THREE.PointLight(0xFF4500, 0, 25);
-sparkLight.position.set(0, 6.2, 0);
-scene.add(sparkLight);
-
-// 5. 🔵 Intake Valve (Vibrant Blue) & 🔴 Exhaust Valve (Vibrant Red)
-const inValve = new THREE.Group();
-const inShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.5, 16), pbr.polishedChrome);
-const inHead = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.12, 0.35, 32), pbr.anodizedBlue);
-inHead.position.y = -1.75;
-inValve.add(inShaft, inHead);
-inValve.position.set(-1.9, 5.2, 0);
-scene.add(inValve);
-
-const exValve = new THREE.Group();
-const exShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.5, 16), pbr.polishedChrome);
-const exHead = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.12, 0.35, 32), pbr.anodizedRed);
-exHead.position.y = -1.75;
-exValve.add(exShaft, exHead);
-exValve.position.set(1.9, 5.2, 0);
-scene.add(exValve);
-
-// 6. 💎 Transparent Crystal Cylinder Sleeve
-const sleeve = new THREE.Mesh(
-  new THREE.CylinderGeometry(2.45, 2.45, 7.4, 64, 1, true),
-  pbr.crystalGlass
-);
-sleeve.position.y = 1.6;
-scene.add(sleeve);
-
-// 7. 🔥 Dynamic Combustion Chamber Plasma Flame Mesh
-const flame = new THREE.Mesh(
-  new THREE.CylinderGeometry(2.4, 2.4, 2.2, 48),
-  new THREE.MeshBasicMaterial({ color: 0xFF3300, transparent: true, opacity: 0.0 })
-);
-flame.position.y = 4.4;
-scene.add(flame);
-
-// 8. 🛢️ Crankcase Oil Sump Base
-const oilPan = new THREE.Mesh(new THREE.BoxGeometry(7.0, 2.2, 8.0), pbr.castIron);
-oilPan.position.set(0, -8.0, 0);
-scene.add(oilPan);
-
-// 🔄 60 FPS EXACT 4-STROKE CYCLE LOOP
-engine.onUpdate((time, delta) => {
-  const theta = time * 3.6;
-  const cycle = ((theta % (4 * Math.PI)) + 4 * Math.PI) % (4 * Math.PI); // 0° to 720°
-
-  const pinX = r * Math.sin(theta);
-  const pinY = crankCenterY + r * Math.cos(theta);
-  const pistonY = crankCenterY + r * Math.cos(theta) + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
-
-  piston.position.set(0, pistonY, 0);
-  conRod.position.set(pinX / 2, (pinY + pistonY) / 2, 0);
-  conRod.rotation.z = Math.asin((-r * Math.sin(theta)) / l);
-  crank.rotation.z = theta;
-
-  // 1. INTAKE (0° - 180°)
-  if (cycle < Math.PI) {
-    inValve.position.y = 5.2 - 0.45 * Math.sin(cycle);
-    exValve.position.y = 5.2;
-    flame.material.color.setHex(0x3B82F6);
-    flame.material.opacity = 0.28 * Math.sin(cycle);
-    sparkLight.intensity = 0;
-  }
-  // 2. COMPRESSION (180° - 360°)
-  else if (cycle < 2 * Math.PI) {
-    inValve.position.y = 5.2;
-    exValve.position.y = 5.2;
-    flame.material.color.setHex(0xF59E0B);
-    flame.material.opacity = 0.38 * Math.sin(cycle - Math.PI);
-    sparkLight.intensity = 0;
-  }
-  // 3. POWER STROKE 💥 (360° - 540°)
-  else if (cycle < 3 * Math.PI) {
-    const powerProgress = cycle - 2 * Math.PI;
-    inValve.position.y = 5.2;
-    exValve.position.y = 5.2;
-    flame.material.color.setHex(0xFF2200);
-    flame.material.opacity = Math.max(0, 0.95 - powerProgress * 0.48);
-    sparkLight.intensity = powerProgress < 0.65 ? 9.0 : 0;
-  }
-  // 4. EXHAUST (540° - 720°)
-  else {
-    const exhProgress = cycle - 3 * Math.PI;
-    inValve.position.y = 5.2;
-    exValve.position.y = 5.2 - 0.45 * Math.sin(exhProgress);
-    flame.material.color.setHex(0x94A3B8);
-    flame.material.opacity = 0.32 * Math.sin(exhProgress);
-    sparkLight.intensity = 0;
-  }
-});`;
-
-// Black Hole GLSL code
-const BLACKHOLE_SHADER_CODE = `// ============================================================================
+// Default simulation script: Interstellar Gargantua Accretion Disk (GLSL)
+const DEFAULT_SIM_CODE = `// ============================================================================
 // 🌌 INTERSTELLAR: GARGANTUA RAY-WARPED ACCRETION DISK (GLSL SHADER)
 // ============================================================================
 
+// 1. 🕳️ Central Event Horizon (Obsidian Void r = 3.4)
 const horizonGeom = new THREE.SphereGeometry(3.4, 64, 64);
 const horizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
 const eventHorizon = new THREE.Mesh(horizonGeom, horizonMat);
 scene.add(eventHorizon);
 
+// 2. ✨ Blinding Photon Sphere (r = 1.5 r_s)
 const photonGeom = new THREE.TorusGeometry(3.65, 0.12, 32, 128);
 const photonMat = new THREE.MeshBasicMaterial({ color: 0xFFFDF0 });
 const photonRing = new THREE.Mesh(photonGeom, photonMat);
 photonRing.rotation.x = Math.PI / 2;
 scene.add(photonRing);
 
+// 3. 🔥 Volumetric Procedural Accretion Disk Shader
 const diskVertexShader = \`
   varying vec2 vUv;
   void main() {
@@ -237,6 +70,7 @@ const diskFragmentShader = \`
     float n2 = noise(vec2(swirl * 8.0 - time, normR * 25.0));
     float plasma = n1 * 0.65 + n2 * 0.35;
 
+    // Relativistic Doppler Beaming
     float doppler = 1.0 + 0.8 * sin(angle + 0.4);
 
     vec3 whiteHot = vec3(1.0, 0.98, 0.92);
@@ -267,6 +101,7 @@ const accretionDisk = new THREE.Mesh(diskGeom, diskMat);
 accretionDisk.rotation.x = -Math.PI / 2.3;
 scene.add(accretionDisk);
 
+// 4. 🌀 Gravitational Lensing Light-Bending Arches
 const haloVertexShader = \`
   varying vec2 vUv;
   void main() {
@@ -311,6 +146,7 @@ bottomHalo.position.set(0, -0.5, 0);
 bottomHalo.rotation.z = -Math.PI * 0.08;
 scene.add(bottomHalo);
 
+// 5. 🌊 Miller's Planet
 const millerDist = 8.5;
 const millerPlanet = new THREE.Mesh(
   new THREE.SphereGeometry(0.65, 32, 32),
@@ -318,6 +154,7 @@ const millerPlanet = new THREE.Mesh(
 );
 scene.add(millerPlanet);
 
+// 6. 60 FPS Orbit
 engine.onUpdate((time, delta) => {
   diskUniforms.time.value = time;
   const angle = time * 1.2;
@@ -326,72 +163,22 @@ engine.onUpdate((time, delta) => {
   millerPlanet.position.set(x, z * Math.sin(accretionDisk.rotation.x), z * Math.cos(accretionDisk.rotation.x));
 });`;
 
-const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
-  engine: {
-    title: "⚙️ 4-Stroke IC Engine (Kinematics & Combustion)",
-    category: "engineering",
-    code: ENGINE_SIM_CODE,
-  },
-  blackhole: {
-    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
-    category: "physics",
-    code: BLACKHOLE_SHADER_CODE,
-  },
-};
-
-// Bright & Polished PBR Materials
 function createPBRMaterials() {
   return {
-    polishedChrome: new THREE.MeshStandardMaterial({
-      color: 0xF8FAFC,
-      metalness: 0.92,
-      roughness: 0.12,
-    }),
-    brushedSteel: new THREE.MeshStandardMaterial({
-      color: 0xE2E8F0,
-      metalness: 0.85,
-      roughness: 0.22,
-    }),
-    forgedGoldBrass: new THREE.MeshStandardMaterial({
-      color: 0xF59E0B,
-      metalness: 0.88,
-      roughness: 0.18,
-    }),
-    anodizedBlue: new THREE.MeshStandardMaterial({
-      color: 0x3B82F6,
-      metalness: 0.85,
-      roughness: 0.2,
-    }),
-    anodizedRed: new THREE.MeshStandardMaterial({
-      color: 0xEF4444,
-      metalness: 0.85,
-      roughness: 0.2,
-    }),
-    castIron: new THREE.MeshStandardMaterial({
-      color: 0x64748B,
-      metalness: 0.65,
-      roughness: 0.35,
-    }),
-    porcelainCeramic: new THREE.MeshStandardMaterial({
-      color: 0xFFFFFF,
-      roughness: 0.1,
-      metalness: 0.05,
-    }),
-    crystalGlass: new THREE.MeshPhysicalMaterial({
-      color: 0xFFFFFF,
-      transmission: 0.85,
-      opacity: 0.9,
-      transparent: true,
-      roughness: 0.08,
-      ior: 1.5,
-      metalness: 0.1,
-    }),
+    polishedChrome: new THREE.MeshStandardMaterial({ color: 0xF8FAFC, metalness: 0.92, roughness: 0.12 }),
+    brushedSteel: new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.85, roughness: 0.22 }),
+    forgedGoldBrass: new THREE.MeshStandardMaterial({ color: 0xF59E0B, metalness: 0.88, roughness: 0.18 }),
+    anodizedBlue: new THREE.MeshStandardMaterial({ color: 0x3B82F6, metalness: 0.85, roughness: 0.2 }),
+    anodizedRed: new THREE.MeshStandardMaterial({ color: 0xEF4444, metalness: 0.85, roughness: 0.2 }),
+    castIron: new THREE.MeshStandardMaterial({ color: 0x64748B, metalness: 0.65, roughness: 0.35 }),
+    porcelainCeramic: new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.1, metalness: 0.05 }),
+    crystalGlass: new THREE.MeshPhysicalMaterial({ color: 0xFFFFFF, transmission: 0.85, opacity: 0.9, transparent: true, roughness: 0.08, ior: 1.5, metalness: 0.1 }),
   };
 }
 
 export default function ScienceSimEngine({
-  initialCategory = "engineering",
-  initialPreset = "engine",
+  initialCategory,
+  initialPreset,
   initialCode,
   autoPlay = true,
 }: ScienceSimEngineProps) {
@@ -399,17 +186,12 @@ export default function ScienceSimEngine({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // States
-  const [activePreset, setActivePreset] = useState<string>(initialPreset || "engine");
-  const [code, setCode] = useState<string>(
-    initialCode?.trim() || (EXECUTABLE_SCRIPTS[initialPreset || "engine"]?.code || EXECUTABLE_SCRIPTS.engine.code)
-  );
+  const [code, setCode] = useState<string>(initialCode?.trim() || DEFAULT_SIM_CODE);
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
-  const [simSpeed, setSimSpeed] = useState<number>(1);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
-  const [showCodeEditor, setShowCodeEditor] = useState<boolean>(true);
+  const [showCodeEditor, setShowCodeEditor] = useState<boolean>(false); // Closed by default for clean blog view!
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>("Bright Studio Engine Active (60 FPS)");
 
   // Three.js Core Refs
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -425,7 +207,15 @@ export default function ScienceSimEngine({
   const isDraggingRef = useRef(false);
   const previousMousePositionRef = useRef({ x: 0, y: 0 });
 
-  // 1. Initialize Bright Studio WebGL Viewport
+  // Update code if initialCode changes
+  useEffect(() => {
+    if (initialCode && initialCode.trim()) {
+      setCode(initialCode.trim());
+      executeCode(initialCode.trim());
+    }
+  }, [initialCode]);
+
+  // 1. Initialize Clean Studio WebGL Viewport
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -433,9 +223,9 @@ export default function ScienceSimEngine({
     const width = container.clientWidth || 800;
     const height = Math.min(Math.max(width * 0.58, 380), 550);
 
-    // Scene & Clean Bright Tech-Slate Studio Background
+    // Scene & Dark Tech Slate Studio Background
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#0F172A"); // Modern dark slate instead of pitch black
+    scene.background = new THREE.Color("#0B0F19");
     sceneRef.current = scene;
 
     // Camera
@@ -444,7 +234,7 @@ export default function ScienceSimEngine({
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // WebGL Renderer with ACES Filmic Tone Mapping & High Exposure
+    // WebGL Renderer with ACES Filmic Tone Mapping
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true,
@@ -453,7 +243,7 @@ export default function ScienceSimEngine({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6; // Bright crisp exposure
+    renderer.toneMappingExposure = 1.6;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
@@ -465,29 +255,22 @@ export default function ScienceSimEngine({
     }
     container.appendChild(renderer.domElement);
 
-    // 💡 Bright 4-Point Studio Lighting Setup
-    // 1. Ambient & Hemisphere Light
+    // Studio Lighting
     const hemiLight = new THREE.HemisphereLight(0xF8FAFC, 0x334155, 1.4);
     scene.add(hemiLight);
 
     const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.2);
     scene.add(ambientLight);
 
-    // 2. Main Key Light (Warm White)
     const keyLight = new THREE.DirectionalLight(0xFFFFFF, 2.2);
     keyLight.position.set(25, 40, 25);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.bias = -0.0001;
     scene.add(keyLight);
 
-    // 3. Cool Fill Light
     const fillLight = new THREE.DirectionalLight(0x93C5FD, 1.4);
     fillLight.position.set(-25, 20, 20);
     scene.add(fillLight);
 
-    // 4. Bright Rim Light
     const rimLight = new THREE.DirectionalLight(0xFDE68A, 1.6);
     rimLight.position.set(0, -10, -30);
     scene.add(rimLight);
@@ -553,13 +336,13 @@ export default function ScienceSimEngine({
     window.addEventListener("resize", handleResize);
 
     // Initial Execution
-    executeCodeInEditor(code);
+    executeCode(code);
 
     // 2. Main 60 FPS Render Loop
     let lastTime = performance.now();
     const animate = (now: number) => {
       animFrameIdRef.current = requestAnimationFrame(animate);
-      const delta = (now - lastTime) * 0.001 * simSpeed;
+      const delta = (now - lastTime) * 0.001;
       lastTime = now;
 
       if (isPlaying) {
@@ -592,7 +375,7 @@ export default function ScienceSimEngine({
   }, []);
 
   // 3. Dynamic Code Execution
-  const executeCodeInEditor = (sourceCode: string) => {
+  const executeCode = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
     const renderer = rendererRef.current;
@@ -625,26 +408,15 @@ export default function ScienceSimEngine({
     try {
       const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "engine", "pbr", "time", sourceCode);
       scriptKernel(scene, camera, renderer, THREE, engineAPI, pbr, simTimeRef.current);
-      setStatusMessage("⚡ Simulation Active (60 FPS)");
     } catch (err: any) {
       console.error("Simulation Script Execution Error:", err);
       setRuntimeError(`Runtime Error: ${err.message}`);
     }
   };
 
-  // Switch Script Preset
-  const handleLoadScript = (presetKey: string) => {
-    const item = EXECUTABLE_SCRIPTS[presetKey];
-    if (item) {
-      setActivePreset(presetKey);
-      setCode(item.code);
-      executeCodeInEditor(item.code);
-    }
-  };
-
   // Compile & Run Button
   const handleRunClick = () => {
-    executeCodeInEditor(code);
+    executeCode(code);
   };
 
   // Capture High-Res Snapshot (PNG)
@@ -718,108 +490,74 @@ export default function ScienceSimEngine({
 
   return (
     <div style={styles.engineContainer} className="science-sim-engine card">
-      {/* Top Header Controls */}
-      <div style={styles.topBar}>
-        <div style={styles.leftControls}>
-          <div style={styles.badgeGroup}>
-            <span style={styles.engineBadge}>⚡ 3D SIMULATION ENGINE</span>
-            <span style={styles.hardwareBadge}>{statusMessage}</span>
-          </div>
+      {/* 3D WebGL Canvas Wrapper */}
+      <div style={styles.canvasWrapper}>
+        <div ref={mountRef} style={styles.canvasMount} />
 
-          {/* Load Sample Scripts into Editor */}
-          <div style={styles.templateGroup}>
-            <span style={styles.templateLabel}>LOAD SCRIPT:</span>
-            {Object.keys(EXECUTABLE_SCRIPTS).map((key) => (
-              <button
-                key={key}
-                onClick={() => handleLoadScript(key)}
-                style={activePreset === key ? styles.templateBtnActive : styles.templateBtn}
-                title={`Load ${EXECUTABLE_SCRIPTS[key].title} into the code editor`}
-              >
-                {key === "engine" ? "⚙️ 4-Stroke Engine" : "🌌 Black Hole"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div style={styles.rightControls}>
-          <button onClick={() => setIsPlaying(!isPlaying)} style={styles.actionBtn}>
-            {isPlaying ? "⏸ Pause" : "▶ Play"}
+        {/* Minimal Floating Glass Controls in Corner */}
+        <div style={styles.floatingControls}>
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            style={styles.glassBtn}
+            title={isPlaying ? "Pause Simulation" : "Play Simulation"}
+          >
+            {isPlaying ? "⏸" : "▶"}
           </button>
-          <button onClick={captureSnapshot} style={styles.actionBtn} title="Capture 4K Snapshot">
-            📸 Snapshot
+          <button
+            onClick={captureSnapshot}
+            style={styles.glassBtn}
+            title="Capture 4K Snapshot"
+          >
+            📸
           </button>
           <button
             onClick={toggleRecording}
             style={{
-              ...styles.recordBtn,
-              backgroundColor: isRecording ? "#EF4444" : "#10B981",
+              ...styles.glassBtn,
+              backgroundColor: isRecording ? "rgba(239, 68, 68, 0.85)" : "rgba(15, 23, 42, 0.75)",
+              color: isRecording ? "#FFFFFF" : "#CBD5E1",
             }}
-            title="Record 60FPS Video (WebM)"
+            title="Record 60FPS Video"
           >
-            {isRecording ? `⏺ Stop (${recordTime}s)` : "🎥 Record Video"}
+            {isRecording ? `⏺ ${recordTime}s` : "🎥"}
           </button>
           <button
             onClick={() => setShowCodeEditor(!showCodeEditor)}
-            style={showCodeEditor ? styles.codeBtnActive : styles.codeBtn}
+            style={{
+              ...styles.glassBtn,
+              backgroundColor: showCodeEditor ? "rgba(209, 167, 81, 0.85)" : "rgba(15, 23, 42, 0.75)",
+              color: showCodeEditor ? "#0F172A" : "#CBD5E1",
+              fontWeight: 700,
+            }}
             title="Toggle Live Code Editor"
           >
-            💻 Code Editor
+            &lt;/&gt;
           </button>
         </div>
-      </div>
 
-      {/* Sub Bar */}
-      <div style={styles.subBar}>
-        {runtimeError ? (
-          <div style={styles.errorAlert}>⚠️ {runtimeError}</div>
-        ) : (
-          <div style={styles.infoText}>
-            💡 Type or edit ANY script in the Code Editor below and click <b>"▶ Compile &amp; Run"</b> (or press Ctrl+Enter).
-          </div>
-        )}
-
-        <div style={styles.sliderGroup}>
-          <span style={styles.sliderLabel}>SPEED: {simSpeed}x</span>
-          <input
-            type="range"
-            min="0.2"
-            max="3.0"
-            step="0.2"
-            value={simSpeed}
-            onChange={(e) => setSimSpeed(parseFloat(e.target.value))}
-            style={styles.slider}
-          />
-        </div>
-      </div>
-
-      {/* 3D WebGL Canvas Wrapper */}
-      <div style={styles.canvasWrapper}>
-        <div ref={mountRef} style={styles.canvasMount} />
         <div style={styles.hintOverlay}>
-          🖱️ Drag to orbit in 3D • Scroll to zoom • Edit code below to transform live!
+          🖱️ 3D Orbit: Drag • Zoom: Scroll
         </div>
       </div>
 
-      {/* 💻 The REAL Live Code Editor Driving the Simulation */}
+      {/* Error alert if any */}
+      {runtimeError && (
+        <div style={styles.errorAlert}>⚠️ {runtimeError}</div>
+      )}
+
+      {/* Optional Collapsible Code Editor (Only opens if user clicks </> button) */}
       {showCodeEditor && (
         <div style={styles.codeDrawer}>
           <div style={styles.codeHeader}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.78rem" }}>
-                💻 Live Simulation Script (Edit lines &amp; hit Run!)
-              </span>
-              <span style={{ color: "#94A3B8", fontSize: "0.68rem" }}>
-                [Injected: scene, camera, renderer, THREE, engine, pbr]
-              </span>
-            </div>
+            <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.75rem" }}>
+              💻 Live Code Sandbox
+            </span>
             <button
               onClick={handleRunClick}
               style={styles.runScriptBtn}
               title="Compile and execute code immediately (Ctrl+Enter)"
             >
-              ▶ Compile &amp; Run Code
+              ▶ Run Code
             </button>
           </div>
           <textarea
@@ -844,8 +582,8 @@ export default function ScienceSimEngine({
 const styles: Record<string, React.CSSProperties> = {
   engineContainer: {
     backgroundColor: "#0B0F19",
-    borderRadius: "10px",
-    border: "1px solid #334155",
+    borderRadius: "12px",
+    border: "1px solid #1E293B",
     overflow: "hidden",
     margin: "2rem 0",
     boxShadow: "0 15px 35px rgba(0, 0, 0, 0.5)",
@@ -853,197 +591,76 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: "100%",
     boxSizing: "border-box",
   },
-  topBar: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "0.6rem 1rem",
-    backgroundColor: "#0F172A",
-    borderBottom: "1px solid #334155",
-    gap: "0.6rem",
-  },
-  leftControls: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.8rem",
-    flexWrap: "wrap",
-  },
-  badgeGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.1rem",
-  },
-  engineBadge: {
-    fontSize: "0.75rem",
-    fontWeight: 800,
-    color: "#D1A751",
-    letterSpacing: "0.06em",
-    fontFamily: "var(--font-sans)",
-  },
-  hardwareBadge: {
-    fontSize: "0.6rem",
-    fontWeight: 700,
-    color: "#10B981",
-    letterSpacing: "0.05em",
-  },
-  templateGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.3rem",
-    background: "#0B0F19",
-    padding: "0.2rem 0.4rem",
-    borderRadius: "6px",
-  },
-  templateLabel: {
-    fontSize: "0.62rem",
-    fontWeight: 700,
-    color: "#94A3B8",
-  },
-  templateBtn: {
-    background: "transparent",
-    border: "1px solid #334155",
-    color: "#CBD5E1",
-    fontSize: "0.68rem",
-    padding: "0.2rem 0.5rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  templateBtnActive: {
-    background: "#334155",
-    border: "1px solid #D1A751",
-    color: "#FFFFFF",
-    fontWeight: 700,
-    fontSize: "0.68rem",
-    padding: "0.2rem 0.5rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  rightControls: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  actionBtn: {
-    background: "rgba(255, 255, 255, 0.12)",
-    border: "1px solid #475569",
-    color: "#F8FAFC",
-    fontSize: "0.72rem",
-    padding: "0.25rem 0.6rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-  recordBtn: {
-    border: "none",
-    color: "#FFFFFF",
-    fontSize: "0.72rem",
-    fontWeight: 700,
-    padding: "0.25rem 0.7rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  },
-  codeBtn: {
-    background: "#1E293B",
-    border: "1px solid #475569",
-    color: "#CBD5E1",
-    fontSize: "0.72rem",
-    fontWeight: 600,
-    padding: "0.25rem 0.6rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  codeBtnActive: {
-    background: "#D1A751",
-    border: "1px solid #D1A751",
-    color: "#0F172A",
-    fontSize: "0.72rem",
-    fontWeight: 700,
-    padding: "0.25rem 0.6rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  subBar: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0.4rem 1rem",
-    backgroundColor: "#0B1120",
-    borderBottom: "1px solid #334155",
-    gap: "0.4rem",
-  },
-  errorAlert: {
-    color: "#EF4444",
-    fontSize: "0.72rem",
-    fontWeight: 700,
-  },
-  infoText: {
-    color: "#CBD5E1",
-    fontSize: "0.68rem",
-  },
-  sliderGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.4rem",
-    marginLeft: "auto",
-  },
-  sliderLabel: {
-    fontSize: "0.65rem",
-    color: "#CBD5E1",
-    fontWeight: 600,
-  },
-  slider: {
-    width: "70px",
-    cursor: "pointer",
-  },
   canvasWrapper: {
     width: "100%",
     position: "relative",
     overflow: "hidden",
-    minHeight: "420px",
-    backgroundColor: "#0F172A",
+    minHeight: "440px",
+    backgroundColor: "#0B0F19",
   },
   canvasMount: {
     width: "100%",
     height: "100%",
     cursor: "grab",
   },
+  floatingControls: {
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    display: "flex",
+    gap: "0.4rem",
+    zIndex: 10,
+  },
+  glassBtn: {
+    background: "rgba(15, 23, 42, 0.75)",
+    backdropFilter: "blur(6px)",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
+    color: "#E2E8F0",
+    fontSize: "0.78rem",
+    padding: "0.35rem 0.65rem",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: 600,
+    transition: "all 0.15s ease",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+  },
   hintOverlay: {
     position: "absolute",
     bottom: "10px",
     left: "12px",
-    background: "rgba(15, 23, 42, 0.85)",
+    background: "rgba(15, 23, 42, 0.75)",
     backdropFilter: "blur(4px)",
-    color: "#CBD5E1",
+    color: "#94A3B8",
     fontSize: "0.68rem",
     padding: "0.25rem 0.6rem",
     borderRadius: "4px",
     pointerEvents: "none",
-    border: "1px solid rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.08)",
+  },
+  errorAlert: {
+    color: "#EF4444",
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    padding: "0.5rem 1rem",
+    backgroundColor: "#04060C",
+    borderTop: "1px solid #334155",
   },
   codeDrawer: {
-    backgroundColor: "#0B0F19",
-    borderTop: "1px solid #334155",
+    backgroundColor: "#060910",
+    borderTop: "1px solid #1E293B",
     padding: "0.8rem 1rem",
   },
   codeHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    fontSize: "0.7rem",
-    fontWeight: 700,
-    color: "#CBD5E1",
     marginBottom: "0.5rem",
-    flexWrap: "wrap",
-    gap: "0.4rem",
   },
   runScriptBtn: {
     background: "#10B981",
     color: "#FFFFFF",
     border: "none",
-    padding: "0.35rem 0.9rem",
+    padding: "0.3rem 0.8rem",
     fontSize: "0.74rem",
     fontWeight: 700,
     borderRadius: "4px",
@@ -1052,13 +669,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scriptTextarea: {
     width: "100%",
-    height: "260px",
-    backgroundColor: "#0F172A",
+    height: "220px",
+    backgroundColor: "#0B0F19",
     color: "#F8FAFC",
     fontFamily: "'Fira Code', monospace",
     fontSize: "0.82rem",
     border: "1px solid #334155",
-    borderRadius: "4px",
+    borderRadius: "6px",
     padding: "0.8rem",
     outline: "none",
     resize: "vertical",
