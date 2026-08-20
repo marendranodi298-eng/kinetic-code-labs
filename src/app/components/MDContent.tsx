@@ -25,6 +25,42 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&nbsp;/g, " ");
 }
 
+// Smart LaTeX normalizer: converts raw bracket equations and copy-pasted mathematical notations to MathJax LaTeX
+function normalizeLatexFormulas(text: string): string {
+  if (!text) return "";
+
+  // 1. Multi-line isolated bracket equations from ChatGPT:
+  // [
+  // \Delta t = \gamma \Delta \tau
+  // ]
+  let normalized = text.replace(/(?:^|\n)\[\s*\n+([\s\S]*?)\n+\s*\](?:\n|$)/g, (_match, eq) => {
+    const cleanEq = eq.trim();
+    return `\n\n$$ ${cleanEq} $$\n\n`;
+  });
+
+  // 2. Single-line bracket equations: [ E = mc^2 ] or [ ds^2=-c^2dt^2+dx^2+dy^2+dz^2 ]
+  normalized = normalized.replace(/(?:^|\n)\[\s*([a-zA-Z0-9\s\\_^{}+\-*\/=,;:()\.\sqrt\pi\mu\nu\Lambda\gamma\Delta\tau\infty\rightarrow]+)\s*\](?:\n|$)/g, (match, eq) => {
+    const cleanEq = eq.trim();
+    // Check if it looks like a math equation (has math symbols or variables)
+    if (/[=\\^_{}]|\b(?:c|v|E|m|p|G|L|r|dt|dx|dy|dz|ds|rs)\b/.test(cleanEq)) {
+      return `\n\n$$ ${cleanEq} $$\n\n`;
+    }
+    return match;
+  });
+
+  // 3. Inline Greek & LaTeX expressions in parentheses like (\Delta\tau), (G_{\mu\nu}), (\Lambda), (\gamma)
+  normalized = normalized.replace(/\((\\[a-zA-Z]+(?:_[0-9a-zA-Z{}]+)?)\)/g, (_match, math) => {
+    return `\\(${math}\\)`;
+  });
+
+  // 4. Inline variables like (v), (c), (L_0), (p=0)
+  normalized = normalized.replace(/(^|\s)\(([a-zA-Z](?:_[0-9a-zA-Z]+)?(?:=[0-9a-zA-Z]+)?)\)(\s|[.,;:?!]|$)/g, (_match, prefix, variable, suffix) => {
+    return `${prefix}\\(${variable}\\)${suffix}`;
+  });
+
+  return normalized;
+}
+
 // Injects id attributes to headings for TOC scroll anchors
 function addIdsToHtmlHeadings(html: string): string {
   return html.replace(/<(h[1-6])([^>]*)>([\s\S]*?)<\/\1>/gi, (match, tag, attrs, text) => {
@@ -53,6 +89,9 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
 
   // Blockquotes > quote
   html = html.replace(/^>\s*(.*?)$/gm, '<blockquote style="border-left:3px solid var(--color-accent);padding:0.6rem 1.2rem;margin:1.5rem 0;font-style:italic;color:#5A4D45;background:rgba(198,154,91,0.05);border-radius:0 6px 6px 0;">$1</blockquote>');
+
+  // Horizontal Rules ---
+  html = html.replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid var(--color-border);margin:2rem 0;" />');
 
   // Links [text](url)
   html = html.replace(
@@ -91,7 +130,7 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
         const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
         result += `<h1 id="${id}" style="font-size:2rem;margin-top:2.5rem;margin-bottom:1.2rem;font-family:var(--font-serif);color:var(--color-text-dark);border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;line-height:1.15;">${text}</h1>`;
       } else if (trimmed === "") {
-        result += '<div style="height:0.8rem;"></div>';
+        result += '<div style="height:0.6rem;"></div>';
       } else {
         result += `<p style="font-size:1.05rem;line-height:1.8;margin-bottom:1.2rem;color:#2C221D;font-weight:300;">${trimmed}</p>`;
       }
@@ -118,11 +157,12 @@ function renderFormattedText(content: string): string {
 export function parseArticleContent(rawContent: string): ContentBlock[] {
   if (!rawContent || !rawContent.trim()) return [];
 
-  let text = rawContent.replace(/\r\n/g, "\n");
+  // Normalize LaTeX formulas first
+  const normalized = normalizeLatexFormulas(rawContent.replace(/\r\n/g, "\n"));
   const codeItems: { code: string; language: string }[] = [];
 
   // Pattern 1: HTML <pre><code>...</code></pre> blocks
-  text = text.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
+  let text = normalized.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
     const cleanCode = decodeHtmlEntities(codeHtml.replace(/<[^>]*>/g, ""));
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
     codeItems.push({ code: cleanCode.trim(), language: lang || "javascript" });
@@ -186,12 +226,19 @@ export default function MDContent({ content }: MDContentProps) {
 
   useEffect(() => {
     // Trigger MathJax LaTeX equation rendering
-    if (typeof window !== "undefined" && (window as any).MathJax) {
-      try {
-        (window as any).MathJax.typesetPromise();
-      } catch (err) {
-        console.error("MathJax typeset error:", err);
-      }
+    if (typeof window !== "undefined") {
+      const renderMath = () => {
+        if ((window as any).MathJax && (window as any).MathJax.typesetPromise) {
+          try {
+            (window as any).MathJax.typesetPromise().catch(() => {});
+          } catch {
+            // MathJax promise catch
+          }
+        }
+      };
+      renderMath();
+      const timer = setTimeout(renderMath, 400);
+      return () => clearTimeout(timer);
     }
   }, [content, blocks]);
 

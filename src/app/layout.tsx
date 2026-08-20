@@ -61,6 +61,29 @@ export default function RootLayout({
         />
       </head>
       <body style={{ backgroundColor: "var(--color-bg-light)", minHeight: "100vh" }}>
+        {/* MathJax Configuration and Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.MathJax = {
+                tex: {
+                  inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+                  displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+                  processEscapes: true,
+                  processEnvironments: true
+                },
+                options: {
+                  skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+                }
+              };
+            `,
+          }}
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+          id="MathJax-script"
+          async
+        />
         {children}
       </body>
     </html>

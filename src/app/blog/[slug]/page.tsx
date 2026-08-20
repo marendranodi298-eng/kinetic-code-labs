@@ -341,12 +341,6 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
         </aside>
       </main>
 
-      {/* Load MathJax asynchronously for LaTeX calculations */}
-      <Script
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-        strategy="afterInteractive"
-      />
-
       {/* Extracted Premium Footer */}
       <Footer />
     </div>
