@@ -322,7 +322,7 @@ export function parseArticleContent(rawContent: string): ContentBlock[] {
   let text = raw.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w:-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
     const cleanCode = decodeHtmlEntities(codeHtml.replace(/<[^>]*>/g, ""));
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
-    const isSim = (lang || "").startsWith("sim");
+    const isSim = (lang || "").startsWith("sim") || (lang || "").startsWith("simulation");
     let simCategory: SimCategory = "physics";
     let simPreset: string = "spacetime";
 
@@ -339,7 +339,7 @@ export function parseArticleContent(rawContent: string): ContentBlock[] {
   // Pattern 2: Markdown triple backtick code fences: ```lang\ncode\n```
   text = text.replace(/(?:^|\n)```([\w:-]*)\n([\s\S]*?)\n```(?:\n|$)/g, (_match, lang, codeText) => {
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
-    const isSim = (lang || "").startsWith("sim");
+    const isSim = (lang || "").startsWith("sim") || (lang || "").startsWith("simulation");
     let simCategory: SimCategory = "physics";
     let simPreset: string = "spacetime";
 
