@@ -195,7 +195,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
           </p>
 
           {/* Responsive Stats Bar */}
-          <div className="stats-bar-responsive card">
+          <div className="stats-bar-responsive">
             <div style={styles.statBox}>
               <div style={styles.statLabel}>CURATED STORIES</div>
               <div style={styles.statVal}>{stats.total}</div>
@@ -501,32 +501,33 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statBox: {
     flex: 1,
-    padding: "1.2rem 1rem",
+    padding: "0.6rem 1rem",
     textAlign: "center",
   },
   statBoxDivider: {
     width: "1px",
-    height: "50px",
+    height: "42px",
     backgroundColor: "var(--color-border)",
   },
   statLabel: {
-    fontSize: "0.65rem",
+    fontSize: "0.68rem",
     fontWeight: 700,
-    letterSpacing: "0.08em",
+    letterSpacing: "0.1em",
     color: "var(--color-text-muted)",
     textTransform: "uppercase",
   },
   statVal: {
     fontFamily: "var(--font-serif)",
-    fontSize: "1.8rem",
-    color: "var(--color-text-dark)",
-    lineHeight: "1.2",
-    margin: "0.2rem 0",
+    fontSize: "2.2rem",
+    fontWeight: 600,
+    color: "var(--color-accent)",
+    lineHeight: "1.1",
+    margin: "0.15rem 0",
   },
   statSubText: {
-    fontSize: "0.7rem",
+    fontSize: "0.72rem",
     color: "var(--color-text-muted)",
-    opacity: 0.8,
+    opacity: 0.85,
   },
   categorySection: {
     backgroundColor: "#FAF7F2",
