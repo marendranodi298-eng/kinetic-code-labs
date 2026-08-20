@@ -516,11 +516,12 @@ export default function PostEditor({ post }: PostEditorProps) {
                     <button 
                       type="button" 
                       onClick={() => {
-                        const choice = prompt("Choose 3D Simulation to insert:\n1. Physics (Spacetime & Orbits)\n2. Chemistry (Molecules H2O / Benzene)\n3. Biotech (3D DNA Double Helix / Virus)\n4. Math (3D Wave Surface / Chaos)\n\nEnter 1, 2, 3, or 4:", "1");
-                        let tag = "[sim:physics:spacetime]";
-                        if (choice === "2") tag = "[sim:chemistry:water]";
-                        if (choice === "3") tag = "[sim:biotech:dna]";
-                        if (choice === "4") tag = "[sim:math:surface]";
+                        const choice = prompt("Choose 3D Simulation to insert:\n1. ⚙️ 4-Stroke IC Engine (Exploded CAD View)\n2. 🌌 Physics (Spacetime & Orbits)\n3. 🧪 Chemistry (Water H2O / Benzene)\n4. 🧬 Biotech (DNA Double Helix / Virus)\n5. 📊 Math (3D Wave Surface)\n\nEnter 1, 2, 3, 4, or 5:", "1");
+                        let tag = "[sim:physics:engine]";
+                        if (choice === "2") tag = "[sim:physics:spacetime]";
+                        if (choice === "3") tag = "[sim:chemistry:water]";
+                        if (choice === "4") tag = "[sim:biotech:dna]";
+                        if (choice === "5") tag = "[sim:math:surface]";
                         if (choice) execCmd("insertHTML", `<p>${tag}</p><p><br></p>`);
                       }}
                       title="Insert Interactive 3D Science Simulation" 

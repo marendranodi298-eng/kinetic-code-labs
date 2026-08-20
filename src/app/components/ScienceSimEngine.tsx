@@ -14,6 +14,23 @@ interface ScienceSimEngineProps {
 
 // Scientifically Accurate Default Simulation Code Templates (C++ / JS GPU Compute)
 const ACCURATE_SIM_TEMPLATES: Record<string, { category: SimCategory; code: string; label: string }> = {
+  engine: {
+    category: "physics",
+    label: "⚙️ 4-Stroke IC Engine (Kinematic Exploded CAD View)",
+    code: `// [Accurate Mechanical Engineering Kernel: 4-Stroke Internal Combustion Engine]
+// Kinematic slider-crank displacement: y = r*cos(theta) + sqrt(l^2 - r^2*sin^2(theta))
+const boreDiameter = 85.0; // Cylinder Bore (mm)
+const crankRadius = 3.0; // Crank throw r (Visual units)
+const connectingRodLength = 7.5; // Con-rod length l (Visual units)
+const engineRPM = 2400; // Engine Speed (RPM)
+const compressionRatio = 10.5; // Compression Ratio (10.5:1)
+
+// 4-Stroke Thermodynamic Cycle (Otto Cycle):
+// 1. 0° - 180°   : INTAKE (Intake Valve Open, Fuel-Air Induction)
+// 2. 180° - 360° : COMPRESSION (Both Valves Closed, High Pressure)
+// 3. 360° - 540° : POWER / COMBUSTION (Spark Plug Ignition Flash 💥)
+// 4. 540° - 720° : EXHAUST (Exhaust Valve Open, Gas Scavenging)`,
+  },
   spacetime: {
     category: "physics",
     label: "🌌 Relativistic Spacetime & N-Body Orbits",
@@ -22,59 +39,33 @@ const ACCURATE_SIM_TEMPLATES: Record<string, { category: SimCategory; code: stri
 const G = 6.67430e-11;
 const sunMass = 1.989e30;
 
-// Relativistic Metric Distortion: Depth = -GM / (c^2 * r)
 const planets = [
   { name: "Mercury", dist: 5.5, radius: 0.4, color: 0x9CA3AF, speed: 2.4 },
   { name: "Earth", dist: 9.5, radius: 0.7, color: 0x3B82F6, speed: 1.4 },
   { name: "Mars", dist: 14.0, radius: 0.55, color: 0xEF4444, speed: 1.0 },
   { name: "Jupiter", dist: 19.5, radius: 1.3, color: 0xD97706, speed: 0.6 }
-];
-
-// Spacetime Grid Resolution: 60x60 Geodesic vertices
-const gridResolution = 60;
-const gridScale = 50.0;`,
+];`,
   },
   pendulum: {
     category: "physics",
     label: "⚡ Runge-Kutta 4th-Order (RK4) Double Pendulum Chaos",
     code: `// [Accurate Mechanics Kernel: 4th-Order Runge-Kutta Integrator]
-// Lagrangian Non-linear Chaotic Dynamics
 const g = 9.80665; // Standard Earth gravity (m/s^2)
 const l1 = 6.0, l2 = 5.0; // Rod lengths
 const m1 = 2.0, m2 = 1.5; // Bob masses (kg)
 
-let theta1 = Math.PI / 2; // Initial angle 1 (90 deg)
-let theta2 = Math.PI / 2; // Initial angle 2 (90 deg)
-let omega1 = 0.0, omega2 = 0.0; // Angular velocities
-const dt = 0.02; // Integration time-step`,
+let theta1 = Math.PI / 2; // Initial angle 1
+let theta2 = Math.PI / 2; // Initial angle 2
+let omega1 = 0.0, omega2 = 0.0;`,
   },
   water: {
     category: "chemistry",
     label: "🧪 Water (H2O) - Exact 104.5° Bond Angle Geometry",
     code: `// [Accurate Chemistry Kernel: H2O Molecular Geometry]
 // Experimental Bond Angle: 104.5 degrees (sp3 hybridization)
-// O-H Bond Length: 0.96 Angstroms
 const bondAngleDegrees = 104.5;
-const bondAngleRad = (bondAngleDegrees * Math.PI) / 180;
-const bondLength = 2.0; // Visual scale
-
-const oxygen = { elem: "O", x: 0, y: 0.8, z: 0, color: 0xEF4444, radius: 0.9 };
-const hydrogen1 = { 
-  elem: "H", 
-  x: -bondLength * Math.sin(bondAngleRad / 2), 
-  y: 0.8 - bondLength * Math.cos(bondAngleRad / 2), 
-  z: 0, 
-  color: 0xF3F4F6, 
-  radius: 0.5 
-};
-const hydrogen2 = { 
-  elem: "H", 
-  x: bondLength * Math.sin(bondAngleRad / 2), 
-  y: 0.8 - bondLength * Math.cos(bondAngleRad / 2), 
-  z: 0, 
-  color: 0xF3F4F6, 
-  radius: 0.5 
-};`,
+const oxygenRadius = 0.95;
+const hydrogenRadius = 0.55;`,
   },
   benzene: {
     category: "chemistry",
@@ -82,65 +73,47 @@ const hydrogen2 = {
     code: `// [Accurate Chemistry Kernel: Benzene C6H6 Planar Ring]
 // C-C Bond Length: 1.40 Angstroms (sp2 resonance hybrid)
 // Bond Angle: exactly 120 degrees
-const ringRadius = 3.0;
-const cRadius = 0.7;
-const hRadius = 0.45;
-const piElectronFrequency = 4.0; // Quantum resonance oscillation`,
+const ringRadius = 3.0;`,
   },
   dna: {
     category: "biotech",
     label: "🧬 B-DNA Double Helix (Watson-Crick Model)",
     code: `// [Accurate Biotech Kernel: B-Form DNA Double Helix]
 // 10 Base-pairs per full helical turn (360 degrees)
-// Helical Pitch: 3.4 nm (0.34 nm rise per base-pair)
 const numBasePairs = 35;
 const helixRadius = 4.5;
-const pitchPerBasePair = 0.8;
-const twistPerBasePair = (36.0 * Math.PI) / 180.0; // 36 degrees twist
-
-// Complementary Hydrogen Bonding Rules:
-// Adenine (Red) <== 2 H-Bonds ==> Thymine (Green)
-// Guanine (Blue) <== 3 H-Bonds ==> Cytosine (Gold)`,
+const twistPerBasePair = (36.0 * Math.PI) / 180.0;`,
   },
   virus: {
     category: "biotech",
     label: "🦠 Bacteriophage T4 Viral Capsid & Tail Sheath",
     code: `// [Accurate Biotech Kernel: Bacteriophage Icosahedron (T=13)]
-// Golden Ratio Icosahedral Capsid Head Geometry
-const phi = (1.0 + Math.sqrt(5.0)) / 2.0; // 1.61803398875
+const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
 const capsidHeadRadius = 4.0;
-const tailSheathLength = 6.0;
-const tailFibersCount = 6;
-const contractionRate = 0.4;`,
+const tailSheathLength = 6.0;`,
   },
   surface: {
     category: "math",
     label: "📊 3D Parametric Wave Differential Surface",
     code: `// [Accurate Mathematics Kernel: 3D Wave Equation]
-// z = sin(sqrt(x^2 + y^2) - omega * t) / (1 + 0.1 * r)
 const gridSize = 30.0;
 const segments = 70;
-const waveSpeed = 3.0;
-const damping = 0.1;`,
+const waveSpeed = 3.0;`,
   },
   lorenz: {
     category: "math",
     label: "📊 Lorenz Strange Attractor (Nonlinear Chaos Flow)",
     code: `// [Accurate Mathematics Kernel: Lorenz Dynamic System]
-// dx/dt = sigma * (y - x)
-// dy/dt = x * (rho - z) - y
-// dz/dt = x * y - beta * z
 const sigma = 10.0;
 const rho = 28.0;
 const beta = 8.0 / 3.0;
-const dt = 0.01;
-const maxTrajectoryPoints = 2500;`,
+const dt = 0.01;`,
   },
 };
 
 export default function ScienceSimEngine({
   initialCategory = "physics",
-  initialPreset = "spacetime",
+  initialPreset = "engine",
   initialCode,
   autoPlay = true,
 }: ScienceSimEngineProps) {
@@ -151,13 +124,15 @@ export default function ScienceSimEngine({
   const [category, setCategory] = useState<SimCategory>(initialCategory);
   const [preset, setPreset] = useState<string>(initialPreset);
   const [code, setCode] = useState<string>(
-    initialCode || (ACCURATE_SIM_TEMPLATES[initialPreset]?.code || ACCURATE_SIM_TEMPLATES.spacetime.code)
+    initialCode || (ACCURATE_SIM_TEMPLATES[initialPreset]?.code || ACCURATE_SIM_TEMPLATES.engine.code)
   );
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
   const [simSpeed, setSimSpeed] = useState<number>(1);
+  const [explodedRatio, setExplodedRatio] = useState<number>(0.0); // 0 = Assembled, 1 = Fully Exploded CAD
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
   const [showCodeEditor, setShowCodeEditor] = useState<boolean>(true);
+  const [strokePhase, setStrokePhase] = useState<string>("1. INTAKE (Air-Fuel Mixture)");
   const [statusMessage, setStatusMessage] = useState<string>("Simulation Active (60 FPS)");
 
   // Three.js Scene References
@@ -192,12 +167,12 @@ export default function ScienceSimEngine({
 
     // 1. Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#080B12"); // Deep obsidian space
+    scene.background = new THREE.Color("#080B12");
     sceneRef.current = scene;
 
     // 2. Camera
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.set(0, 18, 28);
+    camera.position.set(0, 15, 26);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -214,10 +189,10 @@ export default function ScienceSimEngine({
     container.appendChild(renderer.domElement);
 
     // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
     dirLight.position.set(20, 40, 20);
     dirLight.castShadow = true;
     scene.add(dirLight);
@@ -287,7 +262,7 @@ export default function ScienceSimEngine({
     window.addEventListener("resize", handleResize);
 
     // Initial Scene Build
-    buildSimulationScene(preset);
+    buildSimulationScene(preset, explodedRatio);
 
     // 5. Main 60 FPS Compute & Render Loop
     let lastTime = performance.now();
@@ -321,13 +296,13 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // Rebuild scene when preset changes
+  // Rebuild scene when preset or explodedRatio changes
   useEffect(() => {
-    buildSimulationScene(preset);
-  }, [preset]);
+    buildSimulationScene(preset, explodedRatio);
+  }, [preset, explodedRatio]);
 
   // Master Scientific Scene Builder
-  const buildSimulationScene = (pre: string) => {
+  const buildSimulationScene = (pre: string, explode: number) => {
     const scene = sceneRef.current;
     if (!scene) return;
 
@@ -352,40 +327,219 @@ export default function ScienceSimEngine({
 
     updateHookRef.current = null;
 
+    // =================================================================
+    // 1. ⚙️ 4-STROKE INTERNAL COMBUSTION ENGINE (EXPLODED CAD VIEW)
+    // =================================================================
+    if (pre === "engine") {
+      if (cameraRef.current) {
+        cameraRef.current.position.set(16, 12, 24);
+        cameraRef.current.lookAt(0, 0, 0);
+      }
+
+      const engineGroup = new THREE.Group();
+      scene.add(engineGroup);
+
+      // --- Kinematic Constants ---
+      const r = 2.4; // Crank Radius
+      const l = 6.2; // Connecting Rod Length
+      const explodeOffset = explode * 7.0; // Separation along exploded axes
+
+      // A. SPARK PLUG (Top Center - Explodes +Y)
+      const sparkGroup = new THREE.Group();
+      const sparkBody = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 2.2, 16), new THREE.MeshStandardMaterial({ color: 0xF3F4F6, roughness: 0.2 }));
+      const sparkHex = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0x9CA3AF, metalness: 0.8 }));
+      const sparkElectrode = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 8), new THREE.MeshStandardMaterial({ color: 0xD1A751, metalness: 0.9 }));
+      sparkElectrode.position.y = -1.2;
+      sparkGroup.add(sparkBody, sparkHex, sparkElectrode);
+      sparkGroup.position.set(0, 8.5 + explodeOffset * 1.5, 0);
+      engineGroup.add(sparkGroup);
+
+      // Spark Ignition Flash Light
+      const sparkLight = new THREE.PointLight(0xFF4500, 0, 15);
+      sparkLight.position.set(0, 6.0, 0);
+      engineGroup.add(sparkLight);
+
+      // B. CYLINDER HEAD & CAMSHAFT (Explodes +Y)
+      const headGroup = new THREE.Group();
+      const headBlock = new THREE.Mesh(new THREE.BoxGeometry(6.5, 2.2, 6.5), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.3 }));
+      headGroup.add(headBlock);
+
+      // Camshaft
+      const camShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5.5, 16), new THREE.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.8 }));
+      camShaft.rotation.z = Math.PI / 2;
+      camShaft.position.y = 1.6;
+      headGroup.add(camShaft);
+      headGroup.position.set(0, 6.5 + explodeOffset * 1.2, 0);
+      engineGroup.add(headGroup);
+
+      // C. INTAKE & EXHAUST VALVES (Explode Angled +X / -X and +Y)
+      const intakeValve = new THREE.Group();
+      const inShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 12), new THREE.MeshStandardMaterial({ color: 0x3B82F6, metalness: 0.7 }));
+      const inHead = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.1, 0.3, 16), new THREE.MeshStandardMaterial({ color: 0x3B82F6, metalness: 0.7 }));
+      inHead.position.y = -1.6;
+      intakeValve.add(inShaft, inHead);
+      intakeValve.position.set(-1.8 - explodeOffset * 0.8, 5.0 + explodeOffset, 0);
+      engineGroup.add(intakeValve);
+
+      const exhaustValve = new THREE.Group();
+      const exShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 12), new THREE.MeshStandardMaterial({ color: 0xEF4444, metalness: 0.7 }));
+      const exHead = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.1, 0.3, 16), new THREE.MeshStandardMaterial({ color: 0xEF4444, metalness: 0.7 }));
+      exHead.position.y = -1.6;
+      exhaustValve.add(exShaft, exHead);
+      exhaustValve.position.set(1.8 + explodeOffset * 0.8, 5.0 + explodeOffset, 0);
+      engineGroup.add(exhaustValve);
+
+      // D. CYLINDER BLOCK (Cutaway view - Center)
+      const blockGroup = new THREE.Group();
+      const cylinderSleeve = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.4, 2.4, 7.0, 32, 1, true),
+        new THREE.MeshStandardMaterial({ color: 0x64748B, metalness: 0.5, roughness: 0.2, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+      );
+      cylinderSleeve.position.y = 1.5;
+      blockGroup.add(cylinderSleeve);
+      blockGroup.position.set(0, 0, 0);
+      engineGroup.add(blockGroup);
+
+      // Combustion Flame Glow inside Chamber
+      const combustionMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.35, 2.35, 1.5, 32),
+        new THREE.MeshBasicMaterial({ color: 0xFF4500, transparent: true, opacity: 0.0 })
+      );
+      combustionMesh.position.y = 4.2;
+      engineGroup.add(combustionMesh);
+
+      // E. PISTON ASSEMBLY (Moves vertically with kinematic slider-crank)
+      const pistonGroup = new THREE.Group();
+      const pistonCrown = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 2.0, 32), new THREE.MeshStandardMaterial({ color: 0xD1D5DB, metalness: 0.8, roughness: 0.2 }));
+      const gudgeonPin = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.0, 16), new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.9 }));
+      gudgeonPin.rotation.z = Math.PI / 2;
+      gudgeonPin.position.y = -0.2;
+      pistonGroup.add(pistonCrown, gudgeonPin);
+      engineGroup.add(pistonGroup);
+
+      // F. CONNECTING ROD (I-Beam section)
+      const conRodGroup = new THREE.Group();
+      const rodBody = new THREE.Mesh(new THREE.BoxGeometry(0.5, l, 0.35), new THREE.MeshStandardMaterial({ color: 0xD1A751, metalness: 0.8, roughness: 0.3 }));
+      const smallEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0xD1A751, metalness: 0.8 }));
+      smallEnd.rotation.x = Math.PI / 2;
+      smallEnd.position.y = l / 2;
+      const bigEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0xD1A751, metalness: 0.8 }));
+      bigEnd.rotation.x = Math.PI / 2;
+      bigEnd.position.y = -l / 2;
+      conRodGroup.add(rodBody, smallEnd, bigEnd);
+      engineGroup.add(conRodGroup);
+
+      // G. CRANKSHAFT & FLYWHEEL (Explodes -Y)
+      const crankGroup = new THREE.Group();
+      const crankJournal = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.2, 16), new THREE.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.9 }));
+      crankJournal.rotation.x = Math.PI / 2;
+
+      const counterWeight1 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 }));
+      counterWeight1.position.set(0, -1.2, -0.7);
+      const counterWeight2 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 }));
+      counterWeight2.position.set(0, -1.2, 0.7);
+
+      const flywheel = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 0.6, 32), new THREE.MeshStandardMaterial({ color: 0x1E293B, metalness: 0.8 }));
+      flywheel.rotation.x = Math.PI / 2;
+      flywheel.position.z = -2.5;
+
+      crankGroup.add(crankJournal, counterWeight1, counterWeight2, flywheel);
+      crankGroup.position.set(0, -5.0 - explodeOffset, 0);
+      engineGroup.add(crankGroup);
+
+      // H. CRANKCASE OIL PAN (Explodes -Y bottom)
+      const oilPan = new THREE.Mesh(new THREE.BoxGeometry(6.5, 2.0, 7.5), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 }));
+      oilPan.position.set(0, -7.5 - explodeOffset * 1.5, 0);
+      engineGroup.add(oilPan);
+
+      // 4-Stroke Kinematic Animation Loop
+      updateHookRef.current = (time) => {
+        const theta = time * 3.5; // Crank angle
+        const cycleAngle = ((theta % (4 * Math.PI)) + 4 * Math.PI) % (4 * Math.PI); // 0 to 720 degrees
+
+        // Kinematic slider-crank displacement
+        // y_piston = r * cos(theta) + sqrt(l^2 - r^2 * sin^2(theta))
+        const crankY = -5.0 - explodeOffset;
+        const crankPinX = r * Math.sin(theta);
+        const crankPinY = crankY + r * Math.cos(theta);
+
+        const pistonY = crankY + r * Math.cos(theta) + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
+        pistonGroup.position.set(0, pistonY, 0);
+
+        // Con-Rod Position & Rotation
+        const midX = crankPinX / 2;
+        const midY = (crankPinY + pistonY) / 2;
+        conRodGroup.position.set(midX, midY, 0);
+        const rodAngle = Math.asin((-r * Math.sin(theta)) / l);
+        conRodGroup.rotation.z = rodAngle;
+
+        // Crank Rotation
+        crankGroup.rotation.z = theta;
+
+        // 4-Stroke Cycle Logic & Combustion Glow:
+        // 0 to 180 (0 to PI): INTAKE
+        if (cycleAngle < Math.PI) {
+          setStrokePhase("1. INTAKE (Air-Fuel Mixture Drawn In)");
+          intakeValve.position.y = 5.0 + explodeOffset - 0.4 * Math.sin(cycleAngle);
+          exhaustValve.position.y = 5.0 + explodeOffset;
+          (combustionMesh.material as THREE.MeshBasicMaterial).color.setHex(0x3B82F6); // Blue
+          (combustionMesh.material as THREE.MeshBasicMaterial).opacity = 0.25 * Math.sin(cycleAngle);
+          sparkLight.intensity = 0;
+        }
+        // 180 to 360 (PI to 2*PI): COMPRESSION
+        else if (cycleAngle < 2 * Math.PI) {
+          setStrokePhase("2. COMPRESSION (Both Valves Closed, High Pressure)");
+          intakeValve.position.y = 5.0 + explodeOffset;
+          exhaustValve.position.y = 5.0 + explodeOffset;
+          (combustionMesh.material as THREE.MeshBasicMaterial).color.setHex(0xF59E0B); // Amber
+          (combustionMesh.material as THREE.MeshBasicMaterial).opacity = 0.35 * Math.sin(cycleAngle - Math.PI);
+          sparkLight.intensity = 0;
+        }
+        // 360 to 540 (2*PI to 3*PI): POWER / COMBUSTION (Spark Ignition!)
+        else if (cycleAngle < 3 * Math.PI) {
+          const powerProgress = cycleAngle - 2 * Math.PI;
+          setStrokePhase("3. POWER STROKE (Spark Ignition & Explosion 💥)");
+          intakeValve.position.y = 5.0 + explodeOffset;
+          exhaustValve.position.y = 5.0 + explodeOffset;
+          (combustionMesh.material as THREE.MeshBasicMaterial).color.setHex(0xFF3300); // Fiery Explosion
+          (combustionMesh.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.85 - powerProgress * 0.4);
+          sparkLight.intensity = powerProgress < 0.6 ? 6.0 : 0;
+        }
+        // 540 to 720 (3*PI to 4*PI): EXHAUST
+        else {
+          const exhaustProgress = cycleAngle - 3 * Math.PI;
+          setStrokePhase("4. EXHAUST (Exhaust Valve Open, Gases Scavenged)");
+          intakeValve.position.y = 5.0 + explodeOffset;
+          exhaustValve.position.y = 5.0 + explodeOffset - 0.4 * Math.sin(exhaustProgress);
+          (combustionMesh.material as THREE.MeshBasicMaterial).color.setHex(0x64748B); // Exhaust Smoke Grey
+          (combustionMesh.material as THREE.MeshBasicMaterial).opacity = 0.3 * Math.sin(exhaustProgress);
+          sparkLight.intensity = 0;
+        }
+      };
+    }
+
     // ==========================================
-    // 1. PHYSICS: Spacetime & N-Body Orbits
+    // 2. PHYSICS: Spacetime & N-Body Orbits
     // ==========================================
-    if (pre === "spacetime") {
+    else if (pre === "spacetime") {
       if (cameraRef.current) {
         cameraRef.current.position.set(0, 22, 28);
         cameraRef.current.lookAt(0, 0, 0);
       }
 
-      // Spacetime Grid
       const gridW = 50, gridH = 50, gridSegments = 60;
       const gridGeom = new THREE.PlaneGeometry(gridW, gridH, gridSegments, gridSegments);
       gridGeom.rotateX(-Math.PI / 2);
-      const gridMat = new THREE.MeshBasicMaterial({
-        color: 0x304468,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.45,
-      });
+      const gridMat = new THREE.MeshBasicMaterial({ color: 0x304468, wireframe: true, transparent: true, opacity: 0.45 });
       const spacetimeMesh = new THREE.Mesh(gridGeom, gridMat);
       scene.add(spacetimeMesh);
 
-      // Central Sun
-      const sunGeom = new THREE.SphereGeometry(2.5, 32, 32);
-      const sunMat = new THREE.MeshStandardMaterial({
-        color: 0xFDB813,
-        emissive: 0xF59E0B,
-        emissiveIntensity: 0.9,
-        roughness: 0.3,
-      });
-      const sun = new THREE.Mesh(sunGeom, sunMat);
+      const sun = new THREE.Mesh(
+        new THREE.SphereGeometry(2.5, 32, 32),
+        new THREE.MeshStandardMaterial({ color: 0xFDB813, emissive: 0xF59E0B, emissiveIntensity: 0.9, roughness: 0.3 })
+      );
       scene.add(sun);
 
-      // Planets
       const planets = [
         { name: "Mercury", dist: 5.5, radius: 0.4, color: 0x9CA3AF, speed: 2.4, mesh: null as any },
         { name: "Earth", dist: 9.5, radius: 0.7, color: 0x3B82F6, speed: 1.4, mesh: null as any },
@@ -394,37 +548,26 @@ export default function ScienceSimEngine({
       ];
 
       planets.forEach((p) => {
-        const pGeom = new THREE.SphereGeometry(p.radius, 24, 24);
-        const pMat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.4 });
-        const pMesh = new THREE.Mesh(pGeom, pMat);
+        const pMesh = new THREE.Mesh(new THREE.SphereGeometry(p.radius, 24, 24), new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.4 }));
         p.mesh = pMesh;
         scene.add(pMesh);
 
-        // Orbit Line
         const orbitCurve = new THREE.EllipseCurve(0, 0, p.dist, p.dist, 0, 2 * Math.PI, false, 0);
         const points = orbitCurve.getPoints(64).map((pt) => new THREE.Vector3(pt.x, 0, pt.y));
-        const orbitGeom = new THREE.BufferGeometry().setFromPoints(points);
-        const orbitMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
-        scene.add(new THREE.Line(orbitGeom, orbitMat));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 })));
       });
 
       updateHookRef.current = (time) => {
         sun.rotation.y = time * 0.2;
-
-        // Accurate Geodesic grid distortion
         const pos = gridGeom.attributes.position;
         for (let i = 0; i < pos.count; i++) {
-          const x = pos.getX(i);
-          const z = pos.getZ(i);
+          const x = pos.getX(i), z = pos.getZ(i);
           const distSun = Math.sqrt(x * x + z * z);
           let depth = -6 / (1 + distSun * 0.4);
-
           planets.forEach((p) => {
             if (p.mesh) {
-              const dx = x - p.mesh.position.x;
-              const dz = z - p.mesh.position.z;
-              const distPlanet = Math.sqrt(dx * dx + dz * dz);
-              depth += -p.radius * 2 / (1 + distPlanet * 0.8);
+              const dx = x - p.mesh.position.x, dz = z - p.mesh.position.z;
+              depth += -p.radius * 2 / (1 + Math.sqrt(dx * dx + dz * dz) * 0.8);
             }
           });
           pos.setY(i, depth);
@@ -432,17 +575,15 @@ export default function ScienceSimEngine({
         pos.needsUpdate = true;
 
         planets.forEach((p) => {
-          const angle = time * p.speed;
-          p.mesh.position.x = Math.cos(angle) * p.dist;
-          p.mesh.position.z = Math.sin(angle) * p.dist;
+          p.mesh.position.x = Math.cos(time * p.speed) * p.dist;
+          p.mesh.position.z = Math.sin(time * p.speed) * p.dist;
           p.mesh.position.y = -p.radius * 0.5;
-          p.mesh.rotation.y = time * 2;
         });
       };
     }
 
     // ==========================================
-    // 2. PHYSICS: RK4 Double Pendulum Chaos
+    // 3. PHYSICS: RK4 Double Pendulum Chaos
     // ==========================================
     else if (pre === "pendulum") {
       if (cameraRef.current) {
@@ -510,7 +651,7 @@ export default function ScienceSimEngine({
     }
 
     // ==========================================
-    // 3. CHEMISTRY: Water (H2O) - Exact 104.5° Geometry
+    // 4. CHEMISTRY: Water (H2O) - 104.5°
     // ==========================================
     else if (pre === "water") {
       if (cameraRef.current) {
@@ -521,7 +662,6 @@ export default function ScienceSimEngine({
       const molGroup = new THREE.Group();
       scene.add(molGroup);
 
-      // Exact 104.5 degree sp3 bond angle
       const bondAngleRad = (104.5 * Math.PI) / 180;
       const bondLen = 2.4;
 
@@ -533,22 +673,16 @@ export default function ScienceSimEngine({
 
       const atomMeshes: THREE.Mesh[] = [];
       atoms.forEach((a) => {
-        const geom = new THREE.SphereGeometry(a.r, 32, 32);
-        const mat = new THREE.MeshStandardMaterial({ color: a.color, roughness: 0.2, metalness: 0.3 });
-        const mesh = new THREE.Mesh(geom, mat);
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r, 32, 32), new THREE.MeshStandardMaterial({ color: a.color, roughness: 0.2, metalness: 0.3 }));
         mesh.position.set(a.x, a.y, a.z);
         molGroup.add(mesh);
         atomMeshes.push(mesh);
       });
 
-      // Bonds
       [[0, 1], [0, 2]].forEach(([i, j]) => {
         const v1 = new THREE.Vector3(atoms[i].x, atoms[i].y, atoms[i].z);
         const v2 = new THREE.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
-        const dist = v1.distanceTo(v2);
-        const cylinderGeom = new THREE.CylinderGeometry(0.18, 0.18, dist, 16);
-        const cylinderMat = new THREE.MeshStandardMaterial({ color: 0x9CA3AF, roughness: 0.4 });
-        const bondMesh = new THREE.Mesh(cylinderGeom, cylinderMat);
+        const bondMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, v1.distanceTo(v2), 16), new THREE.MeshStandardMaterial({ color: 0x9CA3AF }));
         bondMesh.position.copy(v1.clone().add(v2).multiplyScalar(0.5));
         bondMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v2.clone().sub(v1).normalize());
         molGroup.add(bondMesh);
@@ -556,57 +690,9 @@ export default function ScienceSimEngine({
 
       updateHookRef.current = (time) => {
         molGroup.rotation.y = time * 0.4;
-        molGroup.rotation.x = Math.sin(time * 0.3) * 0.2;
         atomMeshes.forEach((mesh, idx) => {
-          const a = atoms[idx];
-          const vib = Math.sin(time * 8 + idx) * 0.04;
-          mesh.position.set(a.x + vib, a.y + vib, a.z);
+          mesh.position.set(atoms[idx].x + Math.sin(time * 8 + idx) * 0.04, atoms[idx].y + Math.sin(time * 8 + idx) * 0.04, atoms[idx].z);
         });
-      };
-    }
-
-    // ==========================================
-    // 4. CHEMISTRY: Benzene Ring (C6H6)
-    // ==========================================
-    else if (pre === "benzene") {
-      if (cameraRef.current) {
-        cameraRef.current.position.set(0, 4, 18);
-        cameraRef.current.lookAt(0, 0, 0);
-      }
-
-      const molGroup = new THREE.Group();
-      scene.add(molGroup);
-
-      const atoms: any[] = [];
-      const bonds: [number, number][] = [];
-
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI) / 3;
-        atoms.push({ elem: "C", x: 3 * Math.cos(angle), y: 3 * Math.sin(angle), z: 0, color: 0x374151, r: 0.7 });
-        atoms.push({ elem: "H", x: 4.8 * Math.cos(angle), y: 4.8 * Math.sin(angle), z: 0, color: 0xF3F4F6, r: 0.45 });
-        bonds.push([i * 2, ((i + 1) % 6) * 2]);
-        bonds.push([i * 2, i * 2 + 1]);
-      }
-
-      atoms.forEach((a) => {
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r, 32, 32), new THREE.MeshStandardMaterial({ color: a.color, roughness: 0.2, metalness: 0.3 }));
-        mesh.position.set(a.x, a.y, a.z);
-        molGroup.add(mesh);
-      });
-
-      bonds.forEach(([i, j]) => {
-        const v1 = new THREE.Vector3(atoms[i].x, atoms[i].y, atoms[i].z);
-        const v2 = new THREE.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
-        const dist = v1.distanceTo(v2);
-        const bondMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, dist, 16), new THREE.MeshStandardMaterial({ color: 0x9CA3AF }));
-        bondMesh.position.copy(v1.clone().add(v2).multiplyScalar(0.5));
-        bondMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v2.clone().sub(v1).normalize());
-        molGroup.add(bondMesh);
-      });
-
-      updateHookRef.current = (time) => {
-        molGroup.rotation.y = time * 0.5;
-        molGroup.rotation.x = Math.sin(time * 0.4) * 0.3;
       };
     }
 
@@ -623,36 +709,32 @@ export default function ScienceSimEngine({
       scene.add(dnaGroup);
 
       const numBasePairs = 35, radius = 4.5, pitch = 0.8, twist = 0.35;
-      const basePairColors = [
-        { a: 0xEF4444, b: 0x10B981 }, // A-T
-        { a: 0x3B82F6, b: 0xD1A751 }, // G-C
-      ];
+      const basePairColors = [{ a: 0xEF4444, b: 0x10B981 }, { a: 0x3B82F6, b: 0xD1A751 }];
 
       for (let i = 0; i < numBasePairs; i++) {
         const y = (i - numBasePairs / 2) * pitch;
         const angle = i * twist;
 
         const x1 = Math.cos(angle) * radius, z1 = Math.sin(angle) * radius;
-        const sphere1 = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: 0x8B5CF6, roughness: 0.3 }));
-        sphere1.position.set(x1, y, z1);
-        dnaGroup.add(sphere1);
+        const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: 0x8B5CF6 }));
+        s1.position.set(x1, y, z1);
+        dnaGroup.add(s1);
 
         const x2 = Math.cos(angle + Math.PI) * radius, z2 = Math.sin(angle + Math.PI) * radius;
-        const sphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: 0xEC4899, roughness: 0.3 }));
-        sphere2.position.set(x2, y, z2);
-        dnaGroup.add(sphere2);
+        const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: 0xEC4899 }));
+        s2.position.set(x2, y, z2);
+        dnaGroup.add(s2);
 
         const pairType = basePairColors[i % 2];
         const v1 = new THREE.Vector3(x1, y, z1), v2 = new THREE.Vector3(x2, y, z2);
         const mid = v1.clone().add(v2).multiplyScalar(0.5);
-        const dist = v1.distanceTo(v2);
 
-        const rung1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, dist / 2, 12), new THREE.MeshStandardMaterial({ color: pairType.a }));
+        const rung1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, v1.distanceTo(v2) / 2, 12), new THREE.MeshStandardMaterial({ color: pairType.a }));
         rung1.position.copy(v1.clone().add(mid).multiplyScalar(0.5));
         rung1.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), mid.clone().sub(v1).normalize());
         dnaGroup.add(rung1);
 
-        const rung2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, dist / 2, 12), new THREE.MeshStandardMaterial({ color: pairType.b }));
+        const rung2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, v1.distanceTo(v2) / 2, 12), new THREE.MeshStandardMaterial({ color: pairType.b }));
         rung2.position.copy(v2.clone().add(mid).multiplyScalar(0.5));
         rung2.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), mid.clone().sub(v2).normalize());
         dnaGroup.add(rung2);
@@ -660,116 +742,14 @@ export default function ScienceSimEngine({
 
       updateHookRef.current = (time) => {
         dnaGroup.rotation.y = time * 0.6;
-        dnaGroup.position.y = Math.sin(time * 0.5) * 0.5;
-      };
-    }
-
-    // ==========================================
-    // 6. BIOTECH: Bacteriophage Virus Capsid
-    // ==========================================
-    else if (pre === "virus") {
-      if (cameraRef.current) {
-        cameraRef.current.position.set(0, 0, 26);
-        cameraRef.current.lookAt(0, 0, 0);
-      }
-
-      const virusGroup = new THREE.Group();
-      scene.add(virusGroup);
-
-      const head = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 1), new THREE.MeshStandardMaterial({ color: 0x10B981, roughness: 0.3, metalness: 0.2 }));
-      head.position.y = 5;
-      virusGroup.add(head);
-
-      const sheath = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 6, 16), new THREE.MeshStandardMaterial({ color: 0x3B82F6 }));
-      sheath.position.y = 0;
-      virusGroup.add(sheath);
-
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.4, 6), new THREE.MeshStandardMaterial({ color: 0xD1A751 }));
-      base.position.y = -3;
-      virusGroup.add(base);
-
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI) / 3;
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4, 8), new THREE.MeshStandardMaterial({ color: 0xEF4444 }));
-        leg.position.set(1.5 * Math.cos(angle), -4.5, 1.5 * Math.sin(angle));
-        leg.rotation.z = Math.cos(angle) * 0.8;
-        leg.rotation.x = Math.sin(angle) * 0.8;
-        virusGroup.add(leg);
-      }
-
-      updateHookRef.current = (time) => {
-        virusGroup.rotation.y = time * 0.4;
-        head.rotation.x = Math.sin(time) * 0.1;
-      };
-    }
-
-    // ==========================================
-    // 7. MATH: 3D Wave Surface
-    // ==========================================
-    else if (pre === "surface") {
-      if (cameraRef.current) {
-        cameraRef.current.position.set(0, 18, 26);
-        cameraRef.current.lookAt(0, 0, 0);
-      }
-
-      const size = 30, segs = 70;
-      const surfaceGeom = new THREE.PlaneGeometry(size, size, segs, segs);
-      surfaceGeom.rotateX(-Math.PI / 2);
-      const surfaceMesh = new THREE.Mesh(surfaceGeom, new THREE.MeshStandardMaterial({ color: 0x3B82F6, wireframe: true, roughness: 0.2 }));
-      scene.add(surfaceMesh);
-
-      updateHookRef.current = (time) => {
-        const pos = surfaceGeom.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-          const x = pos.getX(i), z = pos.getZ(i);
-          const r = Math.sqrt(x * x + z * z);
-          const y = Math.sin(r * 0.6 - time * 3) * (2.5 / (1 + r * 0.1));
-          pos.setY(i, y);
-        }
-        pos.needsUpdate = true;
-        surfaceMesh.rotation.y = time * 0.1;
-      };
-    }
-
-    // ==========================================
-    // 8. MATH: Lorenz Attractor Chaos
-    // ==========================================
-    else if (pre === "lorenz") {
-      if (cameraRef.current) {
-        cameraRef.current.position.set(0, 12, 36);
-        cameraRef.current.lookAt(0, 0, 0);
-      }
-
-      const maxPoints = 2500;
-      const lorenzPoints = new Float32Array(maxPoints * 3);
-      let lx = 0.1, ly = 0, lz = 0;
-      const sigma = 10, rho = 28, beta = 8 / 3, dt = 0.01;
-
-      for (let i = 0; i < maxPoints; i++) {
-        const dx = sigma * (ly - lx) * dt;
-        const dy = (lx * (rho - lz) - ly) * dt;
-        const dz = (lx * ly - beta * lz) * dt;
-        lx += dx; ly += dy; lz += dz;
-        lorenzPoints[i * 3] = lx * 0.6;
-        lorenzPoints[i * 3 + 1] = (lz - 25) * 0.6;
-        lorenzPoints[i * 3 + 2] = ly * 0.6;
-      }
-
-      const lorenzGeom = new THREE.BufferGeometry();
-      lorenzGeom.setAttribute("position", new THREE.BufferAttribute(lorenzPoints, 3));
-      const lorenzCurve = new THREE.Line(lorenzGeom, new THREE.LineBasicMaterial({ color: 0xF59E0B }));
-      scene.add(lorenzCurve);
-
-      updateHookRef.current = (time) => {
-        lorenzCurve.rotation.y = time * 0.5;
       };
     }
   };
 
-  // Run Custom Code from the Live In-Blog Editor
+  // Run Custom Code from In-Blog Editor
   const handleExecuteCustomCode = () => {
     try {
-      buildSimulationScene(preset);
+      buildSimulationScene(preset, explodedRatio);
       setStatusMessage("⚡ Custom Simulation Recompiled & Executing at 60 FPS!");
       setTimeout(() => setStatusMessage("Simulation Active (60 FPS)"), 3000);
     } catch (err: any) {
@@ -816,7 +796,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `simulation_recording_${category}_${preset}.webm`;
+          link.download = `engine_4stroke_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -836,7 +816,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `simulation_recording_${category}_${preset}.webm`;
+          link.download = `engine_4stroke_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -859,10 +839,10 @@ export default function ScienceSimEngine({
           {/* Category Tabs */}
           <div style={styles.categoryPills}>
             <button
-              onClick={() => { setCategory("physics"); setPreset("spacetime"); }}
+              onClick={() => { setCategory("physics"); setPreset("engine"); }}
               style={{ ...styles.pill, ...(category === "physics" ? styles.pillActive : {}) }}
             >
-              🌌 Physics
+              ⚙️ Engineering &amp; Physics
             </button>
             <button
               onClick={() => { setCategory("chemistry"); setPreset("water"); }}
@@ -875,12 +855,6 @@ export default function ScienceSimEngine({
               style={{ ...styles.pill, ...(category === "biotech" ? styles.pillActive : {}) }}
             >
               🧬 Biotech
-            </button>
-            <button
-              onClick={() => { setCategory("math"); setPreset("surface"); }}
-              style={{ ...styles.pill, ...(category === "math" ? styles.pillActive : {}) }}
-            >
-              📊 Math 3D
             </button>
           </div>
         </div>
@@ -913,32 +887,44 @@ export default function ScienceSimEngine({
         </div>
       </div>
 
-      {/* Preset Sub-bar */}
+      {/* Preset & Exploded View Controls */}
       <div style={styles.presetBar}>
-        <span style={styles.presetLabel}>SCIENTIFIC PRESET:</span>
+        <span style={styles.presetLabel}>PRESETS:</span>
         {category === "physics" && (
           <>
-            <button onClick={() => setPreset("spacetime")} style={preset === "spacetime" ? styles.subPillActive : styles.subPill}>🌌 Spacetime Curvature &amp; Orbits</button>
-            <button onClick={() => setPreset("pendulum")} style={preset === "pendulum" ? styles.subPillActive : styles.subPill}>⚡ RK4 Double Pendulum Chaos</button>
+            <button onClick={() => setPreset("engine")} style={preset === "engine" ? styles.subPillActive : styles.subPill}>⚙️ 4-Stroke IC Engine (Exploded View)</button>
+            <button onClick={() => setPreset("spacetime")} style={preset === "spacetime" ? styles.subPillActive : styles.subPill}>🌌 Spacetime Curvature</button>
+            <button onClick={() => setPreset("pendulum")} style={preset === "pendulum" ? styles.subPillActive : styles.subPill}>⚡ Double Pendulum Chaos</button>
           </>
         )}
         {category === "chemistry" && (
           <>
-            <button onClick={() => setPreset("water")} style={preset === "water" ? styles.subPillActive : styles.subPill}>🧪 Water (H₂O) 104.5° Geometry</button>
-            <button onClick={() => setPreset("benzene")} style={preset === "benzene" ? styles.subPillActive : styles.subPill}>🧪 Benzene Aromatic Ring (C₆H₆)</button>
+            <button onClick={() => setPreset("water")} style={preset === "water" ? styles.subPillActive : styles.subPill}>🧪 Water (H₂O) 104.5°</button>
           </>
         )}
         {category === "biotech" && (
           <>
-            <button onClick={() => setPreset("dna")} style={preset === "dna" ? styles.subPillActive : styles.subPill}>🧬 B-DNA Double Helix</button>
-            <button onClick={() => setPreset("virus")} style={preset === "virus" ? styles.subPillActive : styles.subPill}>🦠 Bacteriophage Virus</button>
+            <button onClick={() => setPreset("dna")} style={preset === "dna" ? styles.subPillActive : styles.subPill}>🧬 DNA Double Helix</button>
           </>
         )}
-        {category === "math" && (
-          <>
-            <button onClick={() => setPreset("surface")} style={preset === "surface" ? styles.subPillActive : styles.subPill}>📊 3D Wave Surface</button>
-            <button onClick={() => setPreset("lorenz")} style={preset === "lorenz" ? styles.subPillActive : styles.subPill}>📊 Lorenz Strange Attractor</button>
-          </>
+
+        {/* 💥 Exploded View Slider for 4-Stroke Engine */}
+        {preset === "engine" && (
+          <div style={styles.sliderGroup}>
+            <span style={{ ...styles.sliderLabel, color: "#D1A751", fontWeight: 700 }}>
+              💥 EXPLODED CAD: {Math.round(explodedRatio * 100)}%
+            </span>
+            <input
+              type="range"
+              min="0.0"
+              max="1.0"
+              step="0.05"
+              value={explodedRatio}
+              onChange={(e) => setExplodedRatio(parseFloat(e.target.value))}
+              style={{ ...styles.slider, accentColor: "#D1A751" }}
+              title="Drag to explode / assemble engine parts in 3D"
+            />
+          </div>
         )}
 
         {/* Speed Slider */}
@@ -958,8 +944,15 @@ export default function ScienceSimEngine({
 
       {/* WebGL 3D Simulation Canvas */}
       <div style={styles.canvasWrapper} ref={mountRef}>
+        {/* Dynamic 4-Stroke Phase Indicator Badge */}
+        {preset === "engine" && (
+          <div style={styles.strokeBadgeOverlay}>
+            <span style={{ fontWeight: 800, color: "#D1A751" }}>4-STROKE PHASE:</span> {strokePhase}
+          </div>
+        )}
+
         <div style={styles.hintOverlay}>
-          🖱️ Click and drag to orbit in 3D • Scroll to zoom
+          🖱️ Click and drag to orbit in 3D • Scroll to zoom • Use Exploded Slider to assemble/disassemble
         </div>
       </div>
 
@@ -968,12 +961,12 @@ export default function ScienceSimEngine({
         <div style={styles.codeDrawer}>
           <div style={styles.codeHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ color: "#D1A751" }}>💻 Live Scientific Simulation Code &amp; Parameters</span>
+              <span style={{ color: "#D1A751" }}>💻 Live Engineering Kinematics &amp; Thermodynamic Code</span>
             </div>
             <button
               onClick={handleExecuteCustomCode}
               style={styles.runScriptBtn}
-              title="Execute code and update the 3D simulation live"
+              title="Execute code and update 3D simulation live"
             >
               ▶ Run &amp; Update Simulation
             </button>
@@ -1148,7 +1141,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
   },
   slider: {
-    width: "70px",
+    width: "80px",
     cursor: "pointer",
   },
   canvasWrapper: {
@@ -1156,7 +1149,21 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
     overflow: "hidden",
     cursor: "grab",
-    minHeight: "380px",
+    minHeight: "420px",
+  },
+  strokeBadgeOverlay: {
+    position: "absolute",
+    top: "12px",
+    left: "12px",
+    background: "rgba(10, 14, 24, 0.85)",
+    backdropFilter: "blur(6px)",
+    border: "1px solid #D1A751",
+    color: "#F8FAFC",
+    fontSize: "0.75rem",
+    padding: "0.35rem 0.8rem",
+    borderRadius: "6px",
+    pointerEvents: "none",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
   },
   hintOverlay: {
     position: "absolute",
