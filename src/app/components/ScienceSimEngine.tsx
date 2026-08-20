@@ -14,7 +14,6 @@ interface ScienceSimEngineProps {
 
 // ============================================================================
 // 🌌 CINEMATIC GLSL SHADER KERNEL: INTERSTELLAR GARGANTUA ACCRETION DISK
-// Continuous fluid plasma, relativistic Doppler beaming, and gravitational lensing
 // ============================================================================
 const BLACKHOLE_SHADER_CODE = `// ============================================================================
 // 🌌 INTERSTELLAR: GARGANTUA RAY-WARPED ACCRETION DISK (GLSL SHADER)
@@ -34,14 +33,12 @@ const photonRing = new THREE.Mesh(photonGeom, photonMat);
 photonRing.rotation.x = Math.PI / 2;
 scene.add(photonRing);
 
-// 3. 🔥 High-Fidelity Volumetric Procedural Accretion Disk Shaders
+// 3. 🔥 Volumetric Procedural Accretion Disk Shaders
 const diskVertexShader = \`
   varying vec2 vUv;
-  varying vec3 vWorldPosition;
   void main() {
     vUv = uv;
     vec4 worldPos = modelMatrix * vec4(position, 1.0);
-    vWorldPosition = worldPos.xyz;
     gl_Position = projectionMatrix * viewMatrix * worldPos;
   }
 \`;
@@ -49,9 +46,7 @@ const diskVertexShader = \`
 const diskFragmentShader = \`
   uniform float time;
   varying vec2 vUv;
-  varying vec3 vWorldPosition;
 
-  // Procedural Noise for Relativistic Plasma Swirl
   float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
   float noise(vec2 x) {
     vec2 i = floor(x);
@@ -67,26 +62,20 @@ const diskFragmentShader = \`
   void main() {
     vec2 uv = vUv * 2.0 - 1.0;
     float r = length(uv);
-
-    // Hard cutoff at Inner Horizon & Soft Outer Falloff
     if (r < 0.28 || r > 0.98) discard;
 
     float normR = (r - 0.28) / (0.98 - 0.28);
     float angle = atan(uv.y, uv.x);
-
-    // Differential Keplerian Plasma Rotation (faster inside)
     float rotSpeed = time * 3.5 / (r * 1.5 + 0.1);
     float swirl = angle + rotSpeed;
 
-    // Multi-layer turbulent plasma smoke
     float n1 = noise(vec2(swirl * 4.0, normR * 12.0));
     float n2 = noise(vec2(swirl * 8.0 - time, normR * 25.0));
     float plasma = n1 * 0.65 + n2 * 0.35;
 
-    // Relativistic Doppler Beaming (approaching side is much brighter and bluer)
+    // Relativistic Doppler Beaming (approaching side is brighter)
     float doppler = 1.0 + 0.8 * sin(angle + 0.4);
 
-    // Incandescent Temperature Color Ramp: White-Hot -> Gold -> Amber -> Crimson
     vec3 whiteHot = vec3(1.0, 0.98, 0.92);
     vec3 gold = vec3(1.0, 0.72, 0.18);
     vec3 crimson = vec3(0.85, 0.22, 0.04);
@@ -94,14 +83,12 @@ const diskFragmentShader = \`
     vec3 color = mix(whiteHot, gold, smoothstep(0.0, 0.35, normR));
     color = mix(color, crimson, smoothstep(0.35, 1.0, normR));
 
-    // Density falloff
     float alpha = smoothstep(0.28, 0.35, r) * smoothstep(0.98, 0.75, r) * (0.8 + 0.4 * plasma) * doppler;
-
     gl_FragColor = vec4(color * (1.5 + doppler * 0.5), clamp(alpha, 0.0, 1.0));
   }
 \`;
 
-// 4. Equatorial Accretion Disk (Wide Mesh with Custom Shader)
+// 4. Equatorial Accretion Disk
 const diskGeom = new THREE.PlaneGeometry(36.0, 36.0, 128, 128);
 const diskUniforms = { time: { value: 0.0 } };
 const diskMat = new THREE.ShaderMaterial({
@@ -115,10 +102,10 @@ const diskMat = new THREE.ShaderMaterial({
 });
 
 const accretionDisk = new THREE.Mesh(diskGeom, diskMat);
-accretionDisk.rotation.x = -Math.PI / 2.3; // Iconic Interstellar Tilt
+accretionDisk.rotation.x = -Math.PI / 2.3; // Tilt
 scene.add(accretionDisk);
 
-// 5. 🌀 Gravitational Lensing Warped Upper & Lower Light Arches
+// 5. 🌀 Gravitational Lensing Halo Arcs
 const haloVertexShader = \`
   varying vec2 vUv;
   void main() {
@@ -163,7 +150,7 @@ bottomHalo.position.set(0, -0.5, 0);
 bottomHalo.rotation.z = -Math.PI * 0.08;
 scene.add(bottomHalo);
 
-// 6. 🌊 Miller's Ocean Planet (Orbiting at r = 8.5)
+// 6. 🌊 Miller's Ocean Planet
 const millerDist = 8.5;
 const millerPlanet = new THREE.Mesh(
   new THREE.SphereGeometry(0.65, 32, 32),
@@ -171,7 +158,6 @@ const millerPlanet = new THREE.Mesh(
 );
 scene.add(millerPlanet);
 
-// Orbit Curve
 const orbitPts = new THREE.EllipseCurve(0, 0, millerDist, millerDist, 0, 2 * Math.PI, false, 0)
   .getPoints(80).map((pt) => new THREE.Vector3(pt.x, 0, pt.y));
 const orbitRing = new THREE.Line(
@@ -181,28 +167,17 @@ const orbitRing = new THREE.Line(
 orbitRing.rotation.x = accretionDisk.rotation.x;
 scene.add(orbitRing);
 
-// 7. 60 FPS Relativistic Compute & Plasma Shader Animation Loop
+// 7. 60 FPS Loop
 engine.onUpdate((time, delta) => {
   diskUniforms.time.value = time;
-
-  // Miller's Planet Orbit along tilted accretion plane
   const angle = time * 1.2;
   const x = Math.cos(angle) * millerDist;
   const z = Math.sin(angle) * millerDist;
   millerPlanet.position.set(x, z * Math.sin(accretionDisk.rotation.x), z * Math.cos(accretionDisk.rotation.x));
 });`;
 
-// Other executable scripts
-const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
-  blackhole: {
-    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
-    category: "physics",
-    code: BLACKHOLE_SHADER_CODE,
-  },
-  engine: {
-    title: "⚙️ 4-Stroke IC Engine (Kinematics & Combustion)",
-    category: "engineering",
-    code: `// [4-Stroke Internal Combustion Engine Simulation]
+// Engine simulation code
+const ENGINE_SIM_CODE = `// [4-Stroke Internal Combustion Engine Simulation]
 const r = 2.4; // Crank Radius
 const l = 6.2; // Connecting Rod Length
 
@@ -308,7 +283,18 @@ engine.onUpdate((time, delta) => {
     flame.material.opacity = 0.3 * Math.sin(exh);
     sparkLight.intensity = 0;
   }
-});`,
+});`;
+
+const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
+  blackhole: {
+    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
+    category: "physics",
+    code: BLACKHOLE_SHADER_CODE,
+  },
+  engine: {
+    title: "⚙️ 4-Stroke IC Engine (Kinematics & Combustion)",
+    category: "engineering",
+    code: ENGINE_SIM_CODE,
   },
 };
 
@@ -334,6 +320,10 @@ export default function ScienceSimEngine({
   const mountRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Time HUD Refs (Updated directly in render loop without thrashing React)
+  const millerTimeRef = useRef<HTMLSpanElement>(null);
+  const earthTimeRef = useRef<HTMLSpanElement>(null);
+
   // States
   const [activePreset, setActivePreset] = useState<string>(initialPreset || "blackhole");
   const [code, setCode] = useState<string>(
@@ -347,10 +337,6 @@ export default function ScienceSimEngine({
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("Volumetric Shader Active (60 FPS)");
 
-  // Time Dilation Clocks
-  const [earthSeconds, setEarthSeconds] = useState<number>(0);
-  const [millerSeconds, setMillerSeconds] = useState<number>(0);
-
   // Three.js Core Refs
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -359,6 +345,8 @@ export default function ScienceSimEngine({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const simTimeRef = useRef<number>(0);
+  const totalMillerSecondsRef = useRef<number>(0);
+  const totalEarthSecondsRef = useRef<number>(0);
   const updateHooksRef = useRef<((time: number, delta: number) => void)[]>([]);
 
   // Orbit controls
@@ -367,11 +355,11 @@ export default function ScienceSimEngine({
 
   // 1. Initialize WebGL Viewport
   useEffect(() => {
-    if (!mountRef.current) return;
-
     const container = mountRef.current;
+    if (!container) return;
+
     const width = container.clientWidth || 800;
-    const height = Math.min(Math.max(width * 0.58, 400), 580);
+    const height = Math.min(Math.max(width * 0.58, 380), 550);
 
     // Scene
     const scene = new THREE.Scene();
@@ -397,7 +385,10 @@ export default function ScienceSimEngine({
     rendererRef.current = renderer;
     canvasRef.current = renderer.domElement;
 
-    container.innerHTML = "";
+    // Safe DOM Attachment (without innerHTML clearing)
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     container.appendChild(renderer.domElement);
 
     // Ambient Lighting
@@ -456,7 +447,7 @@ export default function ScienceSimEngine({
     const handleResize = () => {
       if (!container || !cameraRef.current || !rendererRef.current) return;
       const w = container.clientWidth;
-      const h = Math.min(Math.max(w * 0.58, 400), 580);
+      const h = Math.min(Math.max(w * 0.58, 380), 550);
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
@@ -464,7 +455,7 @@ export default function ScienceSimEngine({
 
     window.addEventListener("resize", handleResize);
 
-    // Initial Execution of the Code in the Editor!
+    // Initial Execution
     executeCodeInEditor(code);
 
     // 2. Main 60 FPS Render Loop
@@ -477,8 +468,23 @@ export default function ScienceSimEngine({
       if (isPlaying) {
         simTimeRef.current += delta;
 
-        setMillerSeconds((m) => m + delta * 0.1);
-        setEarthSeconds((e) => e + delta * 6132.0);
+        // Smooth direct DOM update for Time Dilation HUD (zero React re-render overhead!)
+        totalMillerSecondsRef.current += delta * 0.1;
+        totalEarthSecondsRef.current += delta * 6132.0;
+
+        if (millerTimeRef.current) {
+          const mSec = totalMillerSecondsRef.current;
+          const mins = Math.floor(mSec / 60);
+          const secs = Math.floor(mSec % 60);
+          millerTimeRef.current.textContent = `${mins}m ${secs}s`;
+        }
+
+        if (earthTimeRef.current) {
+          const eSec = totalEarthSecondsRef.current;
+          const years = (eSec / (365.25 * 86400)).toFixed(2);
+          const days = Math.floor((eSec % (365.25 * 86400)) / 86400);
+          earthTimeRef.current.textContent = `${years} Yrs (${days} Days)`;
+        }
 
         updateHooksRef.current.forEach((hook) => {
           try {
@@ -502,7 +508,7 @@ export default function ScienceSimEngine({
       domEl.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      domEl.removeEventListener("wheel", domEl as any);
+      domEl.removeEventListener("wheel", onWheel as any);
       if (rendererRef.current) rendererRef.current.dispose();
     };
   }, []);
@@ -541,7 +547,7 @@ export default function ScienceSimEngine({
     try {
       const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "engine", "pbr", "time", sourceCode);
       scriptKernel(scene, camera, renderer, THREE, engineAPI, pbr, simTimeRef.current);
-      setStatusMessage("⚡ Custom Shader Running at 60 FPS!");
+      setStatusMessage("⚡ Code Running (60 FPS)");
     } catch (err: any) {
       console.error("Simulation Script Execution Error:", err);
       setRuntimeError(`Runtime Error: ${err.message}`);
@@ -602,7 +608,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `blackhole_shader_video_${Date.now()}.webm`;
+          link.download = `simulation_video_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -622,7 +628,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `blackhole_shader_video_${Date.now()}.webm`;
+          link.download = `simulation_video_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -630,19 +636,6 @@ export default function ScienceSimEngine({
         console.error("Video recorder initialization failed:", err);
       }
     }
-  };
-
-  // Format Time Helper
-  const formatEarthTime = (seconds: number) => {
-    const years = (seconds / (365.25 * 86400)).toFixed(2);
-    const days = Math.floor((seconds % (365.25 * 86400)) / 86400);
-    return `${years} Years (${days} Days)`;
-  };
-
-  const formatMillerTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}m ${secs}s`;
   };
 
   return (
@@ -699,7 +692,7 @@ export default function ScienceSimEngine({
         </div>
       </div>
 
-      {/* Sub Bar: Error alert & Speed slider */}
+      {/* Sub Bar */}
       <div style={styles.subBar}>
         {runtimeError ? (
           <div style={styles.errorAlert}>⚠️ {runtimeError}</div>
@@ -723,25 +716,28 @@ export default function ScienceSimEngine({
         </div>
       </div>
 
-      {/* 3D WebGL Canvas */}
-      <div style={styles.canvasWrapper} ref={mountRef}>
+      {/* 3D WebGL Canvas Wrapper */}
+      <div style={styles.canvasWrapper}>
+        {/* Dedicated Mount Div for Three.js (Isolated from React children) */}
+        <div ref={mountRef} style={styles.canvasMount} />
+
         {/* Real-Time Relativistic Time Dilation Comparison Overlay */}
         {activePreset === "blackhole" && (
           <div style={styles.dilationHUD}>
             <div style={styles.dilationHeader}>⏳ GRAVITATIONAL TIME DILATION HUD</div>
             <div style={styles.clockRow}>
               <span style={{ color: "#38BDF8", fontWeight: 700 }}>🌊 Miller&apos;s Planet (r = 8.5):</span>
-              <span style={styles.clockValue}>{formatMillerTime(millerSeconds)}</span>
+              <span ref={millerTimeRef} style={styles.clockValue}>0m 0s</span>
             </div>
             <div style={styles.clockRow}>
               <span style={{ color: "#10B981", fontWeight: 700 }}>🌍 Earth Observer:</span>
-              <span style={styles.clockValue}>{formatEarthTime(earthSeconds)}</span>
+              <span ref={earthTimeRef} style={styles.clockValue}>0.00 Yrs</span>
             </div>
           </div>
         )}
 
         <div style={styles.hintOverlay}>
-          🖱️ Click and drag to orbit in 3D • Scroll to zoom • Edit code below to transform the simulation live!
+          🖱️ Drag to orbit in 3D • Scroll to zoom • Edit code below to transform live!
         </div>
       </div>
 
@@ -792,6 +788,9 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: "hidden",
     margin: "2rem 0",
     boxShadow: "0 15px 35px rgba(0, 0, 0, 0.7)",
+    width: "100%",
+    maxWidth: "100%",
+    boxSizing: "border-box",
   },
   topBar: {
     display: "flex",
@@ -942,8 +941,13 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     position: "relative",
     overflow: "hidden",
+    minHeight: "400px",
+    backgroundColor: "#010204",
+  },
+  canvasMount: {
+    width: "100%",
+    height: "100%",
     cursor: "grab",
-    minHeight: "440px",
   },
   dilationHUD: {
     position: "absolute",
@@ -957,7 +961,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "8px",
     pointerEvents: "none",
     boxShadow: "0 6px 18px rgba(0,0,0,0.8)",
-    minWidth: "260px",
+    minWidth: "240px",
   },
   dilationHeader: {
     fontSize: "0.68rem",
@@ -1032,5 +1036,6 @@ const styles: Record<string, React.CSSProperties> = {
     outline: "none",
     resize: "vertical",
     lineHeight: "1.5",
+    boxSizing: "border-box",
   },
 };
