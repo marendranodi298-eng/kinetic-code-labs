@@ -27,34 +27,46 @@ interface HeadingItem {
   id: string;
 }
 
-// Extract headings for dynamic Table of Contents
+// Extract headings for dynamic Table of Contents (supports HTML and Markdown)
 function extractHeadings(content: string): HeadingItem[] {
+  if (!content) return [];
   const headings: HeadingItem[] = [];
-  const lines = content.split("\n");
+  const seenIds = new Set<string>();
+
+  // 1. Match HTML headings: <h2>...</h2> and <h3>...</h3>
+  const htmlHeadingRegex = /<(h[23])([^>]*)>([\s\S]*?)<\/\1>/gi;
+  let match: RegExpExecArray | null;
   
+  while ((match = htmlHeadingRegex.exec(content)) !== null) {
+    const tag = match[1].toLowerCase();
+    const level = tag === "h2" ? 2 : 3;
+    const text = match[3].replace(/<[^>]*>/g, "").trim();
+    if (text) {
+      const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        headings.push({ text, level, id });
+      }
+    }
+  }
+
+  if (headings.length > 0) return headings;
+
+  // 2. Fallback to Markdown headings: ## and ###
+  const lines = content.split("\n");
   for (const line of lines) {
     const trimmed = line.trim();
     if (trimmed.startsWith("## ") || trimmed.startsWith("### ")) {
       const level = trimmed.startsWith("## ") ? 2 : 3;
       const text = level === 2 ? trimmed.slice(3).trim() : trimmed.slice(4).trim();
       const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-      headings.push({ text, level, id });
-    } else {
-      // Parse HTML heading tags if content is rich text HTML
-      const h2Match = trimmed.match(/<h2[^>]*>(.*?)<\/h2>/i);
-      if (h2Match) {
-        const text = h2Match[1].replace(/<[^>]*>/g, "").trim();
-        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-        headings.push({ text, level: 2, id });
-      }
-      const h3Match = trimmed.match(/<h3[^>]*>(.*?)<\/h3>/i);
-      if (h3Match) {
-        const text = h3Match[1].replace(/<[^>]*>/g, "").trim();
-        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-        headings.push({ text, level: 3, id });
+      if (text && !seenIds.has(id)) {
+        seenIds.add(id);
+        headings.push({ text, level, id });
       }
     }
   }
+
   return headings;
 }
 

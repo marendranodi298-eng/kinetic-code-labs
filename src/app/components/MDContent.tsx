@@ -7,146 +7,36 @@ interface MDContentProps {
   content: string;
 }
 
-export default function MDContent({ content }: MDContentProps) {
-  const [blocks, setBlocks] = useState<{ type: "text" | "code"; content: string; language: string }[]>([]);
-
-  useEffect(() => {
-    // Trigger MathJax parsing on mount or when content updates
-    if (typeof window !== "undefined" && (window as any).MathJax) {
-      try {
-        (window as any).MathJax.typesetPromise();
-      } catch (err) {
-        console.error("MathJax typeset error:", err);
-      }
-    }
-  }, [content]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // Convert markdown to HTML first if it is pure markdown
-    const isHtml = /<[a-z][\s\S]*>/i.test(content);
-    let htmlContent = content;
-
-    if (!isHtml) {
-      htmlContent = renderMarkdownToHtmlCompact(content);
-    }
-
-    // Use DOMParser to safely parse HTML and extract elements
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, "text/html");
-
-    // Extract only pre elements that contain a code tag (real sandbox/code blocks)
-    const preElements = Array.from(doc.querySelectorAll("pre")).filter(pre => pre.querySelector("code") !== null);
-    const parsedBlocks: { type: "text" | "code"; content: string; language: string }[] = [];
-
-    if (preElements.length === 0) {
-      // No code blocks, render full HTML directly
-      setBlocks([{ type: "text", content: doc.body.innerHTML, language: "" }]);
-    } else {
-      let currentHtml = doc.body.innerHTML;
-      
-      // Replace each pre tag with a unique split delimiter
-      preElements.forEach((pre, index) => {
-        const delimiter = `__CODE_BLOCK_DELIMITER_${index}__`;
-        
-        // Extract raw code text (automatically decoding HTML entities and stripping nested styling tags)
-        const rawCode = pre.textContent || pre.innerText || "";
-        
-        // Detect language if present in class list
-        let language = "javascript";
-        const codeElement = pre.querySelector("code");
-        if (codeElement) {
-          const className = codeElement.className || "";
-          const match = className.match(/language-(\w+)/);
-          if (match) {
-            language = match[1];
-          }
-        }
-
-        // Replace outer HTML with split delimiter safely
-        currentHtml = currentHtml.replace(pre.outerHTML, delimiter);
-        parsedBlocks.push({ type: "code", content: rawCode.trim(), language });
-      });
-
-      // Split the HTML by delimiters
-      const textParts = currentHtml.split(/__CODE_BLOCK_DELIMITER_\d+__/);
-      const finalBlocks: { type: "text" | "code"; content: string; language: string }[] = [];
-
-      textParts.forEach((part, index) => {
-        if (part.trim() || part.includes("\n")) {
-          finalBlocks.push({ type: "text", content: part, language: "" });
-        }
-        if (index < parsedBlocks.length) {
-          finalBlocks.push(parsedBlocks[index]);
-        }
-      });
-
-      setBlocks(finalBlocks);
-    }
-  }, [content]);
-
-  return (
-    <div className="md-content-wrapper">
-      {blocks.map((block, index) => {
-        if (block.type === "text") {
-          return (
-            <div
-              key={index}
-              dangerouslySetInnerHTML={{ __html: block.content }}
-              style={styles.textBlock}
-            />
-          );
-        } else {
-          const isRunnable = ["js", "javascript", "ts", "typescript"].includes(block.language);
-          return (
-            <TerminalSandbox
-              key={index}
-              initialCode={block.content}
-              language={isRunnable ? block.language : `${block.language} (read-only)`}
-            />
-          );
-        }
-      })}
-    </div>
-  );
+interface ContentBlock {
+  type: "text" | "code";
+  content: string;
+  language: string;
 }
 
-// Helper to strip copy-pasted rich formatting HTML tags from terminal code
-function stripHtml(html: string): string {
-  let text = html
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/div>/gi, "\n")
-    .replace(/<p[^>]*>/gi, "")
-    .replace(/<\/p>/gi, "\n");
-  // Strip all other HTML tags (like spans, styles, colors)
-  text = text.replace(/<[^>]*>/g, "");
-  // Unescape standard HTML entities
-  return text
+// Decodes HTML entities back to raw characters
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&amp;/g, "&")
-    .trim();
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
 }
 
-// Helper to insert unique id attributes into HTML headings for TOC anchors
+// Injects id attributes to headings for TOC scroll anchors
 function addIdsToHtmlHeadings(html: string): string {
-  return html.replace(/<(h2|h3)([^>]*)>(.*?)<\/(h2|h3)>/gi, (match, tag, attrs, text) => {
+  return html.replace(/<(h[1-6])([^>]*)>([\s\S]*?)<\/\1>/gi, (match, tag, attrs, text) => {
+    if (attrs.includes("id=")) return match;
     const cleanText = text.replace(/<[^>]*>/g, "").trim();
     const id = cleanText.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-    if (attrs.includes("id=")) return match;
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
   });
 }
 
-// Compact markdown & HTML detection parser
+// Converts Markdown formatting to semantic HTML
 function renderMarkdownToHtmlCompact(markdown: string): string {
-  // Check if content already contains native HTML structures (saved from WYSIWYG editor)
-  const isHtml = /<[a-z][\s\S]*>/i.test(markdown);
-  if (isHtml) return addIdsToHtmlHeadings(markdown);
-
   let html = markdown
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -159,12 +49,15 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
 
   // Inline code `code`
-  html = html.replace(/`(.*?)`/g, "<code style='background:rgba(198,154,91,0.1);color:var(--color-text-dark);padding:0.15rem 0.35rem;border-radius:4px;font-family:monospace;font-size:0.9rem;'>$1</code>");
+  html = html.replace(/`(.*?)`/g, "<code style='background:rgba(198,154,91,0.12);color:var(--color-text-dark);padding:0.15rem 0.4rem;border-radius:4px;font-family:monospace;font-size:0.9rem;'>$1</code>");
+
+  // Blockquotes > quote
+  html = html.replace(/^>\s*(.*?)$/gm, '<blockquote style="border-left:3px solid var(--color-accent);padding:0.6rem 1.2rem;margin:1.5rem 0;font-style:italic;color:#5A4D45;background:rgba(198,154,91,0.05);border-radius:0 6px 6px 0;">$1</blockquote>');
 
   // Links [text](url)
   html = html.replace(
     /\[(.*?)\]\((.*?)\)/g,
-    '<a href="$2" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;font-weight:600;">$1</a>'
+    '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline;font-weight:600;">$1</a>'
   );
 
   const lines = html.split("\n");
@@ -210,6 +103,121 @@ function renderMarkdownToHtmlCompact(markdown: string): string {
   }
 
   return result;
+}
+
+// Formats non-code text parts whether they contain HTML or Markdown
+function renderFormattedText(content: string): string {
+  const isHtml = /<(?:p|div|h[1-6]|ul|ol|li|table|img|blockquote|hr|a|span|b|i|strong|em|br)[^>]*>/i.test(content);
+  if (isHtml) {
+    return addIdsToHtmlHeadings(content);
+  }
+  return renderMarkdownToHtmlCompact(content);
+}
+
+// Master Article Parser: splits pure code sandboxes from normal reading content
+export function parseArticleContent(rawContent: string): ContentBlock[] {
+  if (!rawContent || !rawContent.trim()) return [];
+
+  let text = rawContent.replace(/\r\n/g, "\n");
+  const codeItems: { code: string; language: string }[] = [];
+
+  // Pattern 1: HTML <pre><code>...</code></pre> blocks
+  text = text.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
+    const cleanCode = decodeHtmlEntities(codeHtml.replace(/<[^>]*>/g, ""));
+    const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
+    codeItems.push({ code: cleanCode.trim(), language: lang || "javascript" });
+    return placeholder;
+  });
+
+  // Pattern 2: Markdown triple backtick code fences: ```lang\ncode\n```
+  text = text.replace(/(?:^|\n)```([\w-]*)\n([\s\S]*?)\n```(?:\n|$)/g, (_match, lang, codeText) => {
+    const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
+    codeItems.push({ code: codeText.trim(), language: lang || "javascript" });
+    return placeholder;
+  });
+
+  // Pattern 3: Inline/loosely formatted backticks
+  text = text.replace(/```([\w-]*)\n([\s\S]*?)```/g, (_match, lang, codeText) => {
+    const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
+    codeItems.push({ code: codeText.trim(), language: lang || "javascript" });
+    return placeholder;
+  });
+
+  // Split text by the unique slot tokens
+  const parts = text.split(/__CODE_BLOCK_SLOT_(\d+)__/);
+  const blocks: ContentBlock[] = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      // Slot index for code item
+      const slotIndex = parseInt(parts[i], 10);
+      if (codeItems[slotIndex]) {
+        blocks.push({
+          type: "code",
+          content: codeItems[slotIndex].code,
+          language: codeItems[slotIndex].language,
+        });
+      }
+    } else {
+      // Text content part
+      const partContent = parts[i];
+      if (partContent && (partContent.trim() || partContent.includes("<img") || partContent.includes("<table"))) {
+        const htmlPart = renderFormattedText(partContent);
+        if (htmlPart.trim()) {
+          blocks.push({
+            type: "text",
+            content: htmlPart,
+            language: "",
+          });
+        }
+      }
+    }
+  }
+
+  return blocks;
+}
+
+export default function MDContent({ content }: MDContentProps) {
+  const [blocks, setBlocks] = useState<ContentBlock[]>(() => parseArticleContent(content));
+
+  useEffect(() => {
+    setBlocks(parseArticleContent(content));
+  }, [content]);
+
+  useEffect(() => {
+    // Trigger MathJax LaTeX equation rendering
+    if (typeof window !== "undefined" && (window as any).MathJax) {
+      try {
+        (window as any).MathJax.typesetPromise();
+      } catch (err) {
+        console.error("MathJax typeset error:", err);
+      }
+    }
+  }, [content, blocks]);
+
+  return (
+    <div className="md-content-wrapper">
+      {blocks.map((block, index) => {
+        if (block.type === "text") {
+          return (
+            <div
+              key={index}
+              dangerouslySetInnerHTML={{ __html: block.content }}
+              style={styles.textBlock}
+            />
+          );
+        } else {
+          return (
+            <TerminalSandbox
+              key={index}
+              initialCode={block.content}
+              language={block.language}
+            />
+          );
+        }
+      })}
+    </div>
+  );
 }
 
 const styles: Record<string, React.CSSProperties> = {
