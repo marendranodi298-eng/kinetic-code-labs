@@ -153,8 +153,8 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
               <Image
                 src="/logo.png"
                 alt="Kinetic Code Labs Logo"
-                width={140}
-                height={45}
+                width={240}
+                height={70}
                 className="nav-logo-img"
                 priority
               />

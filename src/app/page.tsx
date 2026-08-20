@@ -155,8 +155,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
               <Image
                 src="/logo.png"
                 alt="Kinetic Code Labs Logo"
-                width={160}
-                height={50}
+                width={260}
+                height={75}
                 className="nav-logo-img"
                 priority
               />

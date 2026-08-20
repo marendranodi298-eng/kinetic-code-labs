@@ -177,10 +177,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .nav-logo-img {
   object-fit: contain;
-  width: 150px;
+  width: 240px;
   height: auto;
-  max-height: 44px;
+  max-height: 65px;
   transition: var(--transition-fast);
+  display: block;
 }
 
 .nav-right {
@@ -198,7 +199,14 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .nav-logo-img {
+    width: 185px;
+    max-height: 52px;
+  }
+}
+
+@media (max-width: 500px) {
   .nav-header {
     padding: 0.6rem 0;
   }
@@ -206,7 +214,8 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
   .nav-logo-img {
-    width: 110px;
+    width: 140px;
+    max-height: 40px;
   }
   .nav-member-tag {
     font-size: 0.6rem;
