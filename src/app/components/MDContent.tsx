@@ -422,6 +422,7 @@ export default function MDContent({ content }: MDContentProps) {
               key={index}
               initialCategory={block.simCategory || "physics"}
               initialPreset={block.simPreset || "spacetime"}
+              initialCode={block.content || undefined}
             />
           );
         } else {
