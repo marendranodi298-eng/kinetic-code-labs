@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { GLTFLoader } from "three-stdlib";
+import { GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass } from "three-stdlib";
 
 export type SimCategory = "physics" | "chemistry" | "biotech" | "math" | "custom" | (string & {});
 
@@ -22,6 +22,7 @@ interface ScienceSimEngineProps {
 const GARGANTUA_RAYMARCH_CODE = `// ================================================================
 // 🌀 GARGANTUA — Real-Time Schwarzschild Geodesic Raymarcher
 // Physics: Null Geodesics, Doppler Beaming & Gravitational Lensing
+// Features: Cinematic Auto-Orbit, DPR Retina Scaling & ACES Tonemap
 // ================================================================
 
 const frag = \`
@@ -33,12 +34,12 @@ uniform vec3  uCamPos;
 uniform mat3  uCamBasis;
 uniform float uTanFov;
 
-#define RS       1.0
-#define DISK_IN  2.6
+#define RS       1.0      // Schwarzschild radius (geometric units)
+#define DISK_IN  2.6      // inner edge (~ISCO = 3rs)
 #define DISK_OUT 12.0
 #define FAR      90.0
 #define STEPS    220
-#define DOPPLER  1
+#define DOPPLER  1        // 0 = movie-style symmetric, 1 = physically correct
 
 mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 
@@ -65,6 +66,7 @@ float fbm(vec3 p){
   return v;
 }
 
+// Blackbody-style accretion disk palette (HDR inner core)
 vec3 diskRamp(float x){
   vec3 c = mix(vec3(0.32, 0.07, 0.02), vec3(1.0, 0.42, 0.10), smoothstep(0.0, 0.5, x));
   c = mix(c, vec3(1.0, 0.86, 0.55), smoothstep(0.45, 0.80, x));
@@ -74,15 +76,20 @@ vec3 diskRamp(float x){
 
 vec4 diskShade(vec3 p, vec3 photonVel){
   float r = length(p.xz);
+
+  // Keplerian shear — inner rings orbit faster (omega ~ r^-3/2)
   float omega = 2.0 * pow(r, -1.5);
   vec2 q = rot(omega * uTime) * p.xz;
 
+  // Turbulent emission, two sheared layers
   float n = fbm(vec3(q * 0.55, r * 0.30));
   n += 0.5 * fbm(vec3(q * 1.4, r * 0.9 + 40.0));
   n = pow(n * 0.7, 2.0);
 
+  // Temperature profile T ~ r^-3/4 (Shakura–Sunyaev)
   float temp = pow(DISK_IN / r, 0.75);
 
+  // Relativistic Doppler beaming + gravitational redshift
   float g = 1.0;
   if (DOPPLER == 1){
     vec3 vdir = normalize(vec3(-p.z, 0.0, p.x));
@@ -120,6 +127,7 @@ vec3 stars(vec3 rd){
   return col;
 }
 
+// ⚛️ Tracing null geodesics backwards through curved spacetime
 vec3 trace(vec3 ro, vec3 rd){
   vec3 pos = ro;
   vec3 vel = rd;
@@ -171,7 +179,7 @@ void main(){
 }
 \`;
 
-// Quad Setup
+// Direct Fullscreen Quad Setup inside Main Scene
 const uniforms = {
   uResolution: { value: new THREE.Vector2(1, 1) },
   uTime:       { value: 0 },
@@ -211,13 +219,36 @@ const CINE = {
   resumeDelay: 2.5,
 };
 
+const canvas = renderer.domElement;
+const onUserInteract = () => {
+  CINE.userInteracting = true;
+  CINE.lastInteractTime = performance.now() * 0.001;
+};
+const onUserRelease = () => {
+  CINE.userInteracting = false;
+  CINE.lastInteractTime = performance.now() * 0.001;
+};
+canvas.addEventListener("mousedown", onUserInteract);
+window.addEventListener("mouseup", onUserRelease);
+canvas.addEventListener("touchstart", onUserInteract, { passive: true });
+window.addEventListener("touchend", onUserRelease, { passive: true });
+
 const size = new THREE.Vector2();
 const right = new THREE.Vector3(), up = new THREE.Vector3(), fwd = new THREE.Vector3();
 const m4 = new THREE.Matrix4();
 
+// 🔄 60 FPS MAIN UPDATE LOOP
 engine.onUpdate((time, delta) => {
+  const nowSec = performance.now() * 0.001;
+  if (!CINE.userInteracting && nowSec - CINE.lastInteractTime > CINE.resumeDelay) {
+    const orbitAngle = time * CINE.orbitSpeed;
+    camera.position.x = Math.sin(orbitAngle) * CINE.radius;
+    camera.position.z = Math.cos(orbitAngle) * CINE.radius;
+    camera.position.y = CINE.height + Math.sin(time * 0.1) * 0.8;
+    camera.lookAt(0, 0, 0);
+  }
+
   renderer.getSize(size);
-  // Fix 3: High-DPI DPR Resolution Scaling for razor-sharp raymarching
   const dpr = renderer.getPixelRatio();
   uniforms.uResolution.value.set(size.x * dpr, size.y * dpr);
   uniforms.uTime.value = time;
@@ -285,14 +316,14 @@ export default function ScienceSimEngine({
   const mountRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Fix 1: isPlaying Ref to eliminate stale closure in animation loop!
+  // isPlaying Ref to eliminate stale closure in animation loop
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
   const isPlayingRef = useRef<boolean>(autoPlay);
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  // Fix 3: MediaRecorder timer ref for leak-free cleanup
+  // MediaRecorder timer ref for leak-free cleanup
   const recordTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -308,6 +339,7 @@ export default function ScienceSimEngine({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null); // Edit 2: PostFX Composer Ref
   const animFrameIdRef = useRef<number | null>(null);
   const simTimeRef = useRef<number>(0);
   const updateHooksRef = useRef<((time: number, delta: number) => void)[]>([]);
@@ -480,7 +512,7 @@ export default function ScienceSimEngine({
     domEl.addEventListener("touchmove", onTouchMove, { passive: true });
     domEl.addEventListener("touchend", onTouchEnd, { passive: true });
 
-    // Panel ResizeObserver
+    // Panel ResizeObserver (Edit 5: Update composer size)
     const resizeObserver = new ResizeObserver(() => {
       if (!container || !cameraRef.current || !rendererRef.current) return;
       const w = container.clientWidth;
@@ -488,13 +520,14 @@ export default function ScienceSimEngine({
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
+      composerRef.current?.setSize(w, h);
     });
     resizeObserver.observe(container);
 
     // Initial Execution
     executeCode(code);
 
-    // 2. Main 60 FPS Render Loop (with isPlayingRef Stale Closure Fix)
+    // 2. Main 60 FPS Render Loop (Edit 3: PostFX Composer Render)
     let lastTime = performance.now();
     const animate = (now: number) => {
       animFrameIdRef.current = requestAnimationFrame(animate);
@@ -513,8 +546,12 @@ export default function ScienceSimEngine({
         });
       }
 
-      if (rendererRef.current && sceneRef.current && cameraRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      if (sceneRef.current && cameraRef.current && rendererRef.current) {
+        if (composerRef.current) {
+          composerRef.current.render(delta);
+        } else {
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
+        }
       }
     };
 
@@ -526,6 +563,7 @@ export default function ScienceSimEngine({
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
         mediaRecorderRef.current.stop();
       }
+      if (composerRef.current) composerRef.current.dispose?.();
       resizeObserver.disconnect();
       domEl.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
@@ -538,12 +576,18 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // 3. Dynamic Code Execution with Complete Memory Cleanup
+  // 3. Dynamic Code Execution with Complete Memory Cleanup (Edit 4: Composer cleanup)
   const executeCode = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
     const renderer = rendererRef.current;
     if (!scene || !camera || !renderer) return;
+
+    // PostFX cleanup: dispose previous bloom composer
+    if (composerRef.current) {
+      composerRef.current.dispose?.();
+      composerRef.current = null;
+    }
 
     const objectsToRemove: THREE.Object3D[] = [];
     scene.traverse((obj) => {
@@ -568,11 +612,43 @@ export default function ScienceSimEngine({
 
     const pbr = createPBRMaterials();
 
+    // Universal Scientific Helper APIs (Edit 6: engine.bloom)
     const engineAPI = {
       onUpdate: (fn: (time: number, delta: number) => void) => {
         if (typeof fn === "function") {
           updateHooksRef.current.push(fn);
         }
+      },
+      bloom: (opts: { strength?: number; radius?: number; threshold?: number } = {}) => {
+        const strength = opts.strength ?? 1.0;
+        const radius = opts.radius ?? 0.6;
+        const threshold = opts.threshold ?? 0.8;
+
+        if (composerRef.current) {
+          composerRef.current.dispose?.();
+          composerRef.current = null;
+        }
+
+        const size = new THREE.Vector2();
+        renderer.getSize(size);
+
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(size.x, size.y),
+          strength,
+          radius,
+          threshold
+        );
+        composer.addPass(bloomPass);
+        composer.setSize(size.x, size.y);
+        composerRef.current = composer;
+
+        return {
+          setStrength: (v: number) => { bloomPass.strength = v; },
+          setRadius: (v: number) => { bloomPass.radius = v; },
+          setThreshold: (v: number) => { bloomPass.threshold = v; },
+        };
       },
       aerodynamics: {
         calculateLift: (rho: number, velocity: number, wingArea: number, Cl: number) => 0.5 * rho * velocity * velocity * wingArea * Cl,
@@ -600,9 +676,11 @@ export default function ScienceSimEngine({
     executeCode(code);
   };
 
+  // Edit 7: captureSnapshot with composer check
   const captureSnapshot = () => {
     if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-    rendererRef.current.render(sceneRef.current, cameraRef.current);
+    if (composerRef.current) composerRef.current.render();
+    else rendererRef.current.render(sceneRef.current, cameraRef.current);
     const dataURL = rendererRef.current.domElement.toDataURL("image/png");
     const link = document.createElement("a");
     link.download = `simulation_snapshot_${Date.now()}.png`;
