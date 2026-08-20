@@ -23,6 +23,15 @@ export default function Footer({ transparent }: FooterProps) {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email && email.includes("@")) {
+      try {
+        await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, source: "Footer Newsletter Form" }),
+        });
+      } catch (err) {
+        console.error("Footer subscribe error:", err);
+      }
       setSubscribed(true);
       setTimeout(() => {
         setEmail("");
