@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import TerminalSandbox from "./TerminalSandbox";
+import ScienceSimEngine, { SimCategory } from "./ScienceSimEngine";
 import katex from "katex";
 
 interface MDContentProps {
@@ -9,9 +10,11 @@ interface MDContentProps {
 }
 
 interface ContentBlock {
-  type: "text" | "code";
+  type: "text" | "code" | "sim";
   content: string;
   language: string;
+  simCategory?: SimCategory;
+  simPreset?: string;
 }
 
 // Decodes HTML entities back to raw characters
@@ -292,32 +295,61 @@ function renderFormattedText(content: string): string {
   return renderMarkdownToHtmlCompact(content);
 }
 
-// Master Article Parser: splits pure code sandboxes from normal reading content
+// Master Article Parser: splits pure code sandboxes and 3D simulations from normal reading content
 export function parseArticleContent(rawContent: string): ContentBlock[] {
   if (!rawContent || !rawContent.trim()) return [];
 
-  const raw = rawContent.replace(/\r\n/g, "\n");
-  const codeItems: { code: string; language: string }[] = [];
+  let raw = rawContent.replace(/\r\n/g, "\n");
+
+  // Helper to extract sim tag types
+  const codeItems: { code: string; language: string; isSim?: boolean; simCategory?: SimCategory; simPreset?: string }[] = [];
+
+  // Pattern 0: Direct [sim:category:preset] or [simulation:category] shortcodes
+  raw = raw.replace(/\[\s*(?:simulation|sim):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?\s*\]/gi, (_match, cat, pre) => {
+    const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
+    const simCat = (cat.toLowerCase() as SimCategory) || "physics";
+    codeItems.push({
+      code: "",
+      language: "sim",
+      isSim: true,
+      simCategory: simCat,
+      simPreset: pre || (simCat === "physics" ? "spacetime" : simCat === "chemistry" ? "water" : simCat === "biotech" ? "dna" : "surface"),
+    });
+    return placeholder;
+  });
 
   // Pattern 1: HTML <pre><code>...</code></pre> blocks
-  let text = raw.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
+  let text = raw.replace(/<pre[^>]*>[\s\S]*?<code(?: class="(?:language-)?([\w:-]+)")?[^>]*>([\s\S]*?)<\/code>[\s\S]*?<\/pre>/gi, (_match, lang, codeHtml) => {
     const cleanCode = decodeHtmlEntities(codeHtml.replace(/<[^>]*>/g, ""));
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
-    codeItems.push({ code: cleanCode.trim(), language: lang || "javascript" });
+    const isSim = (lang || "").startsWith("sim");
+    let simCategory: SimCategory = "physics";
+    let simPreset: string = "spacetime";
+
+    if (isSim) {
+      const parts = (lang || "").split(":");
+      if (parts[1]) simCategory = parts[1] as SimCategory;
+      if (parts[2]) simPreset = parts[2];
+    }
+
+    codeItems.push({ code: cleanCode.trim(), language: lang || "javascript", isSim, simCategory, simPreset });
     return placeholder;
   });
 
   // Pattern 2: Markdown triple backtick code fences: ```lang\ncode\n```
-  text = text.replace(/(?:^|\n)```([\w-]*)\n([\s\S]*?)\n```(?:\n|$)/g, (_match, lang, codeText) => {
+  text = text.replace(/(?:^|\n)```([\w:-]*)\n([\s\S]*?)\n```(?:\n|$)/g, (_match, lang, codeText) => {
     const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
-    codeItems.push({ code: codeText.trim(), language: lang || "javascript" });
-    return placeholder;
-  });
+    const isSim = (lang || "").startsWith("sim");
+    let simCategory: SimCategory = "physics";
+    let simPreset: string = "spacetime";
 
-  // Pattern 3: Inline/loosely formatted backticks
-  text = text.replace(/```([\w-]*)\n([\s\S]*?)```/g, (_match, lang, codeText) => {
-    const placeholder = `\n__CODE_BLOCK_SLOT_${codeItems.length}__\n`;
-    codeItems.push({ code: codeText.trim(), language: lang || "javascript" });
+    if (isSim) {
+      const parts = (lang || "").split(":");
+      if (parts[1]) simCategory = parts[1] as SimCategory;
+      if (parts[2]) simPreset = parts[2];
+    }
+
+    codeItems.push({ code: codeText.trim(), language: lang || "javascript", isSim, simCategory, simPreset });
     return placeholder;
   });
 
@@ -329,12 +361,23 @@ export function parseArticleContent(rawContent: string): ContentBlock[] {
     if (i % 2 === 1) {
       // Slot index for code item
       const slotIndex = parseInt(parts[i], 10);
-      if (codeItems[slotIndex]) {
-        blocks.push({
-          type: "code",
-          content: codeItems[slotIndex].code,
-          language: codeItems[slotIndex].language,
-        });
+      const item = codeItems[slotIndex];
+      if (item) {
+        if (item.isSim) {
+          blocks.push({
+            type: "sim",
+            content: item.code,
+            language: item.language,
+            simCategory: item.simCategory,
+            simPreset: item.simPreset,
+          });
+        } else {
+          blocks.push({
+            type: "code",
+            content: item.code,
+            language: item.language,
+          });
+        }
       }
     } else {
       // Text content part
@@ -371,6 +414,14 @@ export default function MDContent({ content }: MDContentProps) {
               key={index}
               dangerouslySetInnerHTML={{ __html: block.content }}
               style={styles.textBlock}
+            />
+          );
+        } else if (block.type === "sim") {
+          return (
+            <ScienceSimEngine
+              key={index}
+              initialCategory={block.simCategory || "physics"}
+              initialPreset={block.simPreset || "spacetime"}
             />
           );
         } else {

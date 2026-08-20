@@ -513,6 +513,21 @@ export default function PostEditor({ post }: PostEditorProps) {
                     >
                       📷 Image URL
                     </button>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const choice = prompt("Choose 3D Simulation to insert:\n1. Physics (Spacetime & Orbits)\n2. Chemistry (Molecules H2O / Benzene)\n3. Biotech (3D DNA Double Helix / Virus)\n4. Math (3D Wave Surface / Chaos)\n\nEnter 1, 2, 3, or 4:", "1");
+                        let tag = "[sim:physics:spacetime]";
+                        if (choice === "2") tag = "[sim:chemistry:water]";
+                        if (choice === "3") tag = "[sim:biotech:dna]";
+                        if (choice === "4") tag = "[sim:math:surface]";
+                        if (choice) execCmd("insertHTML", `<p>${tag}</p><p><br></p>`);
+                      }}
+                      title="Insert Interactive 3D Science Simulation" 
+                      style={{ ...styles.toolbarBtn, color: "var(--color-accent)", fontWeight: 700 }}
+                    >
+                      🧪 3D Science Sim
+                    </button>
                     <button type="button" onClick={() => execCmd("insertHorizontalRule")} title="Horizontal Line" style={styles.toolbarBtn}>Line</button>
                   </div>
 
