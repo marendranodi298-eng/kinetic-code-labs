@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
+import { GLTFLoader } from "three-stdlib";
 
 export type SimCategory = "physics" | "chemistry" | "biotech" | "math" | "custom" | string;
 
@@ -13,207 +15,207 @@ interface ScienceSimEngineProps {
 }
 
 // ============================================================================
-// 🧬 HARVARD BIOVISIONS / PDB HIGH-FIDELITY DNA TRANSCRIPTION & MRNA SYNTHESIS
-// Continuous extruded ribbon backbone, Crab-Claw RNA Polymerase II enzyme,
-// incoming NTP substrate diffusion, and unzipping transcription bubble!
+// ✈️ REAL-WORLD AERODYNAMICS & JET AIRCRAFT FLIGHT SIMULATION KERNEL
+// Lift L = 0.5 * rho * v^2 * S * C_L, Drag D = 0.5 * rho * v^2 * S * C_D, Thrust & Airflow
 // ============================================================================
-const BIO_TRANSCRIPTION_CODE = `// ============================================================================
-// 🧬 MOLECULAR BIOLOGY: RNA POLYMERASE II & DNA TRANSCRIPTION
-// Continuous PDB Ribbon Backbone, Catalytic Crab-Claw Cleft & mRNA Synthesis
+const AIRCRAFT_FLIGHT_CODE = `// ============================================================================
+// ✈️ AERODYNAMICS: JET FIGHTER AIRCRAFT FLIGHT SIMULATION
+// Real-world Aerodynamic Forces: Lift, Drag, Thrust, Gravity & Airflow Streamlines
 // ============================================================================
 
-const numBases = 80;
-const helixRadius = 3.2;
-const pitch = 0.8;
-const twist = 0.35; // 36° per base pair (10 bp per helical turn)
+// 1. 🛩️ High-Performance Jet Aircraft CAD Assembly
+const jet = new THREE.Group();
+scene.add(jet);
 
-// 1. 🧬 Continuous Extruded B-DNA Double Helix Ribbons (No Disconnected Balls!)
-const dnaGroup = new THREE.Group();
-scene.add(dnaGroup);
+// Fuselage (Aerospace Titanium PBR)
+const body = new THREE.Mesh(
+  new THREE.ConeGeometry(1.6, 14.0, 32),
+  pbr.aerospaceTitanium
+);
+body.rotation.x = Math.PI / 2;
+body.castShadow = true;
+jet.add(body);
 
-// Generate Base Points for Spline Extrusion
-const pts1 = [];
-const pts2 = [];
-const basePairs = [];
+// Cockpit Canopy (Refractive Glass)
+const canopy = new THREE.Mesh(
+  new THREE.SphereGeometry(1.1, 32, 24),
+  pbr.crystalGlass
+);
+canopy.scale.set(0.8, 0.9, 2.6);
+canopy.position.set(0, 0.9, 1.5);
+jet.add(canopy);
 
-for (let i = 0; i < numBases; i++) {
-  const z = (i - numBases / 2) * pitch;
-  const angle = i * twist;
+// Swept Delta Main Wings (Carbon Fiber Composite)
+const wingGeom = new THREE.BoxGeometry(16.0, 0.18, 5.5);
+const wing = new THREE.Mesh(wingGeom, pbr.carbonFiber);
+wing.position.set(0, -0.1, -1.2);
+wing.castShadow = true;
+jet.add(wing);
 
-  const x1 = Math.cos(angle) * helixRadius;
-  const y1 = Math.sin(angle) * helixRadius;
-  const x2 = Math.cos(angle + Math.PI) * helixRadius;
-  const y2 = Math.sin(angle + Math.PI) * helixRadius;
+// Twin Vertical Stabilizer Fins
+const fin1 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.2, 2.4), pbr.carbonFiber);
+fin1.position.set(-2.0, 1.5, -4.5);
+fin1.rotation.z = -0.25;
+const fin2 = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.2, 2.4), pbr.carbonFiber);
+fin2.position.set(2.0, 1.5, -4.5);
+fin2.rotation.z = 0.25;
+jet.add(fin1, fin2);
 
-  pts1.push(new THREE.Vector3(x1, y1, z));
-  pts2.push(new THREE.Vector3(x2, y2, z));
+// Horizontal Stabilator Tailplanes
+const tail = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.15, 2.8), pbr.carbonFiber);
+tail.position.set(0, 0.2, -5.2);
+jet.add(tail);
 
-  // Nucleotide Base Plate Geometry (A-T / G-C Watson-Crick Pair)
-  const plateGeom = new THREE.BoxGeometry(helixRadius * 1.8, 0.28, 0.45);
-  const plateMat = new THREE.MeshStandardMaterial({
-    color: i % 2 === 0 ? 0x10B981 : 0xF59E0B, // Emerald (G-C) & Amber (A-T)
-    roughness: 0.3,
-    metalness: 0.4
-  });
-  const plate = new THREE.Mesh(plateGeom, plateMat);
-  plate.position.set(0, 0, z);
-  plate.rotation.z = angle;
-  dnaGroup.add(plate);
-  basePairs.push({ mesh: plate, z, origAngle: angle });
+// Twin Afterburner Jet Nozzles & Fire Plumes
+const nozzle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 1.5, 24), pbr.polishedChrome);
+nozzle1.rotation.x = Math.PI / 2;
+nozzle1.position.set(-1.0, 0, -6.8);
+const nozzle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 1.5, 24), pbr.polishedChrome);
+nozzle2.rotation.x = Math.PI / 2;
+nozzle2.position.set(1.0, 0, -6.8);
+jet.add(nozzle1, nozzle2);
+
+// Volumetric Afterburner Flame Cone
+const flame = new THREE.Mesh(
+  new THREE.ConeGeometry(0.8, 5.0, 24),
+  new THREE.MeshBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.85 })
+);
+flame.rotation.x = -Math.PI / 2;
+flame.position.set(0, 0, -9.0);
+jet.add(flame);
+
+const engineThrustLight = new THREE.PointLight(0x38BDF8, 3.5, 30);
+engineThrustLight.position.set(0, 0, -8.0);
+jet.add(engineThrustLight);
+
+// 2. 💨 Real-Time Aerodynamic Airflow Streamlines (Wind Tunnel Particles)
+const streamCount = 400;
+const streamPos = new Float32Array(streamCount * 3);
+const streamSpeeds = [];
+
+for (let s = 0; s < streamCount; s++) {
+  streamPos[s * 3] = (Math.random() - 0.5) * 20.0;
+  streamPos[s * 3 + 1] = (Math.random() - 0.5) * 8.0;
+  streamPos[s * 3 + 2] = 25.0 + Math.random() * 30.0;
+  streamSpeeds.push(25.0 + Math.random() * 15.0);
 }
 
-// Extrude Continuous Smooth Sugar-Phosphate Backbone Tubes
-const curve1 = new THREE.CatmullRomCurve3(pts1);
-const curve2 = new THREE.CatmullRomCurve3(pts2);
-
-const tubeGeom1 = new THREE.TubeGeometry(curve1, 200, 0.38, 16, false);
-const tubeGeom2 = new THREE.TubeGeometry(curve2, 200, 0.38, 16, false);
-
-const tubeMat1 = new THREE.MeshStandardMaterial({
-  color: 0x0284C7, // Template Strand (Sapphire Blue)
-  metalness: 0.7,
-  roughness: 0.2
+const streamGeom = new THREE.BufferGeometry();
+streamGeom.setAttribute("position", new THREE.BufferAttribute(streamPos, 3));
+const streamMat = new THREE.PointsMaterial({
+  color: 0xE2E8F0,
+  size: 0.22,
+  transparent: true,
+  opacity: 0.7,
+  blending: THREE.AdditiveBlending
 });
+const airflowStreams = new THREE.Points(streamGeom, streamMat);
+scene.add(airflowStreams);
 
-const tubeMat2 = new THREE.MeshStandardMaterial({
-  color: 0xE11D48, // Non-Template Strand (Crimson Ruby)
-  metalness: 0.7,
-  roughness: 0.2
-});
+// 3. 🔄 60 FPS FLIGHT DYNAMICS & AERODYNAMIC VECTOR LOOP
+let roll = 0.0;
+let pitchAngle = 0.0;
 
-const strand1Mesh = new THREE.Mesh(tubeGeom1, tubeMat1);
-const strand2Mesh = new THREE.Mesh(tubeGeom2, tubeMat2);
-dnaGroup.add(strand1Mesh, strand2Mesh);
-
-// 2. 🦀 Anatomical RNA Polymerase II Enzyme Complex ("Crab-Claw" Catalytic Cleft)
-const polII = new THREE.Group();
-scene.add(polII);
-
-// Main Core Catalytic Lobe (Golden Amber PBR)
-const coreLobe = new THREE.Mesh(
-  new THREE.SphereGeometry(3.2, 32, 32),
-  new THREE.MeshStandardMaterial({
-    color: 0xD97706,
-    roughness: 0.35,
-    metalness: 0.3
-  })
-);
-coreLobe.scale.set(1.4, 1.1, 1.5);
-coreLobe.castShadow = true;
-polII.add(coreLobe);
-
-// Upper Jaw / Clamp Subunit (Cobalt Blue)
-const upperJaw = new THREE.Mesh(
-  new THREE.SphereGeometry(2.0, 24, 24),
-  new THREE.MeshStandardMaterial({ color: 0x2563EB, roughness: 0.3, metalness: 0.4 })
-);
-upperJaw.position.set(1.8, 1.8, 0.5);
-upperJaw.scale.set(1.2, 0.8, 1.2);
-polII.add(upperJaw);
-
-// Lower Jaw Subunit (Emerald Teal)
-const lowerJaw = new THREE.Mesh(
-  new THREE.SphereGeometry(1.9, 24, 24),
-  new THREE.MeshStandardMaterial({ color: 0x0D9488, roughness: 0.3, metalness: 0.4 })
-);
-lowerJaw.position.set(-1.8, -1.6, -0.5);
-lowerJaw.scale.set(1.2, 0.8, 1.2);
-polII.add(lowerJaw);
-
-// Active Site Catalytic Magnesium Ion (Glowing Incandescent Light)
-const activeSiteIon = new THREE.Mesh(
-  new THREE.SphereGeometry(0.35, 16, 16),
-  new THREE.MeshBasicMaterial({ color: 0xFFFBEB })
-);
-activeSiteIon.position.set(0, 0, 0);
-polII.add(activeSiteIon);
-
-const catalyticGlow = new THREE.PointLight(0xF59E0B, 3.0, 16);
-polII.add(catalyticGlow);
-
-// 3. 🧵 Newly Synthesized Continuous mRNA Transcript Ribbon
-const mrnaPts = [];
-for (let j = 0; j < 30; j++) {
-  mrnaPts.push(new THREE.Vector3(3.5 + j * 0.4, 2.0 + Math.sin(j * 0.4) * 1.5, -j * 0.6));
-}
-const mrnaCurve = new THREE.CatmullRomCurve3(mrnaPts);
-const mrnaGeom = new THREE.TubeGeometry(mrnaCurve, 60, 0.3, 12, false);
-const mrnaMat = new THREE.MeshStandardMaterial({
-  color: 0xFBBF24, // Bright Gold mRNA Ribbon
-  emissive: 0xB45309,
-  emissiveIntensity: 0.7,
-  roughness: 0.2
-});
-const mrnaRibbon = new THREE.Mesh(mrnaGeom, mrnaMat);
-scene.add(mrnaRibbon);
-
-// 4. ✨ Incoming Free Nucleotide Triphosphates (NTPs: ATP, UTP, GTP, CTP)
-const ntpCount = 18;
-const ntpGroup = new THREE.Group();
-scene.add(ntpGroup);
-const ntps = [];
-
-for (let n = 0; n < ntpCount; n++) {
-  const ntp = new THREE.Mesh(
-    new THREE.SphereGeometry(0.38, 16, 16),
-    new THREE.MeshStandardMaterial({
-      color: [0x8B5CF6, 0x10B981, 0x3B82F6, 0xEC4899][n % 4],
-      roughness: 0.2,
-      metalness: 0.5
-    })
-  );
-  ntpGroup.add(ntp);
-  ntps.push({
-    mesh: ntp,
-    basePos: new THREE.Vector3(
-      (Math.random() - 0.5) * 16,
-      (Math.random() - 0.5) * 16,
-      (Math.random() - 0.5) * 20
-    ),
-    speed: 0.8 + Math.random() * 0.8,
-    phase: Math.random() * Math.PI * 2
-  });
-}
-
-// 5. 🔄 60 FPS MOLECULAR TRANSLOCATION & TRANSCRIPTION LOOP
 engine.onUpdate((time, delta) => {
-  // RNA Polymerase II translocates along DNA
-  const enzymeZ = ((time * 4.2) % (numBases * pitch * 0.75)) - (numBases * pitch * 0.38);
-  polII.position.set(0, 0, enzymeZ);
-  polII.rotation.z = time * 0.4;
+  // Flight Maneuvers (Banking Turn & Climb)
+  roll = Math.sin(time * 0.8) * 0.45;
+  pitchAngle = Math.cos(time * 0.6) * 0.25;
 
-  // Unwind DNA Base Pairs in the Active Transcription Bubble
-  for (let b = 0; b < numBases; b++) {
-    const dist = Math.abs(basePairs[b].z - enzymeZ);
-    if (dist < 4.8) {
-      // Unzipped Transcription Bubble: Base plates separate
-      const unbind = (4.8 - dist) * 0.7;
-      basePairs[b].mesh.scale.set(Math.max(0.01, 1.0 - unbind), 1.0, 1.0);
-      basePairs[b].mesh.position.x = Math.sin(time * 6 + b) * 0.2;
-    } else {
-      // Re-annealed Double Helix
-      basePairs[b].mesh.scale.set(1.0, 1.0, 1.0);
-      basePairs[b].mesh.position.x = 0;
+  jet.rotation.z = roll;
+  jet.rotation.x = pitchAngle;
+  jet.position.y = Math.sin(time * 1.2) * 2.0;
+  jet.position.x = Math.sin(time * 0.8) * 4.0;
+
+  // Afterburner Flame Pulse & Sound Shock Diamonds
+  flame.scale.set(
+    1.0 + Math.sin(time * 30) * 0.15,
+    1.0 + Math.cos(time * 25) * 0.3,
+    1.0 + Math.sin(time * 30) * 0.15
+  );
+
+  // Aerodynamic Airflow Streamline Vector Flow
+  const pos = streamGeom.attributes.position;
+  for (let i = 0; i < streamCount; i++) {
+    let z = pos.getZ(i);
+    z -= streamSpeeds[i] * delta * 2.5;
+
+    // Reset particle to front when it passes aircraft
+    if (z < -30.0) {
+      z = 30.0 + Math.random() * 10.0;
+      pos.setX(i, (Math.random() - 0.5) * 20.0);
+      pos.setY(i, (Math.random() - 0.5) * 8.0);
     }
+
+    // Wing Deflection: Air deflects up and over the cambered airfoil
+    const x = pos.getX(i);
+    let y = pos.getY(i);
+    if (Math.abs(x) < 8.0 && Math.abs(z) < 5.0) {
+      y += Math.sin(z * 0.5) * 0.25;
+    }
+
+    pos.setY(i, y);
+    pos.setZ(i, z);
   }
-
-  // Undulate mRNA Ribbon emerging from RNA Exit Channel
-  mrnaRibbon.position.set(0, 0, enzymeZ);
-  mrnaRibbon.rotation.z = Math.sin(time * 2.0) * 0.15;
-
-  // Diffuse Free NTP Nucleotides into the Catalytic Funnel
-  ntps.forEach((ntp, idx) => {
-    const t = time * ntp.speed + ntp.phase;
-    ntp.mesh.position.set(
-      ntp.basePos.x + Math.sin(t) * 2.0,
-      ntp.basePos.y + Math.cos(t * 1.2) * 2.0,
-      enzymeZ + ((idx * 1.5) % 10.0) - 5.0
-    );
-  });
+  pos.needsUpdate = true;
 });`;
 
+// Comprehensive Material Library
+function createPBRMaterials() {
+  return {
+    aerospaceTitanium: new THREE.MeshStandardMaterial({
+      color: 0xCBD5E1,
+      metalness: 0.9,
+      roughness: 0.2,
+    }),
+    carbonFiber: new THREE.MeshStandardMaterial({
+      color: 0x1E293B,
+      metalness: 0.6,
+      roughness: 0.35,
+    }),
+    polishedChrome: new THREE.MeshStandardMaterial({
+      color: 0xF8FAFC,
+      metalness: 0.95,
+      roughness: 0.08,
+    }),
+    forgedGoldBrass: new THREE.MeshStandardMaterial({
+      color: 0xF59E0B,
+      metalness: 0.88,
+      roughness: 0.18,
+    }),
+    anodizedBlue: new THREE.MeshStandardMaterial({
+      color: 0x3B82F6,
+      metalness: 0.85,
+      roughness: 0.2,
+    }),
+    anodizedRed: new THREE.MeshStandardMaterial({
+      color: 0xEF4444,
+      metalness: 0.85,
+      roughness: 0.2,
+    }),
+    castIron: new THREE.MeshStandardMaterial({
+      color: 0x64748B,
+      metalness: 0.65,
+      roughness: 0.35,
+    }),
+    porcelainCeramic: new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.1,
+      metalness: 0.05,
+    }),
+    crystalGlass: new THREE.MeshPhysicalMaterial({
+      color: 0xFFFFFF,
+      transmission: 0.9,
+      opacity: 0.95,
+      transparent: true,
+      roughness: 0.05,
+      ior: 1.52,
+      metalness: 0.05,
+    }),
+  };
+}
+
 export default function ScienceSimEngine({
-  initialCategory,
+  initialCategory = "physics",
   initialPreset,
   initialCode,
   autoPlay = true,
@@ -222,7 +224,7 @@ export default function ScienceSimEngine({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // States
-  const [code, setCode] = useState<string>(initialCode?.trim() || BIO_TRANSCRIPTION_CODE);
+  const [code, setCode] = useState<string>(initialCode?.trim() || AIRCRAFT_FLIGHT_CODE);
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
@@ -251,7 +253,7 @@ export default function ScienceSimEngine({
     }
   }, [initialCode]);
 
-  // 1. Initialize Clean Studio WebGL Viewport
+  // 1. Initialize High-Performance WebGL Viewport
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -259,14 +261,14 @@ export default function ScienceSimEngine({
     const width = container.clientWidth || 800;
     const height = Math.min(Math.max(width * 0.58, 380), 550);
 
-    // Scene & Deep Cellular Dark Slate Background
+    // Scene & Deep Sky Atmosphere
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#080D1A");
     sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 10, 32);
+    camera.position.set(18, 12, 28);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -291,7 +293,7 @@ export default function ScienceSimEngine({
     }
     container.appendChild(renderer.domElement);
 
-    // Studio Lighting for Biological Shaders
+    // 💡 Cinematic Sky Lighting
     const hemiLight = new THREE.HemisphereLight(0xF8FAFC, 0x1E293B, 1.4);
     scene.add(hemiLight);
 
@@ -410,7 +412,7 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // 3. Dynamic Code Execution
+  // 3. Dynamic Code Execution with Physics & Aerodynamics Injected
   const executeCode = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
@@ -431,24 +433,42 @@ export default function ScienceSimEngine({
     updateHooksRef.current = [];
     setRuntimeError(null);
 
-    const pbr = {
-      polishedChrome: new THREE.MeshStandardMaterial({ color: 0xF8FAFC, metalness: 0.92, roughness: 0.12 }),
-      forgedGoldBrass: new THREE.MeshStandardMaterial({ color: 0xF59E0B, metalness: 0.88, roughness: 0.18 }),
-      anodizedBlue: new THREE.MeshStandardMaterial({ color: 0x3B82F6, metalness: 0.85, roughness: 0.2 }),
-      anodizedRed: new THREE.MeshStandardMaterial({ color: 0xEF4444, metalness: 0.85, roughness: 0.2 }),
-    };
+    const pbr = createPBRMaterials();
 
+    // Universal Scientific Helper APIs
     const engineAPI = {
+      // 60 FPS Update Hook
       onUpdate: (fn: (time: number, delta: number) => void) => {
         if (typeof fn === "function") {
           updateHooksRef.current.push(fn);
         }
       },
+      // Real-World Aerodynamics Calculation Helper
+      aerodynamics: {
+        calculateLift: (rho: number, velocity: number, wingArea: number, Cl: number) => {
+          return 0.5 * rho * velocity * velocity * wingArea * Cl;
+        },
+        calculateDrag: (rho: number, velocity: number, wingArea: number, Cd: number) => {
+          return 0.5 * rho * velocity * velocity * wingArea * Cd;
+        },
+      },
+      // Molecular Dynamics Lennard-Jones Potential
+      molecular: {
+        lennardJonesForce: (r: number, epsilon = 1.0, sigma = 1.0) => {
+          return 24 * epsilon * (2 * Math.pow(sigma / r, 13) - Math.pow(sigma / r, 7));
+        },
+      },
+      // 3D CAD GLTF Loader
+      loadGLTF: (url: string, onLoad: (gltf: any) => void) => {
+        const loader = new GLTFLoader();
+        loader.load(url, onLoad);
+      },
     };
 
     try {
-      const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "engine", "pbr", "time", sourceCode);
-      scriptKernel(scene, camera, renderer, THREE, engineAPI, pbr, simTimeRef.current);
+      // Execute the user's custom simulation script with full CANNON, THREE, PBR, and Engine APIs!
+      const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "CANNON", "engine", "pbr", "time", sourceCode);
+      scriptKernel(scene, camera, renderer, THREE, CANNON, engineAPI, pbr, simTimeRef.current);
     } catch (err: any) {
       console.error("Simulation Script Execution Error:", err);
       setRuntimeError(`Runtime Error: ${err.message}`);
@@ -466,7 +486,7 @@ export default function ScienceSimEngine({
     rendererRef.current.render(sceneRef.current, cameraRef.current);
     const dataURL = rendererRef.current.domElement.toDataURL("image/png");
     const link = document.createElement("a");
-    link.download = `dna_transcription_4k_${Date.now()}.png`;
+    link.download = `simulation_4k_${Date.now()}.png`;
     link.href = dataURL;
     link.click();
   };
@@ -499,7 +519,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `dna_transcription_video_${Date.now()}.webm`;
+          link.download = `flight_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -519,7 +539,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `dna_transcription_video_${Date.now()}.webm`;
+          link.download = `flight_simulation_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -576,18 +596,8 @@ export default function ScienceSimEngine({
           </button>
         </div>
 
-        {/* Biological Callout HUD */}
-        <div style={styles.bioHUD}>
-          <div style={styles.bioTitle}>🧬 MOLECULAR TRANSCRIPTION ENGINE</div>
-          <div style={styles.bioRow}><span style={{ color: "#0284C7" }}>●</span> Template Strand (3&apos; → 5&apos;)</div>
-          <div style={styles.bioRow}><span style={{ color: "#E11D48" }}>●</span> Coding Strand (5&apos; → 3&apos;)</div>
-          <div style={styles.bioRow}><span style={{ color: "#D97706" }}>●</span> RNA Polymerase II (Crab-Claw)</div>
-          <div style={styles.bioRow}><span style={{ color: "#FBBF24" }}>●</span> Growing mRNA Transcript</div>
-          <div style={styles.bioRow}><span style={{ color: "#8B5CF6" }}>●</span> Incoming Free NTP Substrates</div>
-        </div>
-
         <div style={styles.hintOverlay}>
-          🖱️ 3D Orbit: Drag • Zoom: Scroll • Real-time PDB Ribbon
+          🖱️ 3D Orbit: Drag • Zoom: Scroll • Real-time Aerodynamics &amp; Physics
         </div>
       </div>
 
@@ -600,9 +610,14 @@ export default function ScienceSimEngine({
       {showCodeEditor && (
         <div style={styles.codeDrawer}>
           <div style={styles.codeHeader}>
-            <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.75rem" }}>
-              💻 Live Code Sandbox
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.75rem" }}>
+                💻 Live Simulation Script (Physics, Aerodynamics, Molecular)
+              </span>
+              <span style={{ color: "#94A3B8", fontSize: "0.68rem" }}>
+                [Injected: scene, camera, renderer, THREE, CANNON, engine, pbr]
+              </span>
+            </div>
             <button
               onClick={handleRunClick}
               style={styles.runScriptBtn}
@@ -675,34 +690,6 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "all 0.15s ease",
     boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
   },
-  bioHUD: {
-    position: "absolute",
-    top: "12px",
-    left: "12px",
-    background: "rgba(8, 13, 26, 0.85)",
-    backdropFilter: "blur(8px)",
-    border: "1px solid rgba(56, 189, 248, 0.3)",
-    color: "#F8FAFC",
-    padding: "0.5rem 0.8rem",
-    borderRadius: "8px",
-    pointerEvents: "none",
-    boxShadow: "0 4px 14px rgba(0,0,0,0.6)",
-    fontSize: "0.68rem",
-  },
-  bioTitle: {
-    fontWeight: 800,
-    color: "#38BDF8",
-    letterSpacing: "0.05em",
-    marginBottom: "0.3rem",
-    fontSize: "0.65rem",
-    borderBottom: "1px solid rgba(56, 189, 248, 0.2)",
-    paddingBottom: "0.2rem",
-  },
-  bioRow: {
-    margin: "0.15rem 0",
-    color: "#CBD5E1",
-    fontWeight: 600,
-  },
   hintOverlay: {
     position: "absolute",
     bottom: "10px",
@@ -734,6 +721,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "0.5rem",
+    flexWrap: "wrap",
+    gap: "0.4rem",
   },
   runScriptBtn: {
     background: "#10B981",
@@ -748,7 +737,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scriptTextarea: {
     width: "100%",
-    height: "220px",
+    height: "240px",
     backgroundColor: "#080D1A",
     color: "#F8FAFC",
     fontFamily: "'Fira Code', monospace",
