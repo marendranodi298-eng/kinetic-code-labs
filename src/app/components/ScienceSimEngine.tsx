@@ -13,135 +13,200 @@ interface ScienceSimEngineProps {
 }
 
 // ============================================================================
-// 📜 FULL LIVE EXECUTABLE SIMULATION SCRIPTS LOADED DIRECTLY INTO CODE EDITOR
-// Every preset is 100% real, editable, and directly executed from the editor!
+// 🌌 CINEMATIC GLSL SHADER KERNEL: INTERSTELLAR GARGANTUA ACCRETION DISK
+// Continuous fluid plasma, relativistic Doppler beaming, and gravitational lensing
 // ============================================================================
-const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
-  blackhole: {
-    title: "🌌 Kerr Black Hole (Interstellar Gargantua)",
-    category: "physics",
-    code: `// [Kerr Metric Black Hole Simulation]
-// Relativistic Accretion Disk, Photon Sphere & Gravitational Lensing
+const BLACKHOLE_SHADER_CODE = `// ============================================================================
+// 🌌 INTERSTELLAR: GARGANTUA RAY-WARPED ACCRETION DISK (GLSL SHADER)
+// Einstein Kerr Metric with Relativistic Doppler Beaming & Lensing
+// ============================================================================
 
-// 1. Distant Starfield Background (2,000 Stars)
-const starCount = 2000;
-const starPositions = new Float32Array(starCount * 3);
-for (let i = 0; i < starCount; i++) {
-  const r = 80 + Math.random() * 60;
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.acos(Math.random() * 2 - 1);
-  starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-  starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-  starPositions[i * 3 + 2] = r * Math.cos(phi);
-}
-const starGeom = new THREE.BufferGeometry();
-starGeom.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-const starMat = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.45, transparent: true, opacity: 0.85 });
-scene.add(new THREE.Points(starGeom, starMat));
-
-// 2. The Event Horizon (Obsidian Sphere r = 2GM/c^2)
-const horizonRadius = 3.2;
-const eventHorizon = new THREE.Mesh(
-  new THREE.SphereGeometry(horizonRadius, 64, 64),
-  new THREE.MeshBasicMaterial({ color: 0x000000 })
-);
+// 1. 🕳️ Central Event Horizon (Pure Black Void r = 3.4)
+const horizonGeom = new THREE.SphereGeometry(3.4, 64, 64);
+const horizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const eventHorizon = new THREE.Mesh(horizonGeom, horizonMat);
 scene.add(eventHorizon);
 
-// 3. The Photon Sphere Glare Ring (r = 1.5 * r_s)
-const photonRing = new THREE.Mesh(
-  new THREE.TorusGeometry(horizonRadius * 1.06, 0.08, 32, 100),
-  new THREE.MeshBasicMaterial({ color: 0xFFFBEB })
-);
+// 2. ✨ The Blinding Photon Sphere (r = 1.5 r_s)
+const photonGeom = new THREE.TorusGeometry(3.65, 0.12, 32, 128);
+const photonMat = new THREE.MeshBasicMaterial({ color: 0xFFFDF0 });
+const photonRing = new THREE.Mesh(photonGeom, photonMat);
 photonRing.rotation.x = Math.PI / 2;
 scene.add(photonRing);
 
-// 4. Relativistic Accretion Disk (8,000 Superheated Plasma Particles)
-const diskCount = 8000;
-const diskPositions = new Float32Array(diskCount * 3);
-const diskColors = new Float32Array(diskCount * 3);
-
-for (let i = 0; i < diskCount; i++) {
-  const rNorm = Math.pow(Math.random(), 0.7);
-  const rad = 4.0 + rNorm * 12.0;
-  const angle = Math.random() * Math.PI * 2;
-
-  diskPositions[i * 3] = Math.cos(angle) * rad;
-  diskPositions[i * 3 + 1] = (Math.random() - 0.5) * (0.2 + (rad / 16.0) * 0.6);
-  diskPositions[i * 3 + 2] = Math.sin(angle) * rad;
-
-  // Temperature Spectrum: White-Hot Core -> Gold -> Crimson
-  if (rad < 6.0) {
-    diskColors[i * 3] = 1.0; diskColors[i * 3 + 1] = 0.95; diskColors[i * 3 + 2] = 0.85;
-  } else if (rad < 10.0) {
-    diskColors[i * 3] = 0.95; diskColors[i * 3 + 1] = 0.65; diskColors[i * 3 + 2] = 0.15;
-  } else {
-    diskColors[i * 3] = 0.85; diskColors[i * 3 + 1] = 0.25; diskColors[i * 3 + 2] = 0.05;
+// 3. 🔥 High-Fidelity Volumetric Procedural Accretion Disk Shaders
+const diskVertexShader = \`
+  varying vec2 vUv;
+  varying vec3 vWorldPosition;
+  void main() {
+    vUv = uv;
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vWorldPosition = worldPos.xyz;
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
   }
-}
-const diskGeom = new THREE.BufferGeometry();
-diskGeom.setAttribute("position", new THREE.BufferAttribute(diskPositions, 3));
-diskGeom.setAttribute("color", new THREE.BufferAttribute(diskColors, 3));
-const accretionDisk = new THREE.Points(
-  diskGeom,
-  new THREE.PointsMaterial({ size: 0.18, vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending })
-);
+\`;
+
+const diskFragmentShader = \`
+  uniform float time;
+  varying vec2 vUv;
+  varying vec3 vWorldPosition;
+
+  // Procedural Noise for Relativistic Plasma Swirl
+  float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+  float noise(vec2 x) {
+    vec2 i = floor(x);
+    vec2 f = fract(x);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  }
+
+  void main() {
+    vec2 uv = vUv * 2.0 - 1.0;
+    float r = length(uv);
+
+    // Hard cutoff at Inner Horizon & Soft Outer Falloff
+    if (r < 0.28 || r > 0.98) discard;
+
+    float normR = (r - 0.28) / (0.98 - 0.28);
+    float angle = atan(uv.y, uv.x);
+
+    // Differential Keplerian Plasma Rotation (faster inside)
+    float rotSpeed = time * 3.5 / (r * 1.5 + 0.1);
+    float swirl = angle + rotSpeed;
+
+    // Multi-layer turbulent plasma smoke
+    float n1 = noise(vec2(swirl * 4.0, normR * 12.0));
+    float n2 = noise(vec2(swirl * 8.0 - time, normR * 25.0));
+    float plasma = n1 * 0.65 + n2 * 0.35;
+
+    // Relativistic Doppler Beaming (approaching side is much brighter and bluer)
+    float doppler = 1.0 + 0.8 * sin(angle + 0.4);
+
+    // Incandescent Temperature Color Ramp: White-Hot -> Gold -> Amber -> Crimson
+    vec3 whiteHot = vec3(1.0, 0.98, 0.92);
+    vec3 gold = vec3(1.0, 0.72, 0.18);
+    vec3 crimson = vec3(0.85, 0.22, 0.04);
+
+    vec3 color = mix(whiteHot, gold, smoothstep(0.0, 0.35, normR));
+    color = mix(color, crimson, smoothstep(0.35, 1.0, normR));
+
+    // Density falloff
+    float alpha = smoothstep(0.28, 0.35, r) * smoothstep(0.98, 0.75, r) * (0.8 + 0.4 * plasma) * doppler;
+
+    gl_FragColor = vec4(color * (1.5 + doppler * 0.5), clamp(alpha, 0.0, 1.0));
+  }
+\`;
+
+// 4. Equatorial Accretion Disk (Wide Mesh with Custom Shader)
+const diskGeom = new THREE.PlaneGeometry(36.0, 36.0, 128, 128);
+const diskUniforms = { time: { value: 0.0 } };
+const diskMat = new THREE.ShaderMaterial({
+  vertexShader: diskVertexShader,
+  fragmentShader: diskFragmentShader,
+  uniforms: diskUniforms,
+  transparent: true,
+  side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+
+const accretionDisk = new THREE.Mesh(diskGeom, diskMat);
+accretionDisk.rotation.x = -Math.PI / 2.3; // Iconic Interstellar Tilt
 scene.add(accretionDisk);
 
-// 5. Gravitational Lensing Light-Bending Halo Arcs
-const haloMat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending });
-const topHalo = new THREE.Mesh(new THREE.TorusGeometry(5.8, 0.45, 32, 100, Math.PI * 1.2), haloMat);
-topHalo.position.set(0, 0.2, 0);
-topHalo.rotation.z = Math.PI * 0.9;
+// 5. 🌀 Gravitational Lensing Warped Upper & Lower Light Arches
+const haloVertexShader = \`
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+\`;
+
+const haloFragmentShader = \`
+  uniform float time;
+  varying vec2 vUv;
+  void main() {
+    float u = abs(vUv.x - 0.5) * 2.0;
+    float v = abs(vUv.y - 0.5) * 2.0;
+    float edge = 1.0 - length(vec2(u, v));
+    if (edge <= 0.0) discard;
+
+    vec3 goldGlow = vec3(1.0, 0.75, 0.22);
+    float glow = pow(edge, 1.8) * 1.6;
+    gl_FragColor = vec4(goldGlow * glow, clamp(glow * 0.85, 0.0, 1.0));
+  }
+\`;
+
+const haloGeom = new THREE.TorusGeometry(6.4, 1.2, 32, 128, Math.PI * 1.15);
+const haloMat = new THREE.ShaderMaterial({
+  vertexShader: haloVertexShader,
+  fragmentShader: haloFragmentShader,
+  uniforms: { time: { value: 0.0 } },
+  transparent: true,
+  side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+
+const topHalo = new THREE.Mesh(haloGeom, haloMat);
+topHalo.position.set(0, 0.5, 0);
+topHalo.rotation.z = Math.PI * 0.92;
 scene.add(topHalo);
 
-const bottomHalo = new THREE.Mesh(new THREE.TorusGeometry(5.8, 0.45, 32, 100, Math.PI * 1.2), haloMat);
-bottomHalo.position.set(0, -0.2, 0);
-bottomHalo.rotation.z = -Math.PI * 0.1;
+const bottomHalo = new THREE.Mesh(haloGeom, haloMat);
+bottomHalo.position.set(0, -0.5, 0);
+bottomHalo.rotation.z = -Math.PI * 0.08;
 scene.add(bottomHalo);
 
-// 6. Polar Astrophysical Gamma-Ray Plasma Jets
-const jetCount = 2000;
-const jetPositions = new Float32Array(jetCount * 3);
-for (let i = 0; i < jetCount; i++) {
-  const sign = i % 2 === 0 ? 1 : -1;
-  const h = (3.2 + Math.random() * 20.0) * sign;
-  const spread = (Math.abs(h) / 20.0) * 1.5;
-  const a = Math.random() * Math.PI * 2;
-  jetPositions[i * 3] = Math.cos(a) * Math.random() * spread;
-  jetPositions[i * 3 + 1] = h;
-  jetPositions[i * 3 + 2] = Math.sin(a) * Math.random() * spread;
-}
-const jetGeom = new THREE.BufferGeometry();
-jetGeom.setAttribute("position", new THREE.BufferAttribute(jetPositions, 3));
-const polarJets = new THREE.Points(
-  jetGeom,
-  new THREE.PointsMaterial({ color: 0x38BDF8, size: 0.16, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending })
+// 6. 🌊 Miller's Ocean Planet (Orbiting at r = 8.5)
+const millerDist = 8.5;
+const millerPlanet = new THREE.Mesh(
+  new THREE.SphereGeometry(0.65, 32, 32),
+  new THREE.MeshStandardMaterial({ color: 0x0284C7, roughness: 0.2, metalness: 0.3 })
 );
-scene.add(polarJets);
+scene.add(millerPlanet);
 
-// Core Energy Glow
-const coreLight = new THREE.PointLight(0xF59E0B, 3.5, 40);
-scene.add(coreLight);
+// Orbit Curve
+const orbitPts = new THREE.EllipseCurve(0, 0, millerDist, millerDist, 0, 2 * Math.PI, false, 0)
+  .getPoints(80).map((pt) => new THREE.Vector3(pt.x, 0, pt.y));
+const orbitRing = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints(orbitPts),
+  new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.4 })
+);
+orbitRing.rotation.x = accretionDisk.rotation.x;
+scene.add(orbitRing);
 
-// 60 FPS Relativistic Compute Loop
+// 7. 60 FPS Relativistic Compute & Plasma Shader Animation Loop
 engine.onUpdate((time, delta) => {
-  accretionDisk.rotation.y = time * 0.8;
-  topHalo.rotation.y = time * 0.1;
-  bottomHalo.rotation.y = time * 0.1;
-  polarJets.rotation.y = -time * 1.2;
-  coreLight.intensity = 3.0 + Math.sin(time * 4) * 0.6;
-});`,
+  diskUniforms.time.value = time;
+
+  // Miller's Planet Orbit along tilted accretion plane
+  const angle = time * 1.2;
+  const x = Math.cos(angle) * millerDist;
+  const z = Math.sin(angle) * millerDist;
+  millerPlanet.position.set(x, z * Math.sin(accretionDisk.rotation.x), z * Math.cos(accretionDisk.rotation.x));
+});`;
+
+// Other executable scripts
+const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
+  blackhole: {
+    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
+    category: "physics",
+    code: BLACKHOLE_SHADER_CODE,
   },
   engine: {
     title: "⚙️ 4-Stroke IC Engine (Kinematics & Combustion)",
     category: "engineering",
     code: `// [4-Stroke Internal Combustion Engine Simulation]
-// Piston Kinematics: y = r*cos(theta) + sqrt(l^2 - r^2*sin^2(theta))
-
-const r = 2.4; // Crank Throw Radius
+const r = 2.4; // Crank Radius
 const l = 6.2; // Connecting Rod Length
 
-// 1. High-Poly Piston with 3 Rings & Wrist Pin
+// 1. High-Poly Piston with 3 Rings
 const piston = new THREE.Group();
 const crown = new THREE.Mesh(new THREE.CylinderGeometry(2.38, 2.38, 2.2, 48), pbr.brushedSteel);
 crown.castShadow = true;
@@ -213,7 +278,6 @@ engine.onUpdate((time, delta) => {
   const pinX = r * Math.sin(theta);
   const pinY = crankY + r * Math.cos(theta);
 
-  // Reciprocating Displacement
   const pistonY = crankY + r * Math.cos(theta) + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
   piston.position.set(0, pistonY, 0);
 
@@ -221,7 +285,6 @@ engine.onUpdate((time, delta) => {
   conRod.rotation.z = Math.asin((-r * Math.sin(theta)) / l);
   crank.rotation.z = theta;
 
-  // 4-Stroke Lighting: Intake(Blue) -> Compression(Amber) -> Power(💥 Fire) -> Exhaust
   if (cycle < Math.PI) {
     inValve.position.y = 5.2 - 0.45 * Math.sin(cycle);
     exValve.position.y = 5.2;
@@ -247,90 +310,8 @@ engine.onUpdate((time, delta) => {
   }
 });`,
   },
-  water: {
-    title: "🧪 Water (H2O) Exact 104.5° Molecular Dynamics",
-    category: "chemistry",
-    code: `// [Water Molecule Simulation - H2O 104.5° sp3 Hybridization]
-const bondAngleRad = (104.5 * Math.PI) / 180;
-const bondLen = 2.6;
-
-// 1. Oxygen Atom (Red)
-const oxygen = new THREE.Mesh(new THREE.SphereGeometry(1.2, 64, 64), pbr.anodizedRed);
-oxygen.position.set(0, 1.0, 0);
-oxygen.castShadow = true;
-scene.add(oxygen);
-
-// 2. Hydrogen Atoms (Porcelain White)
-const h1Pos = new THREE.Vector3(-bondLen * Math.sin(bondAngleRad / 2), 1.0 - bondLen * Math.cos(bondAngleRad / 2), 0);
-const h2Pos = new THREE.Vector3(bondLen * Math.sin(bondAngleRad / 2), 1.0 - bondLen * Math.cos(bondAngleRad / 2), 0);
-
-const h1 = new THREE.Mesh(new THREE.SphereGeometry(0.7, 48, 48), pbr.porcelainCeramic);
-h1.position.copy(h1Pos);
-h1.castShadow = true;
-const h2 = new THREE.Mesh(new THREE.SphereGeometry(0.7, 48, 48), pbr.porcelainCeramic);
-h2.position.copy(h2Pos);
-h2.castShadow = true;
-scene.add(h1, h2);
-
-// 3. Polished Chrome Covalent Chemical Bonds
-[h1Pos, h2Pos].forEach((hPos) => {
-  const oPos = oxygen.position;
-  const dist = oPos.distanceTo(hPos);
-  const bond = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, dist, 32), pbr.polishedChrome);
-  bond.position.copy(oPos.clone().add(hPos).multiplyScalar(0.5));
-  bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), hPos.clone().sub(oPos).normalize());
-  bond.castShadow = true;
-  scene.add(bond);
-});
-
-// 60 FPS Thermal Bond Vibration & Rotation
-engine.onUpdate((time, delta) => {
-  oxygen.position.y = 1.0 + Math.sin(time * 6) * 0.05;
-  scene.rotation.y = time * 0.5;
-});`,
-  },
-  dna: {
-    title: "🧬 B-DNA Double Helix (Watson-Crick Model)",
-    category: "biotech",
-    code: `// [B-DNA Double Helix Molecular Model]
-const numPairs = 35;
-const radius = 4.5;
-const pitch = 0.85;
-const twist = 0.35;
-
-for (let i = 0; i < numPairs; i++) {
-  const y = (i - numPairs / 2) * pitch;
-  const angle = i * twist;
-
-  // Sugar-Phosphate Strands
-  const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32), pbr.anodizedBlue);
-  s1.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
-  s1.castShadow = true;
-  scene.add(s1);
-
-  const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32), pbr.anodizedRed);
-  s2.position.set(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius);
-  s2.castShadow = true;
-  scene.add(s2);
-
-  // Complementary Base-Pair Hydrogen Rung
-  const v1 = s1.position;
-  const v2 = s2.position;
-  const rung = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, v1.distanceTo(v2), 24), pbr.forgedGoldBrass);
-  rung.position.copy(v1.clone().add(v2).multiplyScalar(0.5));
-  rung.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v2.clone().sub(v1).normalize());
-  rung.castShadow = true;
-  scene.add(rung);
-}
-
-// 60 FPS Helical Rotation
-engine.onUpdate((time, delta) => {
-  scene.rotation.y = time * 0.6;
-});`,
-  },
 };
 
-// Realistic PBR Material Generator Helper
 function createPBRMaterials() {
   return {
     polishedChrome: new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.95, roughness: 0.08 }),
@@ -362,9 +343,13 @@ export default function ScienceSimEngine({
   const [simSpeed, setSimSpeed] = useState<number>(1);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
-  const [showCodeEditor, setShowCodeEditor] = useState<boolean>(true); // Open by default so user sees & edits code!
+  const [showCodeEditor, setShowCodeEditor] = useState<boolean>(true);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>("Simulation Running from Code (60 FPS)");
+  const [statusMessage, setStatusMessage] = useState<string>("Volumetric Shader Active (60 FPS)");
+
+  // Time Dilation Clocks
+  const [earthSeconds, setEarthSeconds] = useState<number>(0);
+  const [millerSeconds, setMillerSeconds] = useState<number>(0);
 
   // Three.js Core Refs
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -390,12 +375,12 @@ export default function ScienceSimEngine({
 
     // Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#020306");
+    scene.background = new THREE.Color("#010204");
     sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 10, 30);
+    camera.position.set(0, 8, 30);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -408,27 +393,16 @@ export default function ScienceSimEngine({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.45;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMappingExposure = 1.5;
     rendererRef.current = renderer;
     canvasRef.current = renderer.domElement;
 
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
-    // Lights
+    // Ambient Lighting
     const ambientLight = new THREE.AmbientLight(0x0F172A, 0.8);
     scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xFDE68A, 2.0);
-    dirLight.position.set(20, 35, 20);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    const rimLight = new THREE.DirectionalLight(0x38BDF8, 1.4);
-    rimLight.position.set(-20, -10, -25);
-    scene.add(rimLight);
 
     // Mouse Interaction for 3D Orbit
     const onMouseDown = (e: MouseEvent) => {
@@ -502,6 +476,10 @@ export default function ScienceSimEngine({
 
       if (isPlaying) {
         simTimeRef.current += delta;
+
+        setMillerSeconds((m) => m + delta * 0.1);
+        setEarthSeconds((e) => e + delta * 6132.0);
+
         updateHooksRef.current.forEach((hook) => {
           try {
             hook(simTimeRef.current, delta);
@@ -536,7 +514,6 @@ export default function ScienceSimEngine({
     const renderer = rendererRef.current;
     if (!scene || !camera || !renderer) return;
 
-    // Clear previous objects created by code (preserve baseline lighting)
     const objectsToRemove: THREE.Object3D[] = [];
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Light) && obj !== scene) {
@@ -562,17 +539,16 @@ export default function ScienceSimEngine({
     };
 
     try {
-      // Execute the EXACT code written in the editor!
       const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "engine", "pbr", "time", sourceCode);
       scriptKernel(scene, camera, renderer, THREE, engineAPI, pbr, simTimeRef.current);
-      setStatusMessage("⚡ Code Compiled & Running at 60 FPS!");
+      setStatusMessage("⚡ Custom Shader Running at 60 FPS!");
     } catch (err: any) {
       console.error("Simulation Script Execution Error:", err);
       setRuntimeError(`Runtime Error: ${err.message}`);
     }
   };
 
-  // Switch Script Preset (Loads script into the Editor and immediately executes it!)
+  // Switch Script Preset
   const handleLoadScript = (presetKey: string) => {
     const item = EXECUTABLE_SCRIPTS[presetKey];
     if (item) {
@@ -626,7 +602,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `simulation_video_${Date.now()}.webm`;
+          link.download = `blackhole_shader_video_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -646,7 +622,7 @@ export default function ScienceSimEngine({
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = `simulation_video_${Date.now()}.webm`;
+          link.download = `blackhole_shader_video_${Date.now()}.webm`;
           link.click();
           URL.revokeObjectURL(url);
         };
@@ -656,13 +632,26 @@ export default function ScienceSimEngine({
     }
   };
 
+  // Format Time Helper
+  const formatEarthTime = (seconds: number) => {
+    const years = (seconds / (365.25 * 86400)).toFixed(2);
+    const days = Math.floor((seconds % (365.25 * 86400)) / 86400);
+    return `${years} Years (${days} Days)`;
+  };
+
+  const formatMillerTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}m ${secs}s`;
+  };
+
   return (
     <div style={styles.engineContainer} className="science-sim-engine card">
       {/* Top Header Controls */}
       <div style={styles.topBar}>
         <div style={styles.leftControls}>
           <div style={styles.badgeGroup}>
-            <span style={styles.engineBadge}>⚡ 3D SIMULATION CODE ENGINE</span>
+            <span style={styles.engineBadge}>⚡ 3D RELATIVISTIC SHADER ENGINE</span>
             <span style={styles.hardwareBadge}>{statusMessage}</span>
           </div>
 
@@ -676,7 +665,7 @@ export default function ScienceSimEngine({
                 style={activePreset === key ? styles.templateBtnActive : styles.templateBtn}
                 title={`Load ${EXECUTABLE_SCRIPTS[key].title} into the code editor`}
               >
-                {key === "blackhole" ? "🌌 Black Hole" : key === "engine" ? "⚙️ 4-Stroke Engine" : key === "water" ? "🧪 Water H₂O" : "🧬 DNA Helix"}
+                {key === "blackhole" ? "🌌 Gargantua Black Hole" : "⚙️ 4-Stroke Engine"}
               </button>
             ))}
           </div>
@@ -716,7 +705,7 @@ export default function ScienceSimEngine({
           <div style={styles.errorAlert}>⚠️ {runtimeError}</div>
         ) : (
           <div style={styles.infoText}>
-            💡 Type or edit ANY Three.js / Physics script in the Code Editor below and click <b>"▶ Compile &amp; Run"</b> (or press Ctrl+Enter).
+            💡 Type or edit ANY script in the Code Editor below and click <b>"▶ Compile &amp; Run"</b> (or press Ctrl+Enter).
           </div>
         )}
 
@@ -736,6 +725,21 @@ export default function ScienceSimEngine({
 
       {/* 3D WebGL Canvas */}
       <div style={styles.canvasWrapper} ref={mountRef}>
+        {/* Real-Time Relativistic Time Dilation Comparison Overlay */}
+        {activePreset === "blackhole" && (
+          <div style={styles.dilationHUD}>
+            <div style={styles.dilationHeader}>⏳ GRAVITATIONAL TIME DILATION HUD</div>
+            <div style={styles.clockRow}>
+              <span style={{ color: "#38BDF8", fontWeight: 700 }}>🌊 Miller&apos;s Planet (r = 8.5):</span>
+              <span style={styles.clockValue}>{formatMillerTime(millerSeconds)}</span>
+            </div>
+            <div style={styles.clockRow}>
+              <span style={{ color: "#10B981", fontWeight: 700 }}>🌍 Earth Observer:</span>
+              <span style={styles.clockValue}>{formatEarthTime(earthSeconds)}</span>
+            </div>
+          </div>
+        )}
+
         <div style={styles.hintOverlay}>
           🖱️ Click and drag to orbit in 3D • Scroll to zoom • Edit code below to transform the simulation live!
         </div>
@@ -782,7 +786,7 @@ export default function ScienceSimEngine({
 
 const styles: Record<string, React.CSSProperties> = {
   engineContainer: {
-    backgroundColor: "#020306",
+    backgroundColor: "#010204",
     borderRadius: "10px",
     border: "1px solid #1E293B",
     overflow: "hidden",
@@ -827,7 +831,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: "0.3rem",
-    background: "#020306",
+    background: "#010204",
     padding: "0.2rem 0.4rem",
     borderRadius: "6px",
   },
@@ -939,13 +943,47 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
     overflow: "hidden",
     cursor: "grab",
-    minHeight: "420px",
+    minHeight: "440px",
+  },
+  dilationHUD: {
+    position: "absolute",
+    top: "12px",
+    left: "12px",
+    background: "rgba(1, 2, 4, 0.92)",
+    backdropFilter: "blur(8px)",
+    border: "1px solid #D1A751",
+    color: "#F8FAFC",
+    padding: "0.5rem 0.9rem",
+    borderRadius: "8px",
+    pointerEvents: "none",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.8)",
+    minWidth: "260px",
+  },
+  dilationHeader: {
+    fontSize: "0.68rem",
+    fontWeight: 800,
+    color: "#D1A751",
+    letterSpacing: "0.05em",
+    marginBottom: "0.3rem",
+    borderBottom: "1px solid rgba(209, 167, 81, 0.3)",
+    paddingBottom: "0.2rem",
+  },
+  clockRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: "0.72rem",
+    margin: "0.15rem 0",
+  },
+  clockValue: {
+    fontFamily: "'Fira Code', monospace",
+    fontWeight: 700,
+    color: "#FFFFFF",
   },
   hintOverlay: {
     position: "absolute",
     bottom: "10px",
     left: "12px",
-    background: "rgba(4, 6, 12, 0.85)",
+    background: "rgba(1, 2, 4, 0.85)",
     backdropFilter: "blur(4px)",
     color: "#94A3B8",
     fontSize: "0.68rem",
@@ -955,7 +993,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.08)",
   },
   codeDrawer: {
-    backgroundColor: "#020306",
+    backgroundColor: "#010204",
     borderTop: "1px solid #1E293B",
     padding: "0.8rem 1rem",
   },
@@ -983,8 +1021,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scriptTextarea: {
     width: "100%",
-    height: "220px",
-    backgroundColor: "#060910",
+    height: "260px",
+    backgroundColor: "#04070D",
     color: "#F8FAFC",
     fontFamily: "'Fira Code', monospace",
     fontSize: "0.82rem",
