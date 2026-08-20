@@ -344,7 +344,7 @@ export default function PostEditor({ post }: PostEditorProps) {
         </div>
       )}
 
-      <div style={styles.flexLayout}>
+      <div style={styles.flexLayout} className="admin-editor-grid">
         {/* Left Side: Metadata and Document Sheet */}
         <div style={styles.leftFields}>
           {/* Title */}
@@ -715,18 +715,21 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "1.5rem",
   },
   flexLayout: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) 300px",
     gap: "2.5rem",
-    flexWrap: "wrap",
+    alignItems: "start",
+    width: "100%",
   },
   leftFields: {
-    flex: "2 1 600px",
+    minWidth: 0,
+    width: "100%",
     display: "flex",
     flexDirection: "column",
     gap: "1.2rem",
   },
   rightUploader: {
-    flex: "1 1 300px",
+    width: "100%",
     display: "flex",
     flexDirection: "column",
     gap: "2rem",

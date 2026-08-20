@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
   }, [state.success]);
 
   return (
-    <div style={styles.container} className="fade-in">
+    <div style={styles.container} className="admin-login-container fade-in">
       {/* Left split - brand banner */}
       <div style={styles.leftPanel}>
         <div style={styles.logoContainer}>
@@ -253,9 +253,13 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "1.2rem",
   },
   input: {
+    width: "100%",
     backgroundColor: "var(--color-white)",
     border: "1px solid var(--color-border)",
     padding: "0.9rem 1.1rem",
+    boxSizing: "border-box",
+    borderRadius: "4px",
+    display: "block",
   },
   button: {
     width: "100%",
