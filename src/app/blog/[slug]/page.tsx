@@ -9,7 +9,6 @@ import { incrementPostViews } from "../../actions/blog";
 import { Metadata } from "next";
 import Footer from "@/app/components/Footer";
 import MDContent from "@/app/components/MDContent";
-import Script from "next/script";
 import { optimizeCloudinaryUrl } from "@/lib/media";
 import SidebarNewsletter from "@/app/components/SidebarNewsletter";
 
@@ -27,7 +26,7 @@ interface HeadingItem {
   id: string;
 }
 
-// Extract headings for dynamic Table of Contents (supports HTML and Markdown)
+// Extract headings for dynamic Table of Contents
 function extractHeadings(content: string): HeadingItem[] {
   if (!content) return [];
   const headings: HeadingItem[] = [];
@@ -97,65 +96,6 @@ export async function generateMetadata({
   };
 }
 
-// Custom Markdown to HTML Converter for safe rendering
-function renderMarkdownToHtml(markdown: string): string {
-  // Prevent XSS while allowing basic formatting
-  let html = markdown
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  // Bold **text** -> <strong>text</strong>
-  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // Italic *text* -> <em>text</em>
-  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-  // Links [text](url) -> <a href="url" target="_blank" rel="noopener" class="md-link">text</a>
-  html = html.replace(
-    /\[(.*?)\]\((.*?)\)/g,
-    '<a href="$2" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">$1</a>'
-  );
-
-  const lines = html.split("\n");
-  let inList = false;
-  let result = "";
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-      if (!inList) {
-        result += '<ul style="margin-left:1.5rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:0.4rem;">';
-        inList = true;
-      }
-      result += `<li>${trimmed.slice(2)}</li>`;
-    } else {
-      if (inList) {
-        result += "</ul>";
-        inList = false;
-      }
-
-      if (trimmed.startsWith("### ")) {
-        result += `<h3 style="font-size:1.2rem;margin-top:1.8rem;margin-bottom:0.8rem;font-family:var(--font-sans);font-weight:700;">${trimmed.slice(4)}</h3>`;
-      } else if (trimmed.startsWith("## ")) {
-        result += `<h2 style="font-size:1.6rem;margin-top:2.2rem;margin-bottom:1rem;font-family:var(--font-serif);color:var(--color-text-dark);">${trimmed.slice(3)}</h2>`;
-      } else if (trimmed.startsWith("# ")) {
-        result += `<h1 style="font-size:2rem;margin-top:2.5rem;margin-bottom:1.2rem;font-family:var(--font-serif);color:var(--color-text-dark);border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;">${trimmed.slice(2)}</h1>`;
-      } else if (trimmed === "") {
-        result += '<div style="height:0.8rem;"></div>';
-      } else {
-        result += `<p style="font-size:1rem;line-height:1.75;margin-bottom:1.2rem;color:#2C221D;">${trimmed}</p>`;
-      }
-    }
-  }
-
-  if (inList) {
-    result += "</ul>";
-  }
-
-  return result;
-}
-
 export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
   const { slug } = await params;
 
@@ -168,7 +108,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
     notFound();
   }
 
-  // Increment views on server render (non-blocking)
+  // Increment views on server render
   incrementPostViews(post.id);
 
   // Fetch related posts (same format, up to 3 posts, excluding current post)
@@ -220,7 +160,7 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
       </header>
 
       {/* Main Post Container (Two-column Grid Layout) */}
-      <main className="container editorial-layout" style={{ paddingTop: "3.5rem", paddingBottom: "6rem" }}>
+      <main className="container editorial-layout" style={{ paddingTop: "2.5rem", paddingBottom: "5rem" }}>
         {/* Left Column: Article Body */}
         <div className="editorial-main">
           {/* Post Metadata Header */}
@@ -231,10 +171,10 @@ export default async function BlogDetailsPage({ params }: BlogDetailsProps) {
               <span style={styles.metaText}>{post.views} views</span>
             </div>
 
-            <h1 style={styles.postTitle}>{post.title}</h1>
+            <h1 className="post-title-fluid">{post.title}</h1>
             <p style={styles.postSummary}>{post.summary}</p>
             
-            {/* Hashtag tags list centered */}
+            {/* Hashtag tags list */}
             <div style={styles.pillsRow}>
               <span className="badge badge-news" style={styles.pill}>#{post.type}</span>
               <span className="badge badge-photo" style={styles.pill}>#global-insights</span>
@@ -353,41 +293,19 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "var(--color-bg-light)",
     display: "flex",
     flexDirection: "column",
-  },
-  header: {
-    backgroundColor: "var(--color-bg-light)",
-    borderBottom: "1px solid var(--color-border)",
-    padding: "1rem 0",
-  },
-  headerContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  logo: {
-    objectFit: "contain",
-  },
-  backBtn: {
-    fontSize: "0.75rem",
-    fontWeight: 700,
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    color: "var(--color-text-dark)",
-  },
-  main: {
-    flexGrow: 1,
-    paddingTop: "3.5rem",
-    paddingBottom: "6rem",
-    maxWidth: "800px", // Centered narrow article reader width
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "hidden",
   },
   postMetaHeader: {
-    marginBottom: "2.5rem",
+    marginBottom: "2rem",
+    width: "100%",
   },
   metaRow: {
     display: "flex",
     alignItems: "center",
     gap: "0.6rem",
-    marginBottom: "1.2rem",
+    marginBottom: "1rem",
     flexWrap: "wrap",
   },
   metaDivider: {
@@ -398,26 +316,28 @@ const styles: Record<string, React.CSSProperties> = {
     color: "var(--color-text-muted)",
     fontWeight: 500,
   },
-  postTitle: {
-    fontSize: "3.2rem",
-    fontFamily: "var(--font-serif)",
-    color: "var(--color-text-dark)",
-    lineHeight: "1.1",
-    fontWeight: "normal",
-    marginBottom: "1rem",
-  },
   postSummary: {
-    fontSize: "1.15rem",
+    fontSize: "1.1rem",
     lineHeight: "1.6",
     fontStyle: "italic",
     color: "var(--color-text-muted)",
     borderLeft: "2px solid var(--color-accent)",
-    paddingLeft: "1.2rem",
-    margin: "1.5rem 0",
+    paddingLeft: "1rem",
+    margin: "1.2rem 0",
+  },
+  pillsRow: {
+    display: "flex",
+    gap: "0.4rem",
+    flexWrap: "wrap",
+    marginTop: "1rem",
+  },
+  pill: {
+    fontSize: "0.65rem",
+    padding: "0.2rem 0.5rem",
   },
   mediaSection: {
     width: "100%",
-    marginBottom: "3rem",
+    marginBottom: "2.5rem",
   },
   videoPlayer: {
     width: "100%",
@@ -436,188 +356,57 @@ const styles: Record<string, React.CSSProperties> = {
     objectFit: "cover",
     display: "block",
   },
-  contentSection: {
-    marginBottom: "5rem",
-  },
-  contentBody: {
-    fontSize: "1.05rem",
-    lineHeight: "1.8",
-  },
-  relatedSection: {
-    borderTop: "1px solid var(--color-border)",
-    paddingTop: "3rem",
-    marginTop: "4rem",
-  },
-  relatedTitle: {
-    fontSize: "1.8rem",
-    fontFamily: "var(--font-serif)",
-    color: "var(--color-text-dark)",
-    marginBottom: "0.5rem",
-  },
-  relatedDivider: {
-    width: "40px",
-    height: "2px",
-    backgroundColor: "var(--color-accent)",
-    marginBottom: "2rem",
-  },
-  relatedGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1.5rem",
-  },
-  relatedCard: {
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-    transition: "var(--transition-smooth)",
-  },
-  relatedCardMedia: {
-    width: "100%",
-    height: "140px",
-    overflow: "hidden",
-    borderBottom: "1px solid var(--color-border)",
-  },
-  relatedCardImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    transition: "transform 0.4s ease",
-  },
-  relatedNewsPlaceholder: {
-    width: "100%",
-    height: "120px",
-    backgroundColor: "#FAF7F2",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "2.5rem",
-    color: "var(--color-border)",
-    fontFamily: "var(--font-serif)",
-    borderBottom: "1px solid var(--color-border)",
-  },
-  relatedCardBody: {
-    padding: "1rem",
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-  },
-  relatedCardDate: {
-    fontSize: "0.7rem",
-    color: "var(--color-text-muted)",
-    marginBottom: "0.4rem",
-  },
-  relatedCardTitle: {
-    fontSize: "0.95rem",
-    fontWeight: 600,
-    color: "var(--color-text-dark)",
-    lineHeight: "1.35",
-    // Line clamping
-    display: "-webkit-box",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
-  footer: {
-    backgroundColor: "var(--color-bg-dark)",
-    color: "var(--color-bg-light)",
-    padding: "3.5rem 0",
-    borderTop: "1px solid var(--color-border-dark)",
-    marginTop: "auto",
-  },
-  footerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    textAlign: "center",
-    gap: "1.5rem",
-  },
-  footerLogo: {
-    objectFit: "contain",
-    filter: "brightness(0) invert(1)",
-  },
-  footerText: {
-    fontSize: "0.8rem",
-    color: "var(--color-bg-tan)",
-    opacity: 0.7,
-    maxWidth: "400px",
-  },
-  footerLinks: {
-    display: "flex",
-    gap: "1rem",
-    fontSize: "0.8rem",
-    color: "var(--color-bg-tan)",
-  },
-  footerLink: {
-    transition: "var(--transition-fast)",
-  },
-  pillsRow: {
-    display: "flex",
-    gap: "0.5rem",
-    flexWrap: "wrap",
-    marginTop: "1.2rem",
-  },
-  pill: {
-    fontSize: "0.65rem",
-    padding: "0.25rem 0.6rem",
-    borderRadius: "20px",
-    textTransform: "lowercase",
-    fontWeight: 600,
-  },
   tocBox: {
-    backgroundColor: "#FAF7F2",
-    border: "1px solid var(--color-border)",
-    padding: "1.5rem",
+    padding: "1.2rem 1.4rem",
+    backgroundColor: "var(--color-white)",
     marginBottom: "2.5rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.8rem",
+    borderRadius: "4px",
   },
   tocTitle: {
-    fontFamily: "var(--font-sans)",
-    fontSize: "0.8rem",
+    fontSize: "0.85rem",
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
-    color: "var(--color-accent)",
-    margin: 0,
+    marginBottom: "0.8rem",
+    color: "var(--color-text-dark)",
   },
   tocList: {
-    listStyleType: "none",
-    padding: 0,
-    margin: 0,
+    listStyle: "none",
     display: "flex",
     flexDirection: "column",
-    gap: "0.6rem",
+    gap: "0.5rem",
   },
   tocItem: {
-    fontSize: "0.9rem",
-    lineHeight: "1.4",
+    fontSize: "0.88rem",
   },
   tocLink: {
     color: "var(--color-text-muted)",
     textDecoration: "none",
-    transition: "color 0.2s",
+    transition: "color 0.15s",
+  },
+  contentSection: {
+    marginBottom: "3.5rem",
+    width: "100%",
+    maxWidth: "100%",
   },
   sidebarRelSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1.2rem",
+    backgroundColor: "var(--color-white)",
+    border: "1px solid var(--color-border)",
+    padding: "1.2rem",
+    borderRadius: "4px",
   },
   sidebarRelHeader: {
-    fontFamily: "var(--font-sans)",
-    fontSize: "0.8rem",
+    fontSize: "0.75rem",
     fontWeight: 700,
-    textTransform: "uppercase",
     letterSpacing: "0.08em",
-    color: "var(--color-text-muted)",
+    color: "var(--color-text-dark)",
+    marginBottom: "1rem",
     borderBottom: "1px solid var(--color-border)",
-    paddingBottom: "0.5rem",
-    margin: 0,
+    paddingBottom: "0.4rem",
   },
   sidebarRelList: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "0.8rem",
   },
 };

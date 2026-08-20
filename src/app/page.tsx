@@ -81,7 +81,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
 
   return (
     <div style={styles.pageContainer} className="fade-in">
-      {/* Top Banner (Zarnoor Jewels inspired) */}
+      {/* Top Banner */}
       <div className="banner-top">
         <span>✦ KINETIC CODE LABS JOURNAL</span>
         <span>•</span>
@@ -105,8 +105,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
               <Image
                 src="/logo.png"
                 alt="Kinetic Code Labs Logo"
-                width={180}
-                height={55}
+                width={160}
+                height={50}
                 className="nav-logo-img"
                 priority
               />
@@ -123,40 +123,32 @@ export default async function HomePage({ searchParams }: HomeProps) {
       <section style={styles.heroSection}>
         <div className="container" style={styles.heroContainer}>
           <span style={styles.heroPreTitle}>GLOBAL CONTENT PORTAL</span>
-          <h1 style={styles.heroTitle}>
-            Trending Stories Across Tech, Entertainment, <br />
-            <span style={styles.heroTitleItalic}>Bollywood, Education, and 100+ Influential Sectors.</span>
+          <h1 className="hero-title-fluid">
+            Trending Stories Across Tech, Engineering, <br />
+            <span style={styles.heroTitleItalic}>Astrophysics, Simulation &amp; Global Innovation.</span>
           </h1>
-          <p style={{
-            color: "var(--color-text-muted)",
-            fontSize: "0.95rem",
-            lineHeight: "1.6",
-            maxWidth: "800px",
-            margin: "1rem auto 0 auto",
-            fontWeight: 300,
-            textAlign: "center"
-          }}>
-            Explore our curated feed of news, photo stories, and video series. From cutting-edge software engineering and AI breakthroughs to Bollywood updates, Hollywood gossips, educational guides, and top-tier industry insights.
+          <p style={styles.heroDescription}>
+            Explore our curated interactive articles, 3D simulations, and deep-dive technical insights. From real-time WebGL physics and quantum algorithms to aerospace mechanics and full-stack engineering.
           </p>
 
-          {/* Stats Bar (Zarnoor Jewels inspired) */}
-          <div style={styles.statsBar}>
+          {/* Responsive Stats Bar */}
+          <div className="stats-bar-responsive card">
             <div style={styles.statBox}>
               <div style={styles.statLabel}>CURATED STORIES</div>
               <div style={styles.statVal}>{stats.total}</div>
               <div style={styles.statSubText}>Total articles published</div>
             </div>
-            <div style={styles.statBoxDivider}></div>
+            <div style={styles.statBoxDivider} className="stat-box-divider-responsive"></div>
             <div style={styles.statBox}>
-              <div style={styles.statLabel}>NEWS & SHORTS</div>
+              <div style={styles.statLabel}>NEWS &amp; ARTICLES</div>
               <div style={styles.statVal}>{stats.news}</div>
               <div style={styles.statSubText}>Updates and highlights</div>
             </div>
-            <div style={styles.statBoxDivider}></div>
+            <div style={styles.statBoxDivider} className="stat-box-divider-responsive"></div>
             <div style={styles.statBox}>
-              <div style={styles.statLabel}>PHOTOGRAPHIC & VIDEO</div>
+              <div style={styles.statLabel}>SIMULATIONS &amp; MEDIA</div>
               <div style={styles.statVal}>{stats.photo + stats.video}</div>
-              <div style={styles.statSubText}>Interactive media files</div>
+              <div style={styles.statSubText}>Interactive 3D labs</div>
             </div>
           </div>
         </div>
@@ -311,11 +303,11 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 className="btn-secondary"
                 style={styles.pageBtn}
               >
-                ← Previous Page
+                ← Previous
               </Link>
             ) : (
               <span style={{ ...styles.pageBtnDisabled, marginRight: "auto" }}>
-                ← Previous Page
+                ← Previous
               </span>
             )}
 
@@ -332,11 +324,11 @@ export default async function HomePage({ searchParams }: HomeProps) {
                 className="btn-primary"
                 style={styles.pageBtn}
               >
-                Next Page →
+                Next →
               </Link>
             ) : (
               <span style={{ ...styles.pageBtnDisabled, marginLeft: "auto" }}>
-                Next Page →
+                Next →
               </span>
             )}
           </div>
@@ -355,62 +347,14 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "var(--color-bg-light)",
     display: "flex",
     flexDirection: "column",
-  },
-  header: {
-    backgroundColor: "var(--color-bg-light)",
-    borderBottom: "1px solid var(--color-border)",
-    padding: "1.2rem 0",
-  },
-  headerContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  headerLeft: {
-    display: "flex",
-    alignItems: "center",
-  },
-  exploreLink: {
-    fontSize: "0.8rem",
-    fontWeight: 600,
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    display: "flex",
-    alignItems: "center",
-    gap: "0.6rem",
-  },
-  exploreMenu: {
-    display: "inline-block",
-    width: "16px",
-    height: "2px",
-    backgroundColor: "var(--color-text-dark)",
-    position: "relative",
-    // Creates standard burger lines
-    boxShadow: "0 -5px 0 var(--color-text-dark), 0 5px 0 var(--color-text-dark)",
-  },
-  headerCenter: {
-    display: "flex",
-    justifyContent: "center",
-  },
-  logo: {
-    objectFit: "contain",
-  },
-  headerRight: {
-    display: "flex",
-    alignItems: "center",
-  },
-  memberTag: {
-    fontSize: "0.7rem",
-    fontWeight: 700,
-    letterSpacing: "0.1em",
-    color: "var(--color-accent)",
-    border: "1px solid var(--color-accent)",
-    padding: "0.2rem 0.5rem",
-    borderRadius: "2px",
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "hidden",
   },
   heroSection: {
-    padding: "4rem 0 3rem 0",
+    padding: "3.5rem 0 2.5rem 0",
     borderBottom: "1px solid var(--color-border)",
+    width: "100%",
   },
   heroContainer: {
     display: "flex",
@@ -419,38 +363,30 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: "center",
   },
   heroPreTitle: {
-    fontSize: "0.75rem",
+    fontSize: "0.72rem",
     fontWeight: 700,
     letterSpacing: "0.15em",
     color: "var(--color-text-muted)",
     textTransform: "uppercase",
-    marginBottom: "1rem",
-  },
-  heroTitle: {
-    fontSize: "3rem",
-    fontFamily: "var(--font-serif)",
-    color: "var(--color-text-dark)",
-    lineHeight: "1.15",
-    fontWeight: "normal",
+    marginBottom: "0.8rem",
   },
   heroTitleItalic: {
     fontStyle: "italic",
     color: "var(--color-accent)",
   },
-  statsBar: {
-    display: "flex",
-    width: "100%",
-    maxWidth: "800px",
-    backgroundColor: "#FAF7F2",
-    border: "1px solid var(--color-border)",
-    padding: "1.5rem",
-    marginTop: "3rem",
-    justifyContent: "space-between",
-    alignItems: "center",
+  heroDescription: {
+    color: "var(--color-text-muted)",
+    fontSize: "0.95rem",
+    lineHeight: "1.6",
+    maxWidth: "760px",
+    margin: "0.8rem auto 0 auto",
+    fontWeight: 400,
+    textAlign: "center",
   },
   statBox: {
     flex: 1,
-    padding: "0 1rem",
+    padding: "1.2rem 1rem",
+    textAlign: "center",
   },
   statBoxDivider: {
     width: "1px",
@@ -479,6 +415,7 @@ const styles: Record<string, React.CSSProperties> = {
   controlsSection: {
     borderBottom: "1px solid var(--color-border)",
     backgroundColor: "#FAF8F4",
+    width: "100%",
   },
   controlsContainer: {
     display: "flex",
@@ -486,19 +423,20 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     paddingTop: "0.8rem",
     paddingBottom: "0.8rem",
-    gap: "1.5rem",
+    gap: "1rem",
     flexWrap: "wrap",
   },
   filtersGroup: {
     display: "flex",
-    gap: "1.5rem",
+    gap: "1rem",
+    flexWrap: "wrap",
   },
   filterTab: {
-    fontSize: "0.8rem",
+    fontSize: "0.78rem",
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    padding: "0.5rem 0",
+    padding: "0.4rem 0",
     borderBottom: "2px solid transparent",
     color: "var(--color-text-muted)",
     transition: "var(--transition-fast)",
@@ -509,38 +447,44 @@ const styles: Record<string, React.CSSProperties> = {
   },
   searchForm: {
     display: "flex",
-    gap: "0.5rem",
+    gap: "0.4rem",
+    flexGrow: 1,
+    maxWidth: "320px",
   },
   searchInput: {
     padding: "0.5rem 0.8rem",
     border: "1px solid var(--color-border)",
     fontSize: "0.8rem",
     backgroundColor: "var(--color-white)",
-    width: "200px",
+    flex: 1,
+    minWidth: 0,
+    outline: "none",
   },
   searchBtn: {
     padding: "0.5rem 1rem",
     backgroundColor: "var(--color-text-dark)",
     color: "var(--color-bg-light)",
     border: "none",
-    fontSize: "0.75rem",
+    fontSize: "0.72rem",
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.05em",
     cursor: "pointer",
+    whiteSpace: "nowrap",
   },
   mainFeed: {
-    paddingTop: "4rem",
-    paddingBottom: "6rem",
+    paddingTop: "3rem",
+    paddingBottom: "5rem",
     flexGrow: 1,
+    width: "100%",
   },
   emptyState: {
-    padding: "5rem 2rem",
+    padding: "4rem 1.5rem",
     textAlign: "center",
     color: "var(--color-text-muted)",
   },
   emptyTitle: {
-    fontSize: "1.8rem",
+    fontSize: "1.6rem",
     fontFamily: "var(--font-serif)",
     color: "var(--color-text-dark)",
     marginBottom: "0.5rem",
@@ -552,17 +496,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cardCounter: {
     position: "absolute",
-    top: "1rem",
-    right: "1.5rem",
+    top: "0.8rem",
+    right: "1.2rem",
     fontFamily: "var(--font-serif)",
-    fontSize: "1.1rem",
+    fontSize: "1rem",
     fontWeight: 600,
     color: "var(--color-border)",
     zIndex: 10,
   },
   cardMediaBox: {
     width: "100%",
-    height: "220px",
+    height: "200px",
     position: "relative",
     overflow: "hidden",
     borderBottom: "1px solid var(--color-border)",
@@ -572,7 +516,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    transition: "transform 0.5s ease",
+    transition: "transform 0.4s ease",
   },
   videoThumbnailWrapper: {
     position: "relative",
@@ -592,33 +536,32 @@ const styles: Record<string, React.CSSProperties> = {
   },
   playIcon: {
     display: "inline-flex",
-    width: "48px",
-    height: "48px",
+    width: "44px",
+    height: "44px",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "var(--color-bg-light)",
     color: "var(--color-text-dark)",
     borderRadius: "50%",
-    fontSize: "0.9rem",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-    paddingLeft: "4px", // Align triangle
+    fontSize: "1rem",
+    paddingLeft: "3px",
   },
   newsAestheticBlock: {
     width: "100%",
-    height: "180px",
+    height: "160px",
     backgroundColor: "#FAF7F2",
+    borderBottom: "1px solid var(--color-border)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    borderBottom: "1px solid var(--color-border)",
   },
   newsSymbol: {
     fontFamily: "var(--font-serif)",
-    fontSize: "4rem",
+    fontSize: "2.5rem",
     color: "var(--color-border)",
   },
   cardBody: {
-    padding: "1.8rem 1.5rem",
+    padding: "1.4rem",
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
@@ -627,96 +570,62 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "1rem",
+    marginBottom: "0.8rem",
   },
   cardDate: {
-    fontSize: "0.75rem",
+    fontSize: "0.72rem",
     color: "var(--color-text-muted)",
-    fontWeight: 500,
   },
   cardTitle: {
-    fontSize: "1.4rem",
+    fontSize: "1.35rem",
+    fontFamily: "var(--font-serif)",
     color: "var(--color-text-dark)",
     lineHeight: "1.25",
-    marginBottom: "0.8rem",
-    fontWeight: "normal",
+    marginBottom: "0.6rem",
   },
   cardExcerpt: {
-    fontSize: "0.85rem",
+    fontSize: "0.88rem",
     color: "var(--color-text-muted)",
     lineHeight: "1.6",
-    marginBottom: "1.5rem",
+    marginBottom: "1.4rem",
     flexGrow: 1,
   },
   readMoreLink: {
-    fontSize: "0.75rem",
+    fontSize: "0.78rem",
     fontWeight: 700,
-    color: "var(--color-text-dark)",
     textTransform: "uppercase",
     letterSpacing: "0.08em",
+    color: "var(--color-text-dark)",
+    display: "inline-flex",
+    alignItems: "center",
     marginTop: "auto",
-    borderBottom: "1px solid transparent",
   },
   pagination: {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginTop: "4rem",
+    alignItems: "center",
+    marginTop: "3.5rem",
     borderTop: "1px solid var(--color-border)",
-    paddingTop: "2rem",
+    paddingTop: "1.8rem",
+    flexWrap: "wrap",
+    gap: "1rem",
   },
   pageBtn: {
     fontSize: "0.75rem",
     padding: "0.6rem 1.2rem",
-    minWidth: "150px",
-    textAlign: "center",
   },
   pageBtnDisabled: {
     fontSize: "0.75rem",
     padding: "0.6rem 1.2rem",
-    minWidth: "150px",
-    textAlign: "center",
-    color: "var(--color-text-muted)",
-    backgroundColor: "transparent",
+    color: "var(--color-border)",
     border: "1px solid var(--color-border)",
     cursor: "not-allowed",
-    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
   pageIndicator: {
-    fontSize: "0.85rem",
+    fontSize: "0.78rem",
+    color: "var(--color-text-muted)",
     fontWeight: 600,
-    color: "var(--color-text-dark)",
-  },
-  footer: {
-    backgroundColor: "var(--color-bg-dark)",
-    color: "var(--color-bg-light)",
-    padding: "3.5rem 0",
-    borderTop: "1px solid var(--color-border-dark)",
-  },
-  footerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    textAlign: "center",
-    gap: "1.5rem",
-  },
-  footerLogo: {
-    objectFit: "contain",
-    filter: "brightness(0) invert(1)",
-  },
-  footerText: {
-    fontSize: "0.8rem",
-    color: "var(--color-bg-tan)",
-    opacity: 0.7,
-    maxWidth: "400px",
-  },
-  footerLinks: {
-    display: "flex",
-    gap: "1rem",
-    fontSize: "0.8rem",
-    color: "var(--color-bg-tan)",
-  },
-  footerLink: {
-    transition: "var(--transition-fast)",
   },
 };
