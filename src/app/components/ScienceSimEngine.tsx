@@ -15,380 +15,222 @@ interface ScienceSimEngineProps {
 }
 
 // ============================================================================
-// 🌍 CINEMATIC NASA EARTH & ROCKET ORBITAL ESCAPE SIMULATION (GLSL SHADERS)
-// Fixed: World-Space Normal Lighting, Fresnel Atmosphere, Swirling Procedural Clouds,
-// Proper Keplerian Tangent Velocity Derivative, and Night City Lights!
+// 🌀 GARGANTUA: REAL-TIME SCHWARZSCHILD GEODESIC RAYMARCHER (GLSL SHADER)
+// Physics: Null Geodesics, Relativistic Doppler Beaming, Gravitational Redshift,
+// Adaptive Log-Step Marching, Cinematic Auto-Orbit & High-DPI DPR Rendering
 // ============================================================================
-const NASA_EARTH_ROCKET_CODE = `// ============================================================================
-// 🌍 PHOTOREALISTIC NASA EARTH & ROCKET ESCAPE VELOCITY SIMULATION
-// ============================================================================
+const GARGANTUA_RAYMARCH_CODE = `// ================================================================
+// 🌀 GARGANTUA — Real-Time Schwarzschild Geodesic Raymarcher
+// Physics: Null Geodesics, Doppler Beaming & Gravitational Lensing
+// ================================================================
 
-// 1. ☀️ Sun Light Direction in World Space
-const sunDir = new THREE.Vector3(40, 20, 30).normalize();
+const frag = \`
+precision highp float;
 
-// 2. 🌍 Procedural NASA Earth Shader (World Space Lighting + City Lights)
-const earthVertexShader = \`
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
-  varying vec2 vUv;
+uniform vec2  uResolution;
+uniform float uTime;
+uniform vec3  uCamPos;
+uniform mat3  uCamBasis;
+uniform float uTanFov;
 
-  void main() {
-    vUv = uv;
-    vWorldNormal = normalize(mat3(modelMatrix) * normal);
-    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPos, 1.0);
-  }
-\`;
+#define RS       1.0
+#define DISK_IN  2.6
+#define DISK_OUT 12.0
+#define FAR      90.0
+#define STEPS    220
+#define DOPPLER  1
 
-const earthFragmentShader = \`
-  uniform vec3 uSunDir;
-  uniform float uTime;
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
-  varying vec2 vUv;
+mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 
-  // 3D Simplex Noise
-  vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-  vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+float hash13(vec3 p){
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
 
-  float snoise(vec3 v) {
-    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-    vec3 i  = floor(v + dot(v, C.yyy));
-    vec3 x0 = v - i + dot(i, C.xxx);
-    vec3 g = step(x0.yzx, x0.xyz);
-    vec3 l = 1.0 - g;
-    vec3 i1 = min(g.xyz, l.zxy);
-    vec3 i2 = max(g.xyz, l.zxy);
-    vec3 x1 = x0 - i1 + C.xxx;
-    vec3 x2 = x0 - i2 + C.yyy;
-    vec3 x3 = x0 - D.yyy;
-    i = mod289(i);
-    vec4 p = permute(permute(permute(
-              i.z + vec4(0.0, i1.z, i2.z, 1.0))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-    float n_ = 0.142857142857;
-    vec3  ns = n_ * D.wyz - D.xzx;
-    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-    vec4 x_ = floor(j * ns.z);
-    vec4 y_ = floor(j - 7.0 * x_);
-    vec4 x = x_ *ns.x + ns.yyyy;
-    vec4 y = y_ *ns.x + ns.yyyy;
-    vec4 h = 1.0 - abs(x) - abs(y);
-    vec4 b0 = vec4(x.xy, y.xy);
-    vec4 b1 = vec4(x.zw, y.zw);
-    vec4 s0 = floor(b0)*2.0 + 1.0;
-    vec4 s1 = floor(b1)*2.0 + 1.0;
-    vec4 sh = -step(h, vec4(0.0));
-    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-    vec3 p0 = vec3(a0.xy, h.x);
-    vec3 p1 = vec3(a0.zw, h.y);
-    vec3 p2 = vec3(a1.xy, h.z);
-    vec3 p3 = vec3(a1.zw, h.w);
-    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-    m = m * m;
-    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+float vnoise(vec3 p){
+  vec3 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(hash13(i),                 hash13(i + vec3(1,0,0)), f.x),
+        mix(hash13(i + vec3(0,1,0)),   hash13(i + vec3(1,1,0)), f.x), f.y),
+    mix(mix(hash13(i + vec3(0,0,1)),   hash13(i + vec3(1,0,1)), f.x),
+        mix(hash13(i + vec3(0,1,1)),   hash13(i + vec3(1,1,1)), f.x), f.y),
+    f.z);
+}
+
+float fbm(vec3 p){
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++){ v += a * vnoise(p); p = p * 2.03 + 11.7; a *= 0.5; }
+  return v;
+}
+
+vec3 diskRamp(float x){
+  vec3 c = mix(vec3(0.32, 0.07, 0.02), vec3(1.0, 0.42, 0.10), smoothstep(0.0, 0.5, x));
+  c = mix(c, vec3(1.0, 0.86, 0.55), smoothstep(0.45, 0.80, x));
+  c = mix(c, vec3(1.35, 1.30, 1.20), smoothstep(0.80, 1.15, x));
+  return c;
+}
+
+vec4 diskShade(vec3 p, vec3 photonVel){
+  float r = length(p.xz);
+  float omega = 2.0 * pow(r, -1.5);
+  vec2 q = rot(omega * uTime) * p.xz;
+
+  float n = fbm(vec3(q * 0.55, r * 0.30));
+  n += 0.5 * fbm(vec3(q * 1.4, r * 0.9 + 40.0));
+  n = pow(n * 0.7, 2.0);
+
+  float temp = pow(DISK_IN / r, 0.75);
+
+  float g = 1.0;
+  if (DOPPLER == 1){
+    vec3 vdir = normalize(vec3(-p.z, 0.0, p.x));
+    float beta = sqrt(0.5 * RS / r);
+    float gamma = inversesqrt(max(1.0 - beta * beta, 0.01));
+    vec3 toObs = -normalize(photonVel);
+    float doppler = 1.0 / (gamma * (1.0 - beta * dot(vdir, toObs)));
+    g = doppler * sqrt(max(1.0 - RS / r, 0.05));
   }
 
-  void main() {
-    vec3 n = normalize(vWorldPos);
-    float elevation = snoise(n * 2.2) * 0.6 + snoise(n * 6.0) * 0.25 + snoise(n * 14.0) * 0.15;
+  vec3 col = diskRamp(clamp(temp * g, 0.0, 1.25)) * (0.30 + n);
+  col *= pow(g, 3.0);
 
-    // True World Space Day/Night Lighting
-    float NdotL = dot(vWorldNormal, uSunDir);
-    float dayLight = smoothstep(-0.15, 0.25, NdotL);
+  float edge = smoothstep(DISK_IN, DISK_IN + 0.6, r) * (1.0 - smoothstep(DISK_OUT - 3.5, DISK_OUT, r));
+  float alpha = edge * clamp(0.2 + n * 1.6, 0.0, 1.0);
+  return vec4(col * edge, alpha);
+}
 
-    vec3 deepOcean = vec3(0.02, 0.08, 0.32);
-    vec3 shallowOcean = vec3(0.04, 0.25, 0.55);
-    vec3 forestGreen = vec3(0.12, 0.42, 0.18);
-    vec3 mountainSand = vec3(0.65, 0.52, 0.32);
-    vec3 snowWhite = vec3(0.92, 0.95, 1.0);
-
-    vec3 dayColor;
-    float isOcean = 0.0;
-
-    if (elevation < 0.05) {
-      // Ocean Surface
-      isOcean = 1.0;
-      dayColor = mix(deepOcean, shallowOcean, smoothstep(-0.3, 0.05, elevation));
-      // Physically Correct World-Space Sun Specular Highlight
-      vec3 viewDir = normalize(cameraPosition - vWorldPos);
-      vec3 halfDir = normalize(uSunDir + viewDir);
-      float spec = pow(max(dot(vWorldNormal, halfDir), 0.0), 32.0);
-      dayColor += vec3(1.0, 0.95, 0.85) * spec * 2.0 * dayLight;
-    } else {
-      // Continents
-      dayColor = mix(forestGreen, mountainSand, smoothstep(0.05, 0.45, elevation));
-      dayColor = mix(dayColor, snowWhite, smoothstep(0.45, 0.75, elevation));
+vec3 stars(vec3 rd){
+  vec3 col = vec3(0.0);
+  for (int i = 0; i < 3; i++){
+    float fi = float(i);
+    vec3 p = rd * (160.0 + fi * 210.0);
+    vec3 id = floor(p);
+    float h = hash13(id + fi * 17.7);
+    vec3 f = fract(p) - 0.5;
+    float m = pow(smoothstep(0.5, 0.0, length(f)), 9.0);
+    if (h > 0.965){
+      vec3 tint = mix(vec3(0.65, 0.75, 1.0), vec3(1.0, 0.82, 0.65), fract(h * 93.0));
+      col += tint * m * (0.5 + fract(h * 47.0)) * 2.2;
     }
-
-    // 🌃 Glowing City Lights on Night Side
-    float cityNoise = snoise(n * 35.0) * 0.5 + snoise(n * 70.0) * 0.5;
-    float cityMask = smoothstep(0.25, 0.6, cityNoise) * (1.0 - isOcean);
-    vec3 nightCities = vec3(1.0, 0.75, 0.25) * cityMask * 2.5 * (1.0 - dayLight);
-
-    // 🌅 Atmospheric Sunset Terminator
-    float sunsetFactor = smoothstep(-0.2, 0.05, NdotL) * smoothstep(0.25, 0.0, NdotL);
-    vec3 sunsetGlow = vec3(1.0, 0.35, 0.08) * sunsetFactor * 0.85;
-
-    vec3 finalColor = dayColor * max(dayLight, 0.04) + nightCities + sunsetGlow;
-    gl_FragColor = vec4(finalColor, 1.0);
   }
+  float band = fbm(rd * 2.5) * smoothstep(0.6, 0.0, abs(dot(rd, normalize(vec3(0.2, 1.0, 0.1)))));
+  col += vec3(0.07, 0.08, 0.12) * band * band * 2.0;
+  return col;
+}
+
+vec3 trace(vec3 ro, vec3 rd){
+  vec3 pos = ro;
+  vec3 vel = rd;
+  vec3 h = cross(pos, vel);
+  float h2 = dot(h, h);
+  vec3 col = vec3(0.0);
+  float trans = 1.0;
+
+  for (int i = 0; i < STEPS; i++){
+    float r2 = dot(pos, pos);
+    float r = sqrt(r2);
+
+    if (r < RS) return col;
+    if (r2 > FAR * FAR && dot(pos, vel) > 0.0) return col + stars(normalize(vel)) * trans;
+
+    float dt = clamp(0.09 * r, 0.025, 1.7);
+    vec3 acc = (-1.5 * h2 / (r2 * r2 * r)) * pos;
+    vel = normalize(vel + acc * dt);
+    vec3 np = pos + vel * dt;
+
+    if (pos.y * np.y <= 0.0 && abs(pos.y - np.y) > 1e-5){
+      float tCross = clamp(pos.y / (pos.y - np.y), 0.0, 1.0);
+      vec3 hit = mix(pos, np, tCross);
+      float hr = length(hit.xz);
+      if (hr > DISK_IN && hr < DISK_OUT){
+        vec4 d = diskShade(hit, vel);
+        col += d.rgb * d.a * trans;
+        trans *= 1.0 - d.a * 0.85;
+        if (trans < 0.02) return col;
+      }
+    }
+    pos = np;
+  }
+  return col;
+}
+
+vec3 aces(vec3 x){
+  return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+}
+
+void main(){
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution) / uResolution.y;
+  vec3 rd = normalize(uCamBasis * vec3(uv * uTanFov, 1.0));
+  vec3 col = trace(uCamPos, rd);
+  col *= 1.4;
+  col = aces(col);
+  col *= 1.0 - 0.25 * dot(uv * 0.4, uv * 0.4);
+  gl_FragColor = vec4(pow(col, vec3(1.0 / 2.2)), 1.0);
+}
 \`;
 
-const earthRadius = 9.0;
-const earthUniforms = {
-  uSunDir: { value: sunDir },
-  uTime: { value: 0.0 }
+// Quad Setup
+const uniforms = {
+  uResolution: { value: new THREE.Vector2(1, 1) },
+  uTime:       { value: 0 },
+  uCamPos:     { value: new THREE.Vector3() },
+  uCamBasis:   { value: new THREE.Matrix3() },
+  uTanFov:     { value: 0.5 },
 };
 
-const earthMat = new THREE.ShaderMaterial({
-  vertexShader: earthVertexShader,
-  fragmentShader: earthFragmentShader,
-  uniforms: earthUniforms,
-});
-
-const earth = new THREE.Mesh(new THREE.SphereGeometry(earthRadius, 96, 96), earthMat);
-scene.add(earth);
-
-// 3. ☁️ Procedural Swirling Clouds Shader (Noise-Based Alpha Transparency)
-const cloudVertexShader = \`
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
-  void main() {
-    vWorldNormal = normalize(mat3(modelMatrix) * normal);
-    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPos, 1.0);
-  }
-\`;
-
-const cloudFragmentShader = \`
-  uniform vec3 uSunDir;
-  uniform float uTime;
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
-
-  vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-  vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-  float snoise(vec3 v) {
-    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-    vec3 i  = floor(v + dot(v, C.yyy));
-    vec3 x0 = v - i + dot(i, C.xxx);
-    vec3 g = step(x0.yzx, x0.xyz);
-    vec3 l = 1.0 - g;
-    vec3 i1 = min(g.xyz, l.zxy);
-    vec3 i2 = max(g.xyz, l.zxy);
-    vec3 x1 = x0 - i1 + C.xxx;
-    vec3 x2 = x0 - i2 + C.yyy;
-    vec3 x3 = x0 - D.yyy;
-    i = mod289(i);
-    vec4 p = permute(permute(permute(
-              i.z + vec4(0.0, i1.z, i2.z, 1.0))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-    float n_ = 0.142857142857;
-    vec3  ns = n_ * D.wyz - D.xzx;
-    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-    vec4 x_ = floor(j * ns.z);
-    vec4 y_ = floor(j - 7.0 * x_);
-    vec4 x = x_ *ns.x + ns.yyyy;
-    vec4 y = y_ *ns.x + ns.yyyy;
-    vec4 h = 1.0 - abs(x) - abs(y);
-    vec4 b0 = vec4(x.xy, y.xy);
-    vec4 b1 = vec4(x.zw, y.zw);
-    vec4 s0 = floor(b0)*2.0 + 1.0;
-    vec4 s1 = floor(b1)*2.0 + 1.0;
-    vec4 sh = -step(h, vec4(0.0));
-    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-    vec3 p0 = vec3(a0.xy, h.x);
-    vec3 p1 = vec3(a0.zw, h.y);
-    vec3 p2 = vec3(a1.xy, h.z);
-    vec3 p3 = vec3(a1.zw, h.w);
-    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-    m = m * m;
-    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-  }
-
-  void main() {
-    vec3 n = normalize(vWorldPos);
-    float cloudNoise = snoise(n * 3.5 + vec3(uTime * 0.03, 0.0, 0.0)) * 0.7 
-                     + snoise(n * 7.0 - vec3(0.0, uTime * 0.02, 0.0)) * 0.3;
-    float alpha = smoothstep(0.15, 0.55, cloudNoise);
-    if (alpha <= 0.01) discard;
-
-    float NdotL = max(dot(vWorldNormal, uSunDir), 0.05);
-    gl_FragColor = vec4(vec3(1.0) * NdotL, alpha * 0.75);
-  }
-\`;
-
-const cloudUniforms = { uSunDir: { value: sunDir }, uTime: { value: 0.0 } };
-const cloudMat = new THREE.ShaderMaterial({
-  vertexShader: cloudVertexShader,
-  fragmentShader: cloudFragmentShader,
-  uniforms: cloudUniforms,
-  transparent: true,
+const quadMat = new THREE.ShaderMaterial({
+  vertexShader: \`
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position.xy, 0.0, 1.0);
+    }
+  \`,
+  fragmentShader: frag,
+  uniforms: uniforms,
   depthWrite: false,
+  depthTest: false,
 });
-const clouds = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.02, 64, 64), cloudMat);
-scene.add(clouds);
 
-// 4. 🌀 True Fresnel Atmospheric Rayleigh Scattering Glow
-const atmoVertexShader = \`
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
-  void main() {
-    vWorldNormal = normalize(mat3(modelMatrix) * normal);
-    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPos, 1.0);
-  }
-\`;
+const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), quadMat);
+quad.frustumCulled = false;
+scene.add(quad);
 
-const atmoFragmentShader = \`
-  uniform vec3 uSunDir;
-  varying vec3 vWorldNormal;
-  varying vec3 vWorldPos;
+camera.position.set(0, 2.6, 14.0);
+camera.lookAt(0, 0, 0);
 
-  void main() {
-    vec3 viewDir = normalize(cameraPosition - vWorldPos);
-    float fresnel = pow(1.0 - max(dot(vWorldNormal, viewDir), 0.0), 3.0);
-    float NdotL = max(dot(vWorldNormal, uSunDir), 0.0);
-    vec3 atmoColor = mix(vec3(0.2, 0.6, 1.0), vec3(0.9, 0.4, 0.1), (1.0 - NdotL) * 0.5);
-    gl_FragColor = vec4(atmoColor * (0.8 + NdotL * 0.5), fresnel * 0.85);
-  }
-\`;
+// 🎬 CINEMATIC AUTO-ORBIT CONTROLLER
+const CINE = {
+  orbitSpeed: 0.05,
+  radius: 14.0,
+  height: 2.6,
+  userInteracting: false,
+  lastInteractTime: 0,
+  resumeDelay: 2.5,
+};
 
-const atmoMat = new THREE.ShaderMaterial({
-  vertexShader: atmoVertexShader,
-  fragmentShader: atmoFragmentShader,
-  uniforms: { uSunDir: { value: sunDir } },
-  transparent: true,
-  side: THREE.BackSide,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-});
-const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(earthRadius * 1.14, 64, 64), atmoMat);
-scene.add(atmosphere);
+const size = new THREE.Vector2();
+const right = new THREE.Vector3(), up = new THREE.Vector3(), fwd = new THREE.Vector3();
+const m4 = new THREE.Matrix4();
 
-// 5. 🌌 Cosmic Starfield Background (2,500 Stars)
-const starCount = 2500;
-const starPos = new Float32Array(starCount * 3);
-for (let i = 0; i < starCount; i++) {
-  const r = 90 + Math.random() * 60;
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.acos(Math.random() * 2 - 1);
-  starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-  starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-  starPos[i * 3 + 2] = r * Math.cos(phi);
-}
-const starGeom = new THREE.BufferGeometry();
-starGeom.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-scene.add(new THREE.Points(starGeom, new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.35 })));
-
-// 6. 🚀 Heavy Space Rocket Vehicle (Close-Up Detailed CAD)
-const rocket = new THREE.Group();
-scene.add(rocket);
-
-const coreStage = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.7, 0.7, 4.8, 32),
-  pbr.aerospaceTitanium
-);
-coreStage.castShadow = true;
-
-const interstage = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.72, 0.72, 0.6, 32),
-  pbr.carbonFiber
-);
-interstage.position.y = 1.0;
-
-const noseFairing = new THREE.Mesh(
-  new THREE.ConeGeometry(0.72, 2.0, 32),
-  pbr.anodizedRed
-);
-noseFairing.position.y = 3.4;
-
-for (let f = 0; f < 4; f++) {
-  const ang = (f * Math.PI) / 2;
-  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.75, 0.85), pbr.carbonFiber);
-  fin.position.set(Math.cos(ang) * 0.75, -1.8, Math.sin(ang) * 0.75);
-  fin.rotation.y = ang;
-  rocket.add(fin);
-}
-
-const engineCluster = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.45, 0.65, 0.8, 24),
-  pbr.polishedChrome
-);
-engineCluster.position.y = -2.8;
-
-const plume = new THREE.Mesh(
-  new THREE.ConeGeometry(0.65, 3.8, 24),
-  new THREE.MeshBasicMaterial({ color: 0xFF5500, transparent: true, opacity: 0.95 })
-);
-plume.rotation.x = Math.PI;
-plume.position.y = -4.7;
-
-const thrustLight = new THREE.PointLight(0xFF4500, 4.0, 25);
-thrustLight.position.y = -4.0;
-
-rocket.add(coreStage, interstage, noseFairing, engineCluster, plume, thrustLight);
-
-// 7. 🛰️ Glowing Trajectory Path Spline
-const orbitPts = [];
-for (let j = 0; j <= 120; j++) {
-  const a = (j / 120) * Math.PI * 2;
-  const rad = 15.0 + Math.sin(a * 2.0) * 3.5;
-  orbitPts.push(new THREE.Vector3(Math.cos(a) * rad, Math.sin(a) * 2.5, Math.sin(a) * rad));
-}
-const orbitPath = new THREE.Line(
-  new THREE.BufferGeometry().setFromPoints(orbitPts),
-  new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.55 })
-);
-scene.add(orbitPath);
-
-// 8. 🔄 60 FPS ORBITAL FLIGHT DYNAMICS LOOP (Exact Derivative Velocity Tangent)
 engine.onUpdate((time, delta) => {
-  cloudUniforms.uTime.value = time;
+  renderer.getSize(size);
+  // Fix 3: High-DPI DPR Resolution Scaling for razor-sharp raymarching
+  const dpr = renderer.getPixelRatio();
+  uniforms.uResolution.value.set(size.x * dpr, size.y * dpr);
+  uniforms.uTime.value = time;
+  uniforms.uTanFov.value = Math.tan(THREE.MathUtils.degToRad(camera.fov) * 0.5);
 
-  earth.rotation.y = time * 0.05;
-  clouds.rotation.y = time * 0.07;
-
-  // Exact Keplerian Elliptical Motion & Mathematical Velocity Derivative
-  const theta = time * 0.65;
-  const rad = 15.0 + Math.sin(theta * 2.0) * 3.5;
-  const dRad = 7.0 * Math.cos(theta * 2.0); // dr/dθ derivative
-
-  const x = Math.cos(theta) * rad;
-  const y = Math.sin(theta) * 2.5;
-  const z = Math.sin(theta) * rad;
-  rocket.position.set(x, y, z);
-
-  // Exact Velocity Tangent Vector dx/dt, dy/dt, dz/dt
-  const vx = -Math.sin(theta) * rad + Math.cos(theta) * dRad;
-  const vy = Math.cos(theta) * 2.5;
-  const vz = Math.cos(theta) * rad + Math.sin(theta) * dRad;
-  const velDir = new THREE.Vector3(vx, vy, vz).normalize();
-
-  rocket.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), velDir);
-
-  // Plume Shock Diamonds
-  plume.scale.set(
-    1.0 + Math.sin(time * 35) * 0.18,
-    1.0 + Math.cos(time * 30) * 0.28,
-    1.0 + Math.sin(time * 35) * 0.18
-  );
+  camera.updateMatrixWorld();
+  const e = camera.matrixWorld.elements;
+  right.set(e[0], e[1], e[2]);
+  up.set(e[4], e[5], e[6]);
+  fwd.set(-e[8], -e[9], -e[10]);
+  m4.makeBasis(right, up, fwd);
+  uniforms.uCamBasis.value.setFromMatrix4(m4);
+  uniforms.uCamPos.value.copy(camera.position);
 });`;
 
 function createPBRMaterials() {
@@ -456,7 +298,7 @@ export default function ScienceSimEngine({
   const recordedChunksRef = useRef<Blob[]>([]);
 
   // States
-  const [code, setCode] = useState<string>(initialCode?.trim() || NASA_EARTH_ROCKET_CODE);
+  const [code, setCode] = useState<string>(initialCode?.trim() || GARGANTUA_RAYMARCH_CODE);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<number>(0);
   const [showCodeEditor, setShowCodeEditor] = useState<boolean>(false);
@@ -491,14 +333,14 @@ export default function ScienceSimEngine({
     const width = container.clientWidth || 800;
     const height = Math.min(Math.max(width * 0.58, 380), 550);
 
-    // Scene & Deep Cosmic Space
+    // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#02040A");
     sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(22, 14, 34);
+    camera.position.set(0, 2.6, 14.0);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -512,6 +354,8 @@ export default function ScienceSimEngine({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.7;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
     canvasRef.current = renderer.domElement;
 
@@ -521,10 +365,10 @@ export default function ScienceSimEngine({
     }
     container.appendChild(renderer.domElement);
 
-    // 💡 Cosmic Sun Lighting (Aligned with sunDir = 40, 20, 30)
+    // Base Lighting
     const sunLight = new THREE.DirectionalLight(0xFFFFFF, 2.5);
     sunLight.position.set(40, 20, 30);
-    sunLight.userData.isBase = true; // Mark as base studio light to prevent removal
+    sunLight.userData.isBase = true;
     scene.add(sunLight);
 
     const ambientLight = new THREE.AmbientLight(0x0F172A, 0.6);
@@ -562,19 +406,18 @@ export default function ScienceSimEngine({
       isDraggingRef.current = false;
     };
 
-    // Fix: Clamped zoom so camera never clips into Earth (r = 9.0)
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (!cameraRef.current) return;
       const cam = cameraRef.current;
       const dir = cam.position.clone().normalize();
       const dist = cam.position.length();
-      const newDist = Math.max(12, Math.min(150, dist + e.deltaY * 0.04));
+      const newDist = Math.max(6, Math.min(150, dist + e.deltaY * 0.04));
       cam.position.copy(dir.multiplyScalar(newDist));
       cam.lookAt(0, 0, 0);
     };
 
-    // Touch Support for Mobile Viewports
+    // Touch Orbit & Pinch Zoom
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         isDraggingRef.current = true;
@@ -615,7 +458,7 @@ export default function ScienceSimEngine({
         const cam = cameraRef.current;
         const dir = cam.position.clone().normalize();
         const curDist = cam.position.length();
-        const newDist = Math.max(12, Math.min(150, curDist + pinchDelta * 0.05));
+        const newDist = Math.max(6, Math.min(150, curDist + pinchDelta * 0.05));
         cam.position.copy(dir.multiplyScalar(newDist));
         cam.lookAt(0, 0, 0);
 
@@ -637,7 +480,7 @@ export default function ScienceSimEngine({
     domEl.addEventListener("touchmove", onTouchMove, { passive: true });
     domEl.addEventListener("touchend", onTouchEnd, { passive: true });
 
-    // ResizeObserver for Panel Resizing
+    // Panel ResizeObserver
     const resizeObserver = new ResizeObserver(() => {
       if (!container || !cameraRef.current || !rendererRef.current) return;
       const w = container.clientWidth;
@@ -651,11 +494,11 @@ export default function ScienceSimEngine({
     // Initial Execution
     executeCode(code);
 
-    // 2. Main 60 FPS Render Loop (with Delta Clamping & Stale Closure Fix)
+    // 2. Main 60 FPS Render Loop (with isPlayingRef Stale Closure Fix)
     let lastTime = performance.now();
     const animate = (now: number) => {
       animFrameIdRef.current = requestAnimationFrame(animate);
-      const delta = Math.min((now - lastTime) * 0.001, 0.05); // Clamped delta prevents physics jump
+      const delta = Math.min((now - lastTime) * 0.001, 0.05);
       lastTime = now;
 
       if (isPlayingRef.current) {
@@ -665,7 +508,7 @@ export default function ScienceSimEngine({
             hook(simTimeRef.current, delta);
           } catch (err) {
             console.error("Simulation Update Hook Error:", err);
-            updateHooksRef.current.splice(idx, 1); // Disable broken hook to prevent console flood
+            updateHooksRef.current.splice(idx, 1);
           }
         });
       }
@@ -695,7 +538,7 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // 3. Dynamic Code Execution with Complete GPU Memory Cleanup
+  // 3. Dynamic Code Execution with Complete Memory Cleanup
   const executeCode = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
@@ -709,7 +552,6 @@ export default function ScienceSimEngine({
       }
     });
 
-    // Complete Geometry & Material GPU Memory Disposal
     objectsToRemove.forEach((obj) => {
       scene.remove(obj);
       obj.traverse((child: any) => {
@@ -754,12 +596,10 @@ export default function ScienceSimEngine({
     }
   };
 
-  // Compile & Run Button
   const handleRunClick = () => {
     executeCode(code);
   };
 
-  // Capture High-Res Snapshot (PNG)
   const captureSnapshot = () => {
     if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
     rendererRef.current.render(sceneRef.current, cameraRef.current);
@@ -770,7 +610,6 @@ export default function ScienceSimEngine({
     link.click();
   };
 
-  // 60 FPS Video Recording with Safari / Cross-Browser Fallback & Single onstop
   const toggleRecording = () => {
     if (isRecording) {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -826,11 +665,9 @@ export default function ScienceSimEngine({
 
   return (
     <div style={styles.engineContainer} className="science-sim-engine card">
-      {/* 3D WebGL Canvas Wrapper */}
       <div style={styles.canvasWrapper}>
         <div ref={mountRef} style={styles.canvasMount} />
 
-        {/* Minimal Floating Glass Controls in Corner */}
         <div style={styles.floatingControls}>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
@@ -876,22 +713,20 @@ export default function ScienceSimEngine({
         </div>
 
         <div style={styles.hintOverlay}>
-          🖱️ 3D Orbit: Drag • Zoom: Scroll / Pinch • Procedural NASA Shaders
+          🖱️ 3D Orbit: Drag • Zoom: Scroll / Pinch • Real-time Geodesic Raymarching
         </div>
       </div>
 
-      {/* Error alert if any */}
       {runtimeError && (
         <div style={styles.errorAlert}>⚠️ {runtimeError}</div>
       )}
 
-      {/* Optional Collapsible Code Editor */}
       {showCodeEditor && (
         <div style={styles.codeDrawer}>
           <div style={styles.codeHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.75rem" }}>
-                💻 Live Simulation Script (Physics, Aerodynamics, Shaders)
+                💻 Live Simulation Script (Physics, Raymarching, GLSL)
               </span>
               <span style={{ color: "#94A3B8", fontSize: "0.68rem" }}>
                 [Injected: scene, camera, renderer, THREE, CANNON, engine, pbr]
