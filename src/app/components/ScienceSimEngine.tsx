@@ -13,27 +13,191 @@ interface ScienceSimEngineProps {
 }
 
 // ============================================================================
-// 🌌 CINEMATIC GLSL SHADER KERNEL: INTERSTELLAR GARGANTUA ACCRETION DISK
+// ⚙️ BRIGHT & VIBRANT 4-STROKE ENGINE CODE
 // ============================================================================
-const BLACKHOLE_SHADER_CODE = `// ============================================================================
-// 🌌 INTERSTELLAR: GARGANTUA RAY-WARPED ACCRETION DISK (GLSL SHADER)
-// Einstein Kerr Metric with Relativistic Doppler Beaming & Lensing
+const ENGINE_SIM_CODE = `// ============================================================================
+// ⚙️ 4-STROKE INTERNAL COMBUSTION ENGINE (BRIGHT STUDIO PBR)
+// Kinematic Equations: y_piston = r*cos(θ) + sqrt(l² - r²*sin²(θ))
+// 4-Stroke 720° Cycle: 1. Intake ➔ 2. Compression ➔ 3. Power 💥 ➔ 4. Exhaust
 // ============================================================================
 
-// 1. 🕳️ Central Event Horizon (Pure Black Void r = 3.4)
+const r = 2.5; // Crank Radius (Stroke = 2r = 5.0 units)
+const l = 6.4; // Forged Connecting Rod Length (l/r = 2.56)
+const crankCenterY = -5.4;
+
+// 1. 🔩 Bright CNC Piston (with 3 Piston Rings & Wrist Pin)
+const piston = new THREE.Group();
+const crown = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.38, 2.38, 2.4, 64),
+  pbr.polishedChrome
+);
+crown.castShadow = true;
+
+// 3 Piston Rings
+for (let ringY = 0.5; ringY >= -0.3; ringY -= 0.35) {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.39, 0.04, 16, 64), pbr.castIron);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = ringY;
+  crown.add(ring);
+}
+
+// Wrist Pin (Bright Chrome)
+const wristPin = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 2.1, 32), pbr.polishedChrome);
+wristPin.rotation.z = Math.PI / 2;
+wristPin.position.y = -0.3;
+piston.add(crown, wristPin);
+scene.add(piston);
+
+// 2. 🏆 Forged I-Beam Connecting Rod (Vibrant Gold-Brass)
+const conRod = new THREE.Group();
+const rodBeam = new THREE.Mesh(new THREE.BoxGeometry(0.55, l, 0.38), pbr.forgedGoldBrass);
+rodBeam.castShadow = true;
+const smallEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.7, 32), pbr.forgedGoldBrass);
+smallEnd.rotation.x = Math.PI / 2;
+smallEnd.position.y = l / 2;
+const bigEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.7, 32), pbr.forgedGoldBrass);
+bigEnd.rotation.x = Math.PI / 2;
+bigEnd.position.y = -l / 2;
+conRod.add(rodBeam, smallEnd, bigEnd);
+scene.add(conRod);
+
+// 3. ⚙️ Crankshaft, Dual Counterweights & Flywheel
+const crank = new THREE.Group();
+const journal = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.4, 32), pbr.polishedChrome);
+journal.rotation.x = Math.PI / 2;
+
+const cw1 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.8, 0.6), pbr.castIron);
+cw1.position.set(0, -1.3, -0.8);
+const cw2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.8, 0.6), pbr.castIron);
+cw2.position.set(0, -1.3, 0.8);
+
+const flywheel = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 0.7, 64), pbr.castIron);
+flywheel.rotation.x = Math.PI / 2;
+flywheel.position.z = -2.8;
+flywheel.castShadow = true;
+
+crank.add(journal, cw1, cw2, flywheel);
+crank.position.set(0, crankCenterY, 0);
+scene.add(crank);
+
+// 4. ⚡ Spark Plug with Center Electrode & Ignition Flash
+const sparkPlug = new THREE.Group();
+const porcelain = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 2.4, 32), pbr.porcelainCeramic);
+const hexNut = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.5, 6), pbr.polishedChrome);
+const electrode = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 16), pbr.forgedGoldBrass);
+electrode.position.y = -1.2;
+sparkPlug.add(porcelain, hexNut, electrode);
+sparkPlug.position.set(0, 8.8, 0);
+scene.add(sparkPlug);
+
+const sparkLight = new THREE.PointLight(0xFF4500, 0, 25);
+sparkLight.position.set(0, 6.2, 0);
+scene.add(sparkLight);
+
+// 5. 🔵 Intake Valve (Vibrant Blue) & 🔴 Exhaust Valve (Vibrant Red)
+const inValve = new THREE.Group();
+const inShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.5, 16), pbr.polishedChrome);
+const inHead = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.12, 0.35, 32), pbr.anodizedBlue);
+inHead.position.y = -1.75;
+inValve.add(inShaft, inHead);
+inValve.position.set(-1.9, 5.2, 0);
+scene.add(inValve);
+
+const exValve = new THREE.Group();
+const exShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.5, 16), pbr.polishedChrome);
+const exHead = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.12, 0.35, 32), pbr.anodizedRed);
+exHead.position.y = -1.75;
+exValve.add(exShaft, exHead);
+exValve.position.set(1.9, 5.2, 0);
+scene.add(exValve);
+
+// 6. 💎 Transparent Crystal Cylinder Sleeve
+const sleeve = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.45, 2.45, 7.4, 64, 1, true),
+  pbr.crystalGlass
+);
+sleeve.position.y = 1.6;
+scene.add(sleeve);
+
+// 7. 🔥 Dynamic Combustion Chamber Plasma Flame Mesh
+const flame = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.4, 2.4, 2.2, 48),
+  new THREE.MeshBasicMaterial({ color: 0xFF3300, transparent: true, opacity: 0.0 })
+);
+flame.position.y = 4.4;
+scene.add(flame);
+
+// 8. 🛢️ Crankcase Oil Sump Base
+const oilPan = new THREE.Mesh(new THREE.BoxGeometry(7.0, 2.2, 8.0), pbr.castIron);
+oilPan.position.set(0, -8.0, 0);
+scene.add(oilPan);
+
+// 🔄 60 FPS EXACT 4-STROKE CYCLE LOOP
+engine.onUpdate((time, delta) => {
+  const theta = time * 3.6;
+  const cycle = ((theta % (4 * Math.PI)) + 4 * Math.PI) % (4 * Math.PI); // 0° to 720°
+
+  const pinX = r * Math.sin(theta);
+  const pinY = crankCenterY + r * Math.cos(theta);
+  const pistonY = crankCenterY + r * Math.cos(theta) + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
+
+  piston.position.set(0, pistonY, 0);
+  conRod.position.set(pinX / 2, (pinY + pistonY) / 2, 0);
+  conRod.rotation.z = Math.asin((-r * Math.sin(theta)) / l);
+  crank.rotation.z = theta;
+
+  // 1. INTAKE (0° - 180°)
+  if (cycle < Math.PI) {
+    inValve.position.y = 5.2 - 0.45 * Math.sin(cycle);
+    exValve.position.y = 5.2;
+    flame.material.color.setHex(0x3B82F6);
+    flame.material.opacity = 0.28 * Math.sin(cycle);
+    sparkLight.intensity = 0;
+  }
+  // 2. COMPRESSION (180° - 360°)
+  else if (cycle < 2 * Math.PI) {
+    inValve.position.y = 5.2;
+    exValve.position.y = 5.2;
+    flame.material.color.setHex(0xF59E0B);
+    flame.material.opacity = 0.38 * Math.sin(cycle - Math.PI);
+    sparkLight.intensity = 0;
+  }
+  // 3. POWER STROKE 💥 (360° - 540°)
+  else if (cycle < 3 * Math.PI) {
+    const powerProgress = cycle - 2 * Math.PI;
+    inValve.position.y = 5.2;
+    exValve.position.y = 5.2;
+    flame.material.color.setHex(0xFF2200);
+    flame.material.opacity = Math.max(0, 0.95 - powerProgress * 0.48);
+    sparkLight.intensity = powerProgress < 0.65 ? 9.0 : 0;
+  }
+  // 4. EXHAUST (540° - 720°)
+  else {
+    const exhProgress = cycle - 3 * Math.PI;
+    inValve.position.y = 5.2;
+    exValve.position.y = 5.2 - 0.45 * Math.sin(exhProgress);
+    flame.material.color.setHex(0x94A3B8);
+    flame.material.opacity = 0.32 * Math.sin(exhProgress);
+    sparkLight.intensity = 0;
+  }
+});`;
+
+// Black Hole GLSL code
+const BLACKHOLE_SHADER_CODE = `// ============================================================================
+// 🌌 INTERSTELLAR: GARGANTUA RAY-WARPED ACCRETION DISK (GLSL SHADER)
+// ============================================================================
+
 const horizonGeom = new THREE.SphereGeometry(3.4, 64, 64);
 const horizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
 const eventHorizon = new THREE.Mesh(horizonGeom, horizonMat);
 scene.add(eventHorizon);
 
-// 2. ✨ The Blinding Photon Sphere (r = 1.5 r_s)
 const photonGeom = new THREE.TorusGeometry(3.65, 0.12, 32, 128);
 const photonMat = new THREE.MeshBasicMaterial({ color: 0xFFFDF0 });
 const photonRing = new THREE.Mesh(photonGeom, photonMat);
 photonRing.rotation.x = Math.PI / 2;
 scene.add(photonRing);
 
-// 3. 🔥 Volumetric Procedural Accretion Disk Shaders
 const diskVertexShader = \`
   varying vec2 vUv;
   void main() {
@@ -73,7 +237,6 @@ const diskFragmentShader = \`
     float n2 = noise(vec2(swirl * 8.0 - time, normR * 25.0));
     float plasma = n1 * 0.65 + n2 * 0.35;
 
-    // Relativistic Doppler Beaming (approaching side is brighter)
     float doppler = 1.0 + 0.8 * sin(angle + 0.4);
 
     vec3 whiteHot = vec3(1.0, 0.98, 0.92);
@@ -88,7 +251,6 @@ const diskFragmentShader = \`
   }
 \`;
 
-// 4. Equatorial Accretion Disk
 const diskGeom = new THREE.PlaneGeometry(36.0, 36.0, 128, 128);
 const diskUniforms = { time: { value: 0.0 } };
 const diskMat = new THREE.ShaderMaterial({
@@ -102,10 +264,9 @@ const diskMat = new THREE.ShaderMaterial({
 });
 
 const accretionDisk = new THREE.Mesh(diskGeom, diskMat);
-accretionDisk.rotation.x = -Math.PI / 2.3; // Tilt
+accretionDisk.rotation.x = -Math.PI / 2.3;
 scene.add(accretionDisk);
 
-// 5. 🌀 Gravitational Lensing Halo Arcs
 const haloVertexShader = \`
   varying vec2 vUv;
   void main() {
@@ -150,7 +311,6 @@ bottomHalo.position.set(0, -0.5, 0);
 bottomHalo.rotation.z = -Math.PI * 0.08;
 scene.add(bottomHalo);
 
-// 6. 🌊 Miller's Ocean Planet
 const millerDist = 8.5;
 const millerPlanet = new THREE.Mesh(
   new THREE.SphereGeometry(0.65, 32, 32),
@@ -158,16 +318,6 @@ const millerPlanet = new THREE.Mesh(
 );
 scene.add(millerPlanet);
 
-const orbitPts = new THREE.EllipseCurve(0, 0, millerDist, millerDist, 0, 2 * Math.PI, false, 0)
-  .getPoints(80).map((pt) => new THREE.Vector3(pt.x, 0, pt.y));
-const orbitRing = new THREE.Line(
-  new THREE.BufferGeometry().setFromPoints(orbitPts),
-  new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.4 })
-);
-orbitRing.rotation.x = accretionDisk.rotation.x;
-scene.add(orbitRing);
-
-// 7. 60 FPS Loop
 engine.onUpdate((time, delta) => {
   diskUniforms.time.value = time;
   const angle = time * 1.2;
@@ -176,158 +326,82 @@ engine.onUpdate((time, delta) => {
   millerPlanet.position.set(x, z * Math.sin(accretionDisk.rotation.x), z * Math.cos(accretionDisk.rotation.x));
 });`;
 
-// Engine simulation code
-const ENGINE_SIM_CODE = `// [4-Stroke Internal Combustion Engine Simulation]
-const r = 2.4; // Crank Radius
-const l = 6.2; // Connecting Rod Length
-
-// 1. High-Poly Piston with 3 Rings
-const piston = new THREE.Group();
-const crown = new THREE.Mesh(new THREE.CylinderGeometry(2.38, 2.38, 2.2, 48), pbr.brushedSteel);
-crown.castShadow = true;
-for (let ringY = 0.4; ringY >= -0.2; ringY -= 0.3) {
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.39, 0.04, 12, 48), pbr.castIron);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.y = ringY;
-  crown.add(ring);
-}
-const wristPin = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 2.1, 24), pbr.polishedChrome);
-wristPin.rotation.z = Math.PI / 2;
-wristPin.position.y = -0.3;
-piston.add(crown, wristPin);
-scene.add(piston);
-
-// 2. Forged Connecting Rod
-const conRod = new THREE.Group();
-const rodBeam = new THREE.Mesh(new THREE.BoxGeometry(0.55, l, 0.38), pbr.forgedGoldBrass);
-rodBeam.castShadow = true;
-conRod.add(rodBeam);
-scene.add(conRod);
-
-// 3. Crankshaft & Flywheel
-const crank = new THREE.Group();
-const journal = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.4, 32), pbr.polishedChrome);
-journal.rotation.x = Math.PI / 2;
-const flywheel = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 0.7, 48), pbr.castIron);
-flywheel.rotation.x = Math.PI / 2;
-flywheel.position.z = -2.8;
-flywheel.castShadow = true;
-crank.add(journal, flywheel);
-crank.position.set(0, -5.2, 0);
-scene.add(crank);
-
-// 4. Spark Plug with Ignition Light
-const sparkPlug = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 2.4, 32), pbr.porcelainCeramic);
-sparkPlug.position.set(0, 8.8, 0);
-scene.add(sparkPlug);
-const sparkLight = new THREE.PointLight(0xFF4500, 0, 18);
-sparkLight.position.set(0, 6.2, 0);
-scene.add(sparkLight);
-
-// 5. Intake (Blue) & Exhaust (Red) Valves
-const inValve = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.85, 3.5, 16), pbr.anodizedBlue);
-inValve.position.set(-1.9, 5.2, 0);
-scene.add(inValve);
-const exValve = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.85, 3.5, 16), pbr.anodizedRed);
-exValve.position.set(1.9, 5.2, 0);
-scene.add(exValve);
-
-// 6. Transparent Glass Cylinder Sleeve
-const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(2.45, 2.45, 7.2, 48, 1, true), pbr.crystalGlass);
-sleeve.position.y = 1.6;
-scene.add(sleeve);
-
-// 7. Combustion Flame Burst Mesh
-const flame = new THREE.Mesh(
-  new THREE.CylinderGeometry(2.4, 2.4, 2.0, 32),
-  new THREE.MeshBasicMaterial({ color: 0xFF3300, transparent: true, opacity: 0.0 })
-);
-flame.position.y = 4.4;
-scene.add(flame);
-
-// 60 FPS 4-Stroke Otto Cycle Kinematics Loop
-engine.onUpdate((time, delta) => {
-  const theta = time * 3.6;
-  const cycle = ((theta % (4 * Math.PI)) + 4 * Math.PI) % (4 * Math.PI);
-  const crankY = -5.2;
-  const pinX = r * Math.sin(theta);
-  const pinY = crankY + r * Math.cos(theta);
-
-  const pistonY = crankY + r * Math.cos(theta) + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
-  piston.position.set(0, pistonY, 0);
-
-  conRod.position.set(pinX / 2, (pinY + pistonY) / 2, 0);
-  conRod.rotation.z = Math.asin((-r * Math.sin(theta)) / l);
-  crank.rotation.z = theta;
-
-  if (cycle < Math.PI) {
-    inValve.position.y = 5.2 - 0.45 * Math.sin(cycle);
-    exValve.position.y = 5.2;
-    flame.material.color.setHex(0x3B82F6);
-    flame.material.opacity = 0.25 * Math.sin(cycle);
-    sparkLight.intensity = 0;
-  } else if (cycle < 2 * Math.PI) {
-    inValve.position.y = 5.2;
-    flame.material.color.setHex(0xF59E0B);
-    flame.material.opacity = 0.35 * Math.sin(cycle - Math.PI);
-    sparkLight.intensity = 0;
-  } else if (cycle < 3 * Math.PI) {
-    const power = cycle - 2 * Math.PI;
-    flame.material.color.setHex(0xFF3300);
-    flame.material.opacity = Math.max(0, 0.9 - power * 0.45);
-    sparkLight.intensity = power < 0.6 ? 7.0 : 0;
-  } else {
-    const exh = cycle - 3 * Math.PI;
-    exValve.position.y = 5.2 - 0.45 * Math.sin(exh);
-    flame.material.color.setHex(0x64748B);
-    flame.material.opacity = 0.3 * Math.sin(exh);
-    sparkLight.intensity = 0;
-  }
-});`;
-
 const EXECUTABLE_SCRIPTS: Record<string, { title: string; category: string; code: string }> = {
-  blackhole: {
-    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
-    category: "physics",
-    code: BLACKHOLE_SHADER_CODE,
-  },
   engine: {
     title: "⚙️ 4-Stroke IC Engine (Kinematics & Combustion)",
     category: "engineering",
     code: ENGINE_SIM_CODE,
   },
+  blackhole: {
+    title: "🌌 Interstellar Gargantua (GLSL Raymarched Plasma)",
+    category: "physics",
+    code: BLACKHOLE_SHADER_CODE,
+  },
 };
 
+// Bright & Polished PBR Materials
 function createPBRMaterials() {
   return {
-    polishedChrome: new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.95, roughness: 0.08 }),
-    brushedSteel: new THREE.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.85, roughness: 0.25 }),
-    forgedGoldBrass: new THREE.MeshStandardMaterial({ color: 0xD1A751, metalness: 0.9, roughness: 0.18 }),
-    anodizedBlue: new THREE.MeshStandardMaterial({ color: 0x2563EB, metalness: 0.85, roughness: 0.2 }),
-    anodizedRed: new THREE.MeshStandardMaterial({ color: 0xDC2626, metalness: 0.85, roughness: 0.2 }),
-    castIron: new THREE.MeshStandardMaterial({ color: 0x1E293B, metalness: 0.7, roughness: 0.45 }),
-    porcelainCeramic: new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.15, metalness: 0.05 }),
-    crystalGlass: new THREE.MeshPhysicalMaterial({ color: 0xFFFFFF, transmission: 0.85, opacity: 0.9, transparent: true, roughness: 0.1, ior: 1.52, metalness: 0.1 }),
+    polishedChrome: new THREE.MeshStandardMaterial({
+      color: 0xF8FAFC,
+      metalness: 0.92,
+      roughness: 0.12,
+    }),
+    brushedSteel: new THREE.MeshStandardMaterial({
+      color: 0xE2E8F0,
+      metalness: 0.85,
+      roughness: 0.22,
+    }),
+    forgedGoldBrass: new THREE.MeshStandardMaterial({
+      color: 0xF59E0B,
+      metalness: 0.88,
+      roughness: 0.18,
+    }),
+    anodizedBlue: new THREE.MeshStandardMaterial({
+      color: 0x3B82F6,
+      metalness: 0.85,
+      roughness: 0.2,
+    }),
+    anodizedRed: new THREE.MeshStandardMaterial({
+      color: 0xEF4444,
+      metalness: 0.85,
+      roughness: 0.2,
+    }),
+    castIron: new THREE.MeshStandardMaterial({
+      color: 0x64748B,
+      metalness: 0.65,
+      roughness: 0.35,
+    }),
+    porcelainCeramic: new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.1,
+      metalness: 0.05,
+    }),
+    crystalGlass: new THREE.MeshPhysicalMaterial({
+      color: 0xFFFFFF,
+      transmission: 0.85,
+      opacity: 0.9,
+      transparent: true,
+      roughness: 0.08,
+      ior: 1.5,
+      metalness: 0.1,
+    }),
   };
 }
 
 export default function ScienceSimEngine({
-  initialCategory = "physics",
-  initialPreset = "blackhole",
+  initialCategory = "engineering",
+  initialPreset = "engine",
   initialCode,
   autoPlay = true,
 }: ScienceSimEngineProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Time HUD Refs (Updated directly in render loop without thrashing React)
-  const millerTimeRef = useRef<HTMLSpanElement>(null);
-  const earthTimeRef = useRef<HTMLSpanElement>(null);
-
   // States
-  const [activePreset, setActivePreset] = useState<string>(initialPreset || "blackhole");
+  const [activePreset, setActivePreset] = useState<string>(initialPreset || "engine");
   const [code, setCode] = useState<string>(
-    initialCode?.trim() || (EXECUTABLE_SCRIPTS[initialPreset || "blackhole"]?.code || EXECUTABLE_SCRIPTS.blackhole.code)
+    initialCode?.trim() || (EXECUTABLE_SCRIPTS[initialPreset || "engine"]?.code || EXECUTABLE_SCRIPTS.engine.code)
   );
   const [isPlaying, setIsPlaying] = useState<boolean>(autoPlay);
   const [simSpeed, setSimSpeed] = useState<number>(1);
@@ -335,7 +409,7 @@ export default function ScienceSimEngine({
   const [recordTime, setRecordTime] = useState<number>(0);
   const [showCodeEditor, setShowCodeEditor] = useState<boolean>(true);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>("Volumetric Shader Active (60 FPS)");
+  const [statusMessage, setStatusMessage] = useState<string>("Bright Studio Engine Active (60 FPS)");
 
   // Three.js Core Refs
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -345,15 +419,13 @@ export default function ScienceSimEngine({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const simTimeRef = useRef<number>(0);
-  const totalMillerSecondsRef = useRef<number>(0);
-  const totalEarthSecondsRef = useRef<number>(0);
   const updateHooksRef = useRef<((time: number, delta: number) => void)[]>([]);
 
   // Orbit controls
   const isDraggingRef = useRef(false);
   const previousMousePositionRef = useRef({ x: 0, y: 0 });
 
-  // 1. Initialize WebGL Viewport
+  // 1. Initialize Bright Studio WebGL Viewport
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -361,18 +433,18 @@ export default function ScienceSimEngine({
     const width = container.clientWidth || 800;
     const height = Math.min(Math.max(width * 0.58, 380), 550);
 
-    // Scene
+    // Scene & Clean Bright Tech-Slate Studio Background
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#010204");
+    scene.background = new THREE.Color("#0F172A"); // Modern dark slate instead of pitch black
     sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 8, 30);
+    camera.position.set(0, 6, 28);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // WebGL Renderer with ACES Filmic Tone Mapping
+    // WebGL Renderer with ACES Filmic Tone Mapping & High Exposure
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true,
@@ -381,19 +453,44 @@ export default function ScienceSimEngine({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.5;
+    renderer.toneMappingExposure = 1.6; // Bright crisp exposure
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
     canvasRef.current = renderer.domElement;
 
-    // Safe DOM Attachment (without innerHTML clearing)
+    // Safe DOM Attachment
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
 
-    // Ambient Lighting
-    const ambientLight = new THREE.AmbientLight(0x0F172A, 0.8);
+    // 💡 Bright 4-Point Studio Lighting Setup
+    // 1. Ambient & Hemisphere Light
+    const hemiLight = new THREE.HemisphereLight(0xF8FAFC, 0x334155, 1.4);
+    scene.add(hemiLight);
+
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.2);
     scene.add(ambientLight);
+
+    // 2. Main Key Light (Warm White)
+    const keyLight = new THREE.DirectionalLight(0xFFFFFF, 2.2);
+    keyLight.position.set(25, 40, 25);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.bias = -0.0001;
+    scene.add(keyLight);
+
+    // 3. Cool Fill Light
+    const fillLight = new THREE.DirectionalLight(0x93C5FD, 1.4);
+    fillLight.position.set(-25, 20, 20);
+    scene.add(fillLight);
+
+    // 4. Bright Rim Light
+    const rimLight = new THREE.DirectionalLight(0xFDE68A, 1.6);
+    rimLight.position.set(0, -10, -30);
+    scene.add(rimLight);
 
     // Mouse Interaction for 3D Orbit
     const onMouseDown = (e: MouseEvent) => {
@@ -467,25 +564,6 @@ export default function ScienceSimEngine({
 
       if (isPlaying) {
         simTimeRef.current += delta;
-
-        // Smooth direct DOM update for Time Dilation HUD (zero React re-render overhead!)
-        totalMillerSecondsRef.current += delta * 0.1;
-        totalEarthSecondsRef.current += delta * 6132.0;
-
-        if (millerTimeRef.current) {
-          const mSec = totalMillerSecondsRef.current;
-          const mins = Math.floor(mSec / 60);
-          const secs = Math.floor(mSec % 60);
-          millerTimeRef.current.textContent = `${mins}m ${secs}s`;
-        }
-
-        if (earthTimeRef.current) {
-          const eSec = totalEarthSecondsRef.current;
-          const years = (eSec / (365.25 * 86400)).toFixed(2);
-          const days = Math.floor((eSec % (365.25 * 86400)) / 86400);
-          earthTimeRef.current.textContent = `${years} Yrs (${days} Days)`;
-        }
-
         updateHooksRef.current.forEach((hook) => {
           try {
             hook(simTimeRef.current, delta);
@@ -513,7 +591,7 @@ export default function ScienceSimEngine({
     };
   }, []);
 
-  // 3. True Real-Time Code Compiler & Execution
+  // 3. Dynamic Code Execution
   const executeCodeInEditor = (sourceCode: string) => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
@@ -547,7 +625,7 @@ export default function ScienceSimEngine({
     try {
       const scriptKernel = new Function("scene", "camera", "renderer", "THREE", "engine", "pbr", "time", sourceCode);
       scriptKernel(scene, camera, renderer, THREE, engineAPI, pbr, simTimeRef.current);
-      setStatusMessage("⚡ Code Running (60 FPS)");
+      setStatusMessage("⚡ Simulation Active (60 FPS)");
     } catch (err: any) {
       console.error("Simulation Script Execution Error:", err);
       setRuntimeError(`Runtime Error: ${err.message}`);
@@ -644,7 +722,7 @@ export default function ScienceSimEngine({
       <div style={styles.topBar}>
         <div style={styles.leftControls}>
           <div style={styles.badgeGroup}>
-            <span style={styles.engineBadge}>⚡ 3D RELATIVISTIC SHADER ENGINE</span>
+            <span style={styles.engineBadge}>⚡ 3D SIMULATION ENGINE</span>
             <span style={styles.hardwareBadge}>{statusMessage}</span>
           </div>
 
@@ -658,7 +736,7 @@ export default function ScienceSimEngine({
                 style={activePreset === key ? styles.templateBtnActive : styles.templateBtn}
                 title={`Load ${EXECUTABLE_SCRIPTS[key].title} into the code editor`}
               >
-                {key === "blackhole" ? "🌌 Gargantua Black Hole" : "⚙️ 4-Stroke Engine"}
+                {key === "engine" ? "⚙️ 4-Stroke Engine" : "🌌 Black Hole"}
               </button>
             ))}
           </div>
@@ -718,24 +796,7 @@ export default function ScienceSimEngine({
 
       {/* 3D WebGL Canvas Wrapper */}
       <div style={styles.canvasWrapper}>
-        {/* Dedicated Mount Div for Three.js (Isolated from React children) */}
         <div ref={mountRef} style={styles.canvasMount} />
-
-        {/* Real-Time Relativistic Time Dilation Comparison Overlay */}
-        {activePreset === "blackhole" && (
-          <div style={styles.dilationHUD}>
-            <div style={styles.dilationHeader}>⏳ GRAVITATIONAL TIME DILATION HUD</div>
-            <div style={styles.clockRow}>
-              <span style={{ color: "#38BDF8", fontWeight: 700 }}>🌊 Miller&apos;s Planet (r = 8.5):</span>
-              <span ref={millerTimeRef} style={styles.clockValue}>0m 0s</span>
-            </div>
-            <div style={styles.clockRow}>
-              <span style={{ color: "#10B981", fontWeight: 700 }}>🌍 Earth Observer:</span>
-              <span ref={earthTimeRef} style={styles.clockValue}>0.00 Yrs</span>
-            </div>
-          </div>
-        )}
-
         <div style={styles.hintOverlay}>
           🖱️ Drag to orbit in 3D • Scroll to zoom • Edit code below to transform live!
         </div>
@@ -749,7 +810,7 @@ export default function ScienceSimEngine({
               <span style={{ color: "#D1A751", fontWeight: 700, fontSize: "0.78rem" }}>
                 💻 Live Simulation Script (Edit lines &amp; hit Run!)
               </span>
-              <span style={{ color: "#64748B", fontSize: "0.68rem" }}>
+              <span style={{ color: "#94A3B8", fontSize: "0.68rem" }}>
                 [Injected: scene, camera, renderer, THREE, engine, pbr]
               </span>
             </div>
@@ -782,12 +843,12 @@ export default function ScienceSimEngine({
 
 const styles: Record<string, React.CSSProperties> = {
   engineContainer: {
-    backgroundColor: "#010204",
+    backgroundColor: "#0B0F19",
     borderRadius: "10px",
-    border: "1px solid #1E293B",
+    border: "1px solid #334155",
     overflow: "hidden",
     margin: "2rem 0",
-    boxShadow: "0 15px 35px rgba(0, 0, 0, 0.7)",
+    boxShadow: "0 15px 35px rgba(0, 0, 0, 0.5)",
     width: "100%",
     maxWidth: "100%",
     boxSizing: "border-box",
@@ -798,8 +859,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "0.6rem 1rem",
-    backgroundColor: "#060910",
-    borderBottom: "1px solid #1E293B",
+    backgroundColor: "#0F172A",
+    borderBottom: "1px solid #334155",
     gap: "0.6rem",
   },
   leftControls: {
@@ -830,28 +891,28 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: "0.3rem",
-    background: "#010204",
+    background: "#0B0F19",
     padding: "0.2rem 0.4rem",
     borderRadius: "6px",
   },
   templateLabel: {
     fontSize: "0.62rem",
     fontWeight: 700,
-    color: "#64748B",
+    color: "#94A3B8",
   },
   templateBtn: {
     background: "transparent",
-    border: "1px solid #1E293B",
-    color: "#94A3B8",
+    border: "1px solid #334155",
+    color: "#CBD5E1",
     fontSize: "0.68rem",
     padding: "0.2rem 0.5rem",
     borderRadius: "4px",
     cursor: "pointer",
   },
   templateBtnActive: {
-    background: "#1E293B",
+    background: "#334155",
     border: "1px solid #D1A751",
-    color: "#F8FAFC",
+    color: "#FFFFFF",
     fontWeight: 700,
     fontSize: "0.68rem",
     padding: "0.2rem 0.5rem",
@@ -864,9 +925,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "0.5rem",
   },
   actionBtn: {
-    background: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid #334155",
-    color: "#E2E8F0",
+    background: "rgba(255, 255, 255, 0.12)",
+    border: "1px solid #475569",
+    color: "#F8FAFC",
     fontSize: "0.72rem",
     padding: "0.25rem 0.6rem",
     borderRadius: "4px",
@@ -886,7 +947,7 @@ const styles: Record<string, React.CSSProperties> = {
   codeBtn: {
     background: "#1E293B",
     border: "1px solid #475569",
-    color: "#94A3B8",
+    color: "#CBD5E1",
     fontSize: "0.72rem",
     fontWeight: 600,
     padding: "0.25rem 0.6rem",
@@ -896,7 +957,7 @@ const styles: Record<string, React.CSSProperties> = {
   codeBtnActive: {
     background: "#D1A751",
     border: "1px solid #D1A751",
-    color: "#060910",
+    color: "#0F172A",
     fontSize: "0.72rem",
     fontWeight: 700,
     padding: "0.25rem 0.6rem",
@@ -909,8 +970,8 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "space-between",
     padding: "0.4rem 1rem",
-    backgroundColor: "#04060C",
-    borderBottom: "1px solid #1E293B",
+    backgroundColor: "#0B1120",
+    borderBottom: "1px solid #334155",
     gap: "0.4rem",
   },
   errorAlert: {
@@ -919,7 +980,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
   },
   infoText: {
-    color: "#94A3B8",
+    color: "#CBD5E1",
     fontSize: "0.68rem",
   },
   sliderGroup: {
@@ -930,7 +991,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sliderLabel: {
     fontSize: "0.65rem",
-    color: "#94A3B8",
+    color: "#CBD5E1",
     fontWeight: 600,
   },
   slider: {
@@ -941,64 +1002,30 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     position: "relative",
     overflow: "hidden",
-    minHeight: "400px",
-    backgroundColor: "#010204",
+    minHeight: "420px",
+    backgroundColor: "#0F172A",
   },
   canvasMount: {
     width: "100%",
     height: "100%",
     cursor: "grab",
   },
-  dilationHUD: {
-    position: "absolute",
-    top: "12px",
-    left: "12px",
-    background: "rgba(1, 2, 4, 0.92)",
-    backdropFilter: "blur(8px)",
-    border: "1px solid #D1A751",
-    color: "#F8FAFC",
-    padding: "0.5rem 0.9rem",
-    borderRadius: "8px",
-    pointerEvents: "none",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.8)",
-    minWidth: "240px",
-  },
-  dilationHeader: {
-    fontSize: "0.68rem",
-    fontWeight: 800,
-    color: "#D1A751",
-    letterSpacing: "0.05em",
-    marginBottom: "0.3rem",
-    borderBottom: "1px solid rgba(209, 167, 81, 0.3)",
-    paddingBottom: "0.2rem",
-  },
-  clockRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "0.72rem",
-    margin: "0.15rem 0",
-  },
-  clockValue: {
-    fontFamily: "'Fira Code', monospace",
-    fontWeight: 700,
-    color: "#FFFFFF",
-  },
   hintOverlay: {
     position: "absolute",
     bottom: "10px",
     left: "12px",
-    background: "rgba(1, 2, 4, 0.85)",
+    background: "rgba(15, 23, 42, 0.85)",
     backdropFilter: "blur(4px)",
-    color: "#94A3B8",
+    color: "#CBD5E1",
     fontSize: "0.68rem",
     padding: "0.25rem 0.6rem",
     borderRadius: "4px",
     pointerEvents: "none",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.15)",
   },
   codeDrawer: {
-    backgroundColor: "#010204",
-    borderTop: "1px solid #1E293B",
+    backgroundColor: "#0B0F19",
+    borderTop: "1px solid #334155",
     padding: "0.8rem 1rem",
   },
   codeHeader: {
@@ -1007,7 +1034,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     fontSize: "0.7rem",
     fontWeight: 700,
-    color: "#94A3B8",
+    color: "#CBD5E1",
     marginBottom: "0.5rem",
     flexWrap: "wrap",
     gap: "0.4rem",
@@ -1026,11 +1053,11 @@ const styles: Record<string, React.CSSProperties> = {
   scriptTextarea: {
     width: "100%",
     height: "260px",
-    backgroundColor: "#04070D",
+    backgroundColor: "#0F172A",
     color: "#F8FAFC",
     fontFamily: "'Fira Code', monospace",
     fontSize: "0.82rem",
-    border: "1px solid #1E293B",
+    border: "1px solid #334155",
     borderRadius: "4px",
     padding: "0.8rem",
     outline: "none",
