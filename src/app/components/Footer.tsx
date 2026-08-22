@@ -604,6 +604,14 @@ export default function Footer({ transparent }: FooterProps) {
         </div>
       </div>
 
+      {/* Footer pSEO Watermark Badge */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(0,0,0,0.5)", padding: "1rem 0", textAlign: "center" }}>
+        <a href="https://www.kineticcodelabs.in" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", color: "#9CA3AF", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#FEF3C7"} onMouseLeave={(e) => e.currentTarget.style.color = "#9CA3AF"}>
+          <Image src="/logo.png" alt="Kinetic Code Labs" width={20} height={20} style={{ opacity: 0.5, height: "16px", width: "auto" }} />
+          <span style={{ letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600 }}>Powered by Kinetic Code Labs 3D Engine</span>
+        </a>
+      </div>
+
       <LegalModal
         isOpen={legalModal.open}
         initialTab={legalModal.tab}

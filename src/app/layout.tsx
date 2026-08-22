@@ -118,6 +118,40 @@ export default function RootLayout({
           id="MathJax-script"
           async
         />
+        {/* Global pSEO Floating Badge */}
+        <a 
+          href="https://www.kineticcodelabs.in"
+          style={{
+            position: "fixed",
+            bottom: "1.5rem",
+            right: "1.5rem",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            backgroundColor: "rgba(5, 5, 5, 0.9)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            padding: "0.6rem 1rem",
+            borderRadius: "9999px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+            textDecoration: "none",
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+            e.currentTarget.style.borderColor = "rgba(252, 211, 77, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(5, 5, 5, 0.9)";
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+          }}
+        >
+          <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9CA3AF" }}>
+            Powered by <span style={{ color: "#ffffff" }}>Kinetic Code Labs</span>
+          </span>
+        </a>
         {children}
       </body>
     </html>

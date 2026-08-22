@@ -112,7 +112,17 @@ export default async function HomePage({ searchParams }: HomeProps) {
       "@type": "Organization",
       "name": "Kinetic Code Labs",
       "url": "https://www.kineticcodelabs.in",
-      "logo": "https://journal.kineticcodelabs.in/logo.png"
+      "logo": "https://journal.kineticcodelabs.in/logo.png",
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Kinetic Code Labs Kanpur",
+        "url": "https://www.kineticcodelabs.in"
+      },
+      "sameAs": [
+        "https://www.kineticcodelabs.in",
+        "https://www.linkedin.com/in/kinetic-code-labs-132b77412",
+        "https://www.instagram.com/kineticcodelabs_"
+      ]
     }
   };
 
