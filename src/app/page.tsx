@@ -99,31 +99,146 @@ export default async function HomePage({ searchParams }: HomeProps) {
   // Structured Data Schema for Google SEO
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Kinetic Code Labs Journal",
-    "url": "https://journal.kineticcodelabs.in",
-    "description": "Next-generation interactive 3D science simulations and technical publishing platform.",
-    "author": {
-      "@type": "Person",
-      "name": "Ajeet Prakash Yadav",
-      "url": "https://www.kineticcodelabs.in"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Kinetic Code Labs",
-      "url": "https://www.kineticcodelabs.in",
-      "logo": "https://journal.kineticcodelabs.in/logo.png",
-      "parentOrganization": {
+    "@graph": [
+      {
         "@type": "Organization",
-        "name": "Kinetic Code Labs Kanpur",
-        "url": "https://www.kineticcodelabs.in"
+        "@id": "https://www.kineticcodelabs.in/#organization",
+        "name": "Kinetic Code Labs",
+        "legalName": "Kinetic Code Labs",
+        "alternateName": ["Kinetic Code Labs India", "Kinetic Code Labs Kanpur"],
+        "url": "https://www.kineticcodelabs.in/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.kineticcodelabs.in/logo.png"
+        },
+        "foundingDate": "2026-05",
+        "description": "Kinetic Code Labs is a premier custom software engineering and IT services agency headquartered in Kanpur, Uttar Pradesh, India, founded by Ajeet Prakash Yadav. We deliver 18+ specialized digital engineering services including custom website development without templates, Full Stack MERN web applications, Artificial Intelligence chatbots and intelligent automation workflows, Python backend servers, business ERP and inventory software, zero-cost sales analytics dashboards, VPS cloud hosting setup, e-commerce online stores with payment gateways, UI/UX design, and Programmatic SEO (pSEO) to local Indian small businesses and global technology clients. We maintain the Kinetic Code Journal, offer the AI Vision Readiness Tool, ensure 100/100 Lighthouse Performance Scores on all web applications, and conduct an intensive 12-week AI & Software Engineering Internship program.",
+        "knowsAbout": [
+          "Custom Website Development without Templates",
+          "Full Stack MERN Web Applications (React, Node.js, MongoDB)",
+          "Artificial Intelligence (AI) Chatbot Systems",
+          "Machine Learning (ML) & Predictive Analytics",
+          "Python Engineering & Automation (FastAPI, Flask)",
+          "Large Language Models (LLM) & RAG Vector Databases",
+          "Custom ERP & Business Management Software",
+          "Zero-Cost Data Analytics & Admin Dashboards",
+          "Cloud VPS Server Deployment & DevOps (AWS, Render, Vercel)",
+          "E-Commerce Online Stores & Secure Payment Gateways",
+          "Responsive UI/UX Design & Landing Pages",
+          "Programmatic SEO (pSEO) & Organic Google Ranking",
+          "WhatsApp Business API Bots & Custom Integrations",
+          "12-Week Production Software & AI Mentorship in Kanpur"
+        ],
+        "areaServed": [
+          { "@type": "City", "name": "Kanpur" },
+          { "@type": "AdministrativeArea", "name": "Uttar Pradesh" },
+          { "@type": "Country", "name": "India" },
+          { "@type": "Country", "name": "USA" },
+          { "@type": "Country", "name": "UK" },
+          { "@type": "Country", "name": "Germany" },
+          { "@type": "Country", "name": "Japan" },
+          { "@type": "Country", "name": "Australia" },
+          { "@type": "Country", "name": "Canada" },
+          { "@type": "Country", "name": "UAE" }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/kineticcodelabs_",
+          "https://www.linkedin.com/in/kinetic-code-labs-132b77412",
+          "https://x.com/yadavajit_spy",
+          "https://github.com/kineticscodelabs-ux",
+          "https://github.com/kineticscodelabs-ux/kineticscodelabs-ux",
+          "https://www.justdial.com/Kanpur/Kinetic-Code-Labs-Yashoda-Nagar/0512PX512-X512-260513011900-W1I3_BZDET",
+          "https://www.kineticcodelabs.in/about",
+          "https://www.kineticcodelabs.in/instalinks",
+          "https://www.kineticcodelabs.in/blogs",
+          "https://www.kineticcodelabs.in/work",
+          "mailto:connect@kineticcodelabs.in"
+        ],
+        "founder": {
+          "@id": "https://www.kineticcodelabs.in/#founder"
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "sales",
+            "telephone": "+91-90269-26680",
+            "email": "connect@kineticcodelabs.in",
+            "availableLanguage": ["en", "hi"]
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Yashoda Nagar",
+          "addressLocality": "Kanpur",
+          "addressRegion": "Uttar Pradesh",
+          "postalCode": "208011",
+          "addressCountry": "IN"
+        }
       },
-      "sameAs": [
-        "https://www.kineticcodelabs.in",
-        "https://www.linkedin.com/in/kinetic-code-labs-132b77412",
-        "https://www.instagram.com/kineticcodelabs_"
-      ]
-    }
+      {
+        "@type": "Person",
+        "@id": "https://www.kineticcodelabs.in/#founder",
+        "name": "Ajeet Prakash Yadav",
+        "alternateName": ["Ajit Prakash Yadav", "Ajeet Yadav", "Ajit Yadav", "Founder Kinetic Code Labs Kanpur"],
+        "jobTitle": "Founder, Managing Director & Chief Software Architect",
+        "description": "Ajeet Prakash Yadav is an Indian software engineer, MERN stack architect, Artificial Intelligence developer, and tech entrepreneur in Kanpur, Uttar Pradesh. Holding a Bachelor of Technology (B.Tech) in Mechanical Engineering, he merges mechanical engineering precision, logical problem-solving, and strict system reliability into software architecture. He designs and develops crash-proof, sub-100ms web applications and AI tools from scratch without relying on generic templates.",
+        "alumniOf": { "@type": "EducationalOrganization", "name": "Bachelor of Technology in Mechanical Engineering" },
+        "knowsAbout": [
+          "Ajeet Prakash Yadav",
+          "Kinetic Code Labs Founder",
+          "Web Development Kanpur",
+          "Custom Software Development without Templates",
+          "Full Stack MERN Architecture (MongoDB, Express, React, Node.js)",
+          "Artificial Intelligence (AI) Tools & Custom Chatbot Integration",
+          "Python Engineering & Machine Learning (ML)",
+          "Large Language Models (LLM) & RAG Vector Databases",
+          "Custom ERP & Business Management Software",
+          "Zero-Cost Data Analytics & Executive Admin Dashboards",
+          "Cloud Server Setup & DevOps (AWS, Vercel, Render)",
+          "E-Commerce Website & Secure Payment Gateway Setup",
+          "Programmatic SEO (pSEO) & Google Brand Optimization",
+          "Production Software Engineering Mentorship in Kanpur"
+        ],
+        "image": [
+          "https://www.kineticcodelabs.in/images/founder/user_photo1.jpg",
+          "https://www.kineticcodelabs.in/images/founder/user_photo2.jpg",
+          "https://www.kineticcodelabs.in/images/founder/user_photo3.jpg",
+          "https://www.kineticcodelabs.in/images/founder/user_photo4.jpg",
+          "https://www.kineticcodelabs.in/images/founder/user_photo5.jpg",
+          "https://www.kineticcodelabs.in/assets/founder-portrait.webp",
+          "https://res.cloudinary.com/de3eouhfj/image/upload/v1779546244/kinetic_uploads/jbiqab61qbrocinzc7or.jpg",
+          "https://res.cloudinary.com/de3eouhfj/image/upload/v1779546268/kinetic_uploads/wc1fxtwu3qcd4ulma1af.jpg",
+          "https://res.cloudinary.com/de3eouhfj/image/upload/v1779645209/kinetic_uploads/gryb7mf9sytziieybcwq.jpg",
+          "https://res.cloudinary.com/de3eouhfj/image/upload/v1779659723/kinetic_uploads/omyflpq7gamwzzu8dltp.jpg",
+          "https://res.cloudinary.com/de3eouhfj/image/upload/v1779659735/kinetic_uploads/hmtgzbjbkaj7tuk692ts.jpg"
+        ],
+        "worksFor": {
+          "@id": "https://www.kineticcodelabs.in/#organization",
+          "name": "Kinetic Code Labs",
+          "url": "https://www.kineticcodelabs.in/"
+        },
+        "sameAs": [
+          "https://www.instagram.com/kineticcodelabs_",
+          "https://www.linkedin.com/in/kinetic-code-labs-132b77412",
+          "https://x.com/yadavajit_spy",
+          "https://github.com/kineticscodelabs-ux",
+          "https://github.com/kineticscodelabs-ux/kineticscodelabs-ux",
+          "https://www.justdial.com/Kanpur/Kinetic-Code-Labs-Yashoda-Nagar/0512PX512-X512-260513011900-W1I3_BZDET",
+          "https://www.kineticcodelabs.in/about",
+          "https://www.kineticcodelabs.in/instalinks"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://journal.kineticcodelabs.in/#website",
+        "url": "https://journal.kineticcodelabs.in/",
+        "name": "Kinetic Code Labs Journal",
+        "description": "Next-generation interactive 3D science simulations, deep tech publishing platform, and software engineering technical journal by Ajeet Prakash Yadav at Kinetic Code Labs.",
+        "publisher": {
+          "@id": "https://www.kineticcodelabs.in/#organization"
+        }
+      }
+    ]
   };
 
   return (

@@ -82,6 +82,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="5HYx-IQlYm3qUVXkbBvJHgxabhqwZEKb2DGDk6JUZjM" />
+        <meta name="msvalidate.01" content="3D625794C2C9CAC38583014FF6DBF10C" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
