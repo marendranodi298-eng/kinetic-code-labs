@@ -611,3 +611,28 @@ textarea.form-input {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Global Floating Badge */
+.global-floating-badge {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(5, 5, 5, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.global-floating-badge:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(252, 211, 77, 0.4);
+}
